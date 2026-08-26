@@ -1,0 +1,142 @@
+{
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "chunk_id": "chunk_1",
+      "severity": "normal",
+      "n_events": 500,
+      "n_events_near_z_peak": 168,
+      "mean_mass": {
+        "full_spectrum": null,
+        "z_peak": 91.027
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.935,
+        "full_spectrum:chi2": 0.759,
+        "z_peak:ks": 0.928,
+        "z_peak:chi2": 0.49,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 1.0
+      },
+      "drift": {},
+      "summary": "Textbook clean chunk. All six tests pass. Z-peak mean mass 91.027 GeV, well-centered. Drift tracking initialized."
+    },
+    {
+      "chunk_index": 1,
+      "chunk_id": "chunk_2",
+      "severity": "normal",
+      "n_events": 500,
+      "n_events_near_z_peak": 166,
+      "mean_mass": {
+        "full_spectrum": null,
+        "z_peak": 91.345
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.719,
+        "full_spectrum:chi2": 0.513,
+        "z_peak:ks": 0.162,
+        "z_peak:chi2": 0.954,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.887
+      },
+      "drift": {},
+      "summary": "Nothing flags after correction. Z-peak mean mass 91.345 GeV, on-resonance. Drift needs 5 chunks minimum, at 2 now."
+    },
+    {
+      "chunk_index": 2,
+      "chunk_id": "chunk_3",
+      "severity": "watch",
+      "n_events": 500,
+      "n_events_near_z_peak": 169,
+      "mean_mass": {
+        "full_spectrum": null,
+        "z_peak": 91.742
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.111,
+        "full_spectrum:chi2": 0.718,
+        "z_peak:ks": 0.00023,
+        "z_peak:chi2": 0.214,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.925
+      },
+      "drift": {},
+      "summary": "Z-peak KS survives BH correction (p=0.00023) -- shape difference within the Z window, characteristic of momentum-scale miscalibration. Z-peak mean mass +0.55 GeV above nominal. Everything else clean. Watch closely next chunk."
+    },
+    {
+      "chunk_index": 3,
+      "chunk_id": "chunk_4",
+      "severity": "anomaly",
+      "n_events": 500,
+      "n_events_near_z_peak": 172,
+      "mean_mass": {
+        "full_spectrum": null,
+        "z_peak": 91.96
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.042,
+        "full_spectrum:chi2": 0.064,
+        "z_peak:ks": 9e-06,
+        "z_peak:chi2": 0.0096,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.276
+      },
+      "drift": {},
+      "summary": "Z-peak KS and chi2 both survive correction -- robust shape distortion confirmed by two independent tests. Z-peak mean mass 91.960 GeV. Two consecutive chunks with Z-peak anomalies noted as too early to call a systematic trend (needs 3+ recurrences). Cross-check momentum calibration recommended."
+    },
+    {
+      "chunk_index": 4,
+      "chunk_id": "chunk_5",
+      "severity": "anomaly",
+      "n_events": 500,
+      "n_events_near_z_peak": 175,
+      "mean_mass": {
+        "full_spectrum": null,
+        "z_peak": 92.44
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.00055,
+        "full_spectrum:chi2": 5.3e-08,
+        "z_peak:ks": 1.4e-12,
+        "z_peak:chi2": 4.1e-07,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.962
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.34,
+          "trend_p_value": 0.00042,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "summary": "Shape anomaly now visible in full-spectrum tests too, not just Z-peak. Drift formally confirmed for the first time: 3 consecutive chunks rising, slope +0.34 GeV/chunk, trend p=4.2e-4. Z-peak mean mass 92.44 GeV, +1.25 GeV above nominal. Momentum calibration review recommended."
+    },
+    {
+      "chunk_index": 5,
+      "chunk_id": "chunk_6",
+      "severity": "anomaly",
+      "n_events": 500,
+      "n_events_near_z_peak": 168,
+      "mean_mass": {
+        "full_spectrum": null,
+        "z_peak": 92.895
+      },
+      "pvalues": {
+        "full_spectrum:ks": 7.1e-07,
+        "full_spectrum:chi2": 5.6e-05,
+        "z_peak:ks": 4.3e-18,
+        "z_peak:chi2": 7.2e-09,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.96
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.367,
+          "trend_p_value": 3.8e-05,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "summary": "Most severe chunk yet. Z-peak mean mass 92.895 GeV, +1.705 GeV above nominal. Drift confirmed sustained and monotonic, slope +0.367 GeV/chunk, trend p=3.8e-5. Event counts remain completely normal throughout -- pure shape/scale problem, not efficiency or trigger issue. Immediate notification to detector operations and calibration teams warranted."
+    }
+  ]
+}

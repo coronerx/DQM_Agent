@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dimuon spectrum drift -- 3D waterfall</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #f7f7f5; margin: 0; padding: 24px; color: #1a1a18; }
+  h1 { font-size: 18px; font-weight: 500; margin: 0 0 4px; }
+  .subtitle { font-size: 13px; color: #6b6a66; margin: 0 0 20px; max-width: 700px; line-height: 1.5; }
+  #plot { width: 100%; height: 640px; }
+  .caption { font-size: 12px; color: #6b6a66; margin-top: 8px; max-width: 700px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<h1>Dimuon invariant mass spectrum -- 3D waterfall across a drifting shift</h1>
+<p class="subtitle">
+Each ridge is one chunk's full mass spectrum. The tall peak near 91 GeV is the Z resonance --
+watch it visibly slide toward higher mass as chunk index increases, driven by an injected
+momentum-scale drift (0% to 2% across 6 chunks). This is the same drift the live agent
+detected and correctly flagged as a developing trend, not a one-off fluctuation. Drag to
+rotate, scroll to zoom.
+</p>
+
+<div id="plot"></div>
+
+<p class="caption">
+Data generated from the same reproducible synthetic dimuon events (seeded RNG) used in the
+real agent validation run -- see demo/test_drift_threshold_fix.py in the project repo.
+</p>
+
+<script>
+const massBins = [21.0, 23.0, 25.0, 27.0, 29.0, 31.0, 33.0, 35.0, 37.0, 39.0, 41.0, 43.0, 45.0, 47.0, 49.0, 51.0, 53.0, 55.0, 57.0, 59.0, 61.0, 63.0, 65.0, 67.0, 69.0, 71.0, 73.0, 75.0, 77.0, 79.0, 81.0, 83.0, 85.0, 87.0, 89.0, 91.0, 93.0, 95.0, 97.0, 99.0, 101.0, 103.0, 105.0, 107.0, 109.0, 111.0, 113.0, 115.0, 117.0, 119.0, 121.0, 123.0, 125.0, 127.0, 129.0, 131.0, 133.0, 135.0, 137.0, 139.0];
+const counts = [[48, 45, 41, 30, 25, 12, 12, 9, 17, 6, 6, 7, 10, 6, 3, 3, 4, 4, 3, 4, 1, 3, 5, 2, 3, 1, 2, 1, 2, 1, 3, 6, 4, 9, 27, 73, 28, 11, 6, 4, 1, 1, 0, 0, 1, 1, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4], [54, 45, 27, 22, 20, 18, 22, 16, 6, 10, 10, 6, 7, 6, 8, 4, 1, 3, 6, 1, 3, 2, 6, 3, 4, 3, 1, 3, 2, 0, 3, 3, 4, 11, 15, 75, 40, 12, 2, 3, 1, 1, 1, 0, 1, 2, 3, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0], [70, 44, 35, 22, 27, 17, 10, 9, 12, 9, 6, 10, 5, 6, 4, 6, 5, 2, 2, 3, 2, 1, 1, 2, 0, 1, 2, 4, 1, 2, 2, 2, 6, 6, 14, 58, 51, 19, 5, 4, 3, 2, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [58, 41, 39, 24, 18, 18, 18, 19, 8, 13, 8, 7, 9, 2, 1, 8, 0, 2, 4, 5, 1, 4, 3, 3, 2, 2, 3, 1, 2, 1, 6, 3, 0, 7, 7, 52, 59, 15, 7, 1, 2, 3, 2, 0, 1, 1, 0, 2, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0], [60, 42, 34, 36, 30, 21, 8, 9, 5, 12, 7, 5, 7, 8, 7, 2, 3, 1, 4, 4, 2, 2, 1, 3, 0, 0, 3, 5, 0, 0, 5, 3, 3, 3, 5, 41, 84, 16, 5, 4, 1, 2, 2, 0, 0, 0, 0, 2, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], [46, 43, 34, 25, 23, 26, 14, 10, 11, 11, 6, 6, 4, 3, 5, 7, 5, 3, 6, 1, 1, 3, 4, 3, 6, 1, 5, 1, 1, 1, 1, 2, 3, 6, 7, 24, 71, 37, 9, 6, 1, 3, 1, 0, 1, 1, 1, 2, 1, 0, 2, 1, 0, 0, 1, 0, 0, 0, 1, 0]];
+const chunkLabels = ["chunk_1", "chunk_2", "chunk_3", "chunk_4", "chunk_5", "chunk_6"];
+
+const traces = counts.map((countsRow, i) => ({
+  type: 'scatter3d',
+  mode: 'lines',
+  x: massBins,
+  y: massBins.map(() => i),
+  z: countsRow,
+  line: { width: 5, color: i === 0 ? '#378ADD' : (i === counts.length - 1 ? '#D85A30' : '#5DCAA5') },
+  name: chunkLabels[i],
+  showlegend: false,
+}));
+
+const layout = {
+  scene: {
+    xaxis: { title: 'dimuon mass (GeV)' },
+    yaxis: { title: 'chunk index', tickvals: [0,1,2,3,4,5], ticktext: chunkLabels },
+    zaxis: { title: 'events per bin' },
+    camera: { eye: { x: 1.6, y: -1.8, z: 0.9 } },
+  },
+  margin: { l: 0, r: 0, t: 0, b: 0 },
+  paper_bgcolor: 'rgba(0,0,0,0)',
+};
+
+Plotly.newPlot('plot', traces, layout, { responsive: true });
+</script>
+
+</body>
+</html>

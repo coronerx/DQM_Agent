@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DQM Shift Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #f7f7f5; margin: 0; padding: 24px; color: #1a1a18; }
+  h1 { font-size: 18px; font-weight: 500; margin: 0 0 4px; }
+  .subtitle { font-size: 13px; color: #6b6a66; margin: 0 0 20px; }
+  .controls { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  input[type=file] { font-size: 13px; }
+  .btn { font-size: 13px; padding: 6px 12px; border: 0.5px solid #b4b2a9; border-radius: 6px; background: white; cursor: pointer; }
+  .btn:hover { background: #f1efe8; }
+
+  .timeline { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .chunk-box { min-width: 100px; padding: 10px 12px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+  .chunk-box.selected { border-color: #1a1a18; }
+  .chunk-box .id { font-size: 12px; font-weight: 500; }
+  .chunk-box .sev { font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .sev-normal { background: #EAF3DE; color: #27500A; }
+  .sev-watch  { background: #FAEEDA; color: #633806; }
+  .sev-anomaly{ background: #FCEBEB; color: #791F1F; }
+  .sev-unknown{ background: #F1EFE8; color: #444441; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .card { background: white; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 16px; }
+  .card h3 { font-size: 13px; font-weight: 500; margin: 0 0 12px; color: #6b6a66; }
+  canvas { max-height: 260px; }
+
+  .detail { background: white; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 16px 20px; }
+  .detail h2 { font-size: 15px; margin: 0 0 2px; }
+  .detail .meta { font-size: 12px; color: #6b6a66; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 14px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 0.5px solid #e5e3db; }
+  th { color: #6b6a66; font-weight: 500; }
+  .fail { color: #791F1F; font-weight: 500; }
+  .pass { color: #27500A; }
+  .summary-text { font-size: 13px; line-height: 1.6; white-space: pre-wrap; color: #333; }
+  .empty { color: #6b6a66; font-size: 13px; padding: 40px; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>DQM shift dashboard</h1>
+<p class="subtitle">Load a shift export JSON (from demo/export_shift_json.py) to view a chunk-by-chunk timeline.</p>
+
+<div class="controls">
+  <input type="file" id="fileInput" accept="application/json">
+  <span id="fileStatus" style="font-size: 13px; color: #6b6a66;"></span>
+</div>
+
+<div id="content" class="empty">No data loaded yet.</div>
+
+<script>
+const ALPHA = 0.05;
+let currentData = null;
+let selectedIndex = 0;
+let pChart = null;
+let massChart = null;
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      currentData = data;
+      selectedIndex = 0;
+      document.getElementById('fileStatus').textContent = `Loaded ${data.chunks.length} chunks`;
+      render();
+    } catch (err) {
+      document.getElementById('fileStatus').textContent = 'Could not parse JSON: ' + err.message;
+    }
+  };
+  reader.readAsText(file);
+});
+
+function sevClass(sev) {
+  return { normal: 'sev-normal', watch: 'sev-watch', anomaly: 'sev-anomaly' }[sev] || 'sev-unknown';
+}
+
+function render() {
+  if (!currentData || !currentData.chunks || currentData.chunks.length === 0) {
+    document.getElementById('content').innerHTML = '<div class="empty">No chunks in this file.</div>';
+    return;
+  }
+  const chunks = currentData.chunks;
+
+  let html = '<div class="timeline" id="timeline"></div>';
+  html += '<div class="grid">';
+  html += '<div class="card"><h3>P-values by test (log scale, dashed line = alpha 0.05)</h3><canvas id="pChart"></canvas></div>';
+  html += '<div class="card"><h3>Z-peak mean mass (dashed line = PDG 91.19 GeV)</h3><canvas id="massChart"></canvas></div>';
+  html += '</div>';
+  html += '<div class="detail" id="detail"></div>';
+  document.getElementById('content').innerHTML = html;
+
+  const timeline = document.getElementById('timeline');
+  chunks.forEach((c, i) => {
+    const box = document.createElement('div');
+    box.className = 'chunk-box ' + sevClass(c.severity) + (i === selectedIndex ? ' selected' : '');
+    box.innerHTML = `<div class="id">${c.chunk_id}</div><div class="sev">${c.severity}</div>`;
+    box.onclick = () => { selectedIndex = i; render(); };
+    timeline.appendChild(box);
+  });
+
+  renderCharts(chunks);
+  renderDetail(chunks[selectedIndex]);
+}
+
+function renderCharts(chunks) {
+  const labels = chunks.map(c => c.chunk_id);
+
+  const testKeys = new Set();
+  chunks.forEach(c => Object.keys(c.pvalues || {}).forEach(k => testKeys.add(k)));
+
+  const colors = ['#378ADD', '#D85A30', '#639922', '#993556', '#BA7517', '#534AB7'];
+  const pDatasets = Array.from(testKeys).map((key, i) => ({
+    label: key,
+    data: chunks.map(c => c.pvalues && c.pvalues[key] != null ? Math.max(c.pvalues[key], 1e-15) : null),
+    borderColor: colors[i % colors.length],
+    backgroundColor: colors[i % colors.length],
+    spanGaps: true,
+    tension: 0.15,
+  }));
+  pDatasets.push({
+    label: 'alpha = 0.05',
+    data: labels.map(() => ALPHA),
+    borderColor: '#791F1F',
+    borderDash: [4, 4],
+    pointRadius: 0,
+  });
+
+  if (pChart) pChart.destroy();
+  pChart = new Chart(document.getElementById('pChart'), {
+    type: 'line',
+    data: { labels, datasets: pDatasets },
+    options: {
+      scales: { y: { type: 'logarithmic', title: { display: true, text: 'p-value' } } },
+      plugins: { legend: { labels: { font: { size: 11 } } } },
+    },
+  });
+
+  const massData = chunks.map(c => c.mean_mass ? c.mean_mass.z_peak : null);
+  if (massChart) massChart.destroy();
+  massChart = new Chart(document.getElementById('massChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Z-peak mean mass', data: massData, borderColor: '#378ADD', backgroundColor: '#378ADD', spanGaps: true },
+        { label: 'PDG Z mass', data: labels.map(() => 91.1876), borderColor: '#791F1F', borderDash: [4, 4], pointRadius: 0 },
+      ],
+    },
+    options: { scales: { y: { title: { display: true, text: 'GeV' } } } },
+  });
+}
+
+function renderDetail(chunk) {
+  let html = `<h2>${chunk.chunk_id}</h2>`;
+  html += `<div class="meta">${chunk.n_events} events total, ${chunk.n_events_near_z_peak} near Z-peak</div>`;
+
+  html += '<table><tr><th>Test</th><th>p-value</th><th>Result</th></tr>';
+  for (const [key, p] of Object.entries(chunk.pvalues || {})) {
+    const isFail = p != null && p < ALPHA;
+    html += `<tr><td>${key}</td><td>${p != null ? p.toExponential(3) : 'n/a'}</td>`;
+    html += `<td class="${isFail ? 'fail' : 'pass'}">${isFail ? 'flagged' : 'clean'}</td></tr>`;
+  }
+  html += '</table>';
+
+  html += `<div class="summary-text">${chunk.summary || ''}</div>`;
+  document.getElementById('detail').innerHTML = html;
+}
+</script>
+
+</body>
+</html>

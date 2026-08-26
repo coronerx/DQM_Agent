@@ -1,0 +1,244 @@
+{
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "chunk_id": "chunk_1",
+      "severity": "watch",
+      "n_events": 1500,
+      "n_events_near_z_peak": 309,
+      "mean_mass": {
+        "full_spectrum": 35.267,
+        "z_peak": 90.478
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.130327,
+        "full_spectrum:chi2": 0.579251,
+        "z_peak:ks": 0.958387,
+        "z_peak:chi2": 0.000229,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.518089
+      },
+      "summary": "Z-peak chi-square flagged (p=0.000229), survives BH correction, but Z-peak KS is clean (p=0.958) -- suggests localized bin irregularity, not a broad shift. Occupancy and full-spectrum tests all normal. Mean mass 90.478 GeV, mildly off-nominal."
+    },
+    {
+      "chunk_index": 1,
+      "chunk_id": "chunk_2",
+      "severity": "anomaly",
+      "n_events": 1500,
+      "n_events_near_z_peak": 310,
+      "mean_mass": {
+        "full_spectrum": 35.248,
+        "z_peak": 90.51
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.328324,
+        "full_spectrum:chi2": 0.0,
+        "z_peak:ks": 0.931099,
+        "z_peak:chi2": 0.047193,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.477133
+      },
+      "summary": "[LATER FOUND TO BE A MEASUREMENT ARTIFACT, NOT REAL] Full-spectrum chi-square returned p=0.0 (stat~2,000,008) -- at the time interpreted as a catastrophic localized bin overflow. Subsequently traced to a chi_square_test bug: a single stray event in a reference-empty bin, combined with a one-sample-vs-two-sample statistical error, produced non-physical significance. See LAB_MANUAL.md / NOTES.md for the full writeup."
+    },
+    {
+      "chunk_index": 2,
+      "chunk_id": "chunk_3",
+      "severity": "watch",
+      "n_events": 1500,
+      "n_events_near_z_peak": 271,
+      "mean_mass": {
+        "full_spectrum": 32.996,
+        "z_peak": 90.632
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.906026,
+        "full_spectrum:chi2": 0.56498,
+        "z_peak:ks": 0.961664,
+        "z_peak:chi2": 0.339483,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.07039
+      },
+      "summary": "All tests clean after correction. Z-peak share is softer than expected (271 events, p=0.070, not significant) -- second chunk trending low, worth watching. Full-spectrum mean mass dropping."
+    },
+    {
+      "chunk_index": 3,
+      "chunk_id": "chunk_4",
+      "severity": "anomaly",
+      "n_events": 1500,
+      "n_events_near_z_peak": 279,
+      "mean_mass": {
+        "full_spectrum": 33.638,
+        "z_peak": 90.785
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.453225,
+        "full_spectrum:chi2": 0.0,
+        "z_peak:ks": 0.803793,
+        "z_peak:chi2": 0.307917,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.207494
+      },
+      "summary": "[LATER FOUND TO BE A MEASUREMENT ARTIFACT] Full-spectrum chi-square p=0.0 again (2nd occurrence) -- see chunk_2 note. Z-peak mean mass drifting upward across 4 chunks: 90.478 -> 90.785 GeV."
+    },
+    {
+      "chunk_index": 4,
+      "chunk_id": "chunk_5",
+      "severity": "anomaly",
+      "n_events": 1500,
+      "n_events_near_z_peak": 248,
+      "mean_mass": {
+        "full_spectrum": 31.186,
+        "z_peak": 91.03
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.076255,
+        "full_spectrum:chi2": 0.286436,
+        "z_peak:ks": 0.07902,
+        "z_peak:chi2": 0.061476,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.000864
+      },
+      "summary": "REAL FINDING CONFIRMED: Z-peak occupancy drop (p=0.00086, 248 vs ~299 expected events) plus formal drift detection now active -- Z-peak mean mass risen monotonically across 5 chunks (90.478->91.030 GeV), drift z-score 3.55 sigma, slope +0.138 GeV/chunk. Total occupancy normal -- events migrating OUT of Z-peak window, not lost globally. Classic momentum-scale miscalibration signature."
+    },
+    {
+      "chunk_index": 5,
+      "chunk_id": "chunk_6",
+      "severity": "anomaly",
+      "n_events": 1500,
+      "n_events_near_z_peak": 262,
+      "mean_mass": {
+        "full_spectrum": 32.448,
+        "z_peak": 91.577
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.020235,
+        "full_spectrum:chi2": 0.004573,
+        "z_peak:ks": 1.94e-05,
+        "z_peak:chi2": 1.04e-08,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.016743
+      },
+      "summary": "5/6 tests now flagged. Z-peak shape (KS+chi2) both fail for the first time -- distortion now large enough to be a broad shift, not just bin-level. Z-peak mean mass crossed above nominal: 91.577 GeV (+0.387 above 91.19). Drift z-score 4.39 sigma, slope accelerating to +0.206 GeV/chunk."
+    },
+    {
+      "chunk_index": 6,
+      "chunk_id": "chunk_7",
+      "severity": "anomaly",
+      "n_events": 1500,
+      "n_events_near_z_peak": 227,
+      "mean_mass": {
+        "full_spectrum": 30.663,
+        "z_peak": 91.447
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.04702,
+        "full_spectrum:chi2": 0.039502,
+        "z_peak:ks": 0.000482,
+        "z_peak:chi2": 2.71e-05,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 1.7e-06
+      },
+      "summary": "Z-peak occupancy depletion worst yet: 227 events (15.1% share vs 19.9% reference, p=1.7e-6). Z-peak shape still failing. Mean mass 91.447 GeV, sustained above nominal. Sustained momentum-scale miscalibration."
+    },
+    {
+      "chunk_index": 7,
+      "chunk_id": "chunk_8",
+      "severity": "anomaly",
+      "n_events": 1500,
+      "n_events_near_z_peak": 250,
+      "mean_mass": {
+        "full_spectrum": 32.047,
+        "z_peak": 91.617
+      },
+      "pvalues": {
+        "full_spectrum:ks": 0.000344,
+        "full_spectrum:chi2": 1.8e-06,
+        "z_peak:ks": 2.43e-05,
+        "z_peak:chi2": 1.5e-09,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.001367
+      },
+      "summary": "Full-spectrum shape now also failing decisively (both KS and chi2) -- distortion large enough to deform the entire spectrum. Z-peak mean mass new high: 91.617 GeV (+0.427 above nominal). 5/6 tests failing."
+    },
+    {
+      "chunk_index": 8,
+      "chunk_id": "chunk_9",
+      "severity": "anomaly",
+      "n_events": 1500,
+      "n_events_near_z_peak": 269,
+      "mean_mass": {
+        "full_spectrum": 34.582,
+        "z_peak": 92.545
+      },
+      "pvalues": {
+        "full_spectrum:ks": 1.1e-06,
+        "full_spectrum:chi2": 0.0,
+        "z_peak:ks": 5.35e-15,
+        "z_peak:chi2": 1.3e-33,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.052515
+      },
+      "summary": "[Full-spectrum chi2 p=0.0 is the measurement artifact -- see chunk_2 note] Z-peak mean mass jumps to 92.545 GeV, +1.355 above nominal -- single-chunk leap of +0.928 GeV. Z-peak shape p-values at the most extreme of the whole run (1.3e-33). Drift z-score re-spikes to 3.43 sigma, slope accelerating to +0.234 GeV/chunk."
+    },
+    {
+      "chunk_index": 9,
+      "chunk_id": "chunk_10",
+      "severity": "anomaly",
+      "n_events": 1500,
+      "n_events_near_z_peak": 282,
+      "mean_mass": {
+        "full_spectrum": 34.36,
+        "z_peak": 92.702
+      },
+      "pvalues": {
+        "full_spectrum:ks": 2.13e-05,
+        "full_spectrum:chi2": 0.0,
+        "z_peak:ks": 8.36e-20,
+        "z_peak:chi2": 6.39e-37,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.2862
+      },
+      "summary": "[Full-spectrum chi2 p=0.0 is the measurement artifact] Z-peak mean mass new record: 92.702 GeV (+1.512 above nominal). Z-peak shape p-values set new records (chi2 p=6.4e-37). Drift slope +0.253 GeV/chunk, accelerating."
+    },
+    {
+      "chunk_index": 10,
+      "chunk_id": "chunk_11",
+      "severity": "anomaly",
+      "n_events": 1500,
+      "n_events_near_z_peak": 306,
+      "mean_mass": {
+        "full_spectrum": 38.412,
+        "z_peak": 93.541
+      },
+      "pvalues": {
+        "full_spectrum:ks": 3.17e-08,
+        "full_spectrum:chi2": 0.0,
+        "z_peak:ks": 2.42e-29,
+        "z_peak:chi2": 9.49e-84,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.650975
+      },
+      "summary": "[Full-spectrum chi2 p=0.0 is the measurement artifact] Z-peak chi-square statistic more than doubled in one chunk (193.9 -> 414.8, p=9.5e-84) -- most extreme of the run. Z-peak mean mass 93.541 GeV, +2.351 above nominal. Drift slope steepest yet: +0.290 GeV/chunk."
+    },
+    {
+      "chunk_index": 11,
+      "chunk_id": "chunk_12",
+      "severity": "anomaly",
+      "n_events": 827,
+      "n_events_near_z_peak": 151,
+      "mean_mass": {
+        "full_spectrum": 34.979,
+        "z_peak": 93.845
+      },
+      "pvalues": {
+        "full_spectrum:ks": 7.76e-05,
+        "full_spectrum:chi2": 0.0,
+        "z_peak:ks": 1.42e-25,
+        "z_peak:chi2": 2.06e-50,
+        "occupancy:total": 2.29e-80,
+        "occupancy:z_peak": 0.239991
+      },
+      "summary": "[Full-spectrum chi2 p=0.0 is the measurement artifact] NEW: total occupancy collapse -- only 827/1500 events (z=-17.4 sigma) -- this is the final, smaller, partial chunk (real data ran out), not a real DAQ failure. Z-peak mean mass 93.845 GeV, +2.655 above nominal, steepest drift slope of the run (+0.312 GeV/chunk)."
+    }
+  ]
+}
