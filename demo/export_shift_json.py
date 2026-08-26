@@ -60,6 +60,42 @@ def _extract_mean_masses(chunk_summary: dict) -> dict:
     }
 
 
+def _extract_steps(tool_calls: list[dict]) -> list[dict]:
+    """Preserve the REAL order the agent actually called tools in, with a
+    short plain-language caption per step -- used by demo/agent_story.html
+    to replay the actual decision sequence rather than a guessed one.
+    Older exports won't have this field; the story page falls back to a
+    representative fixed order in that case."""
+    captions = {
+        "run_distribution_test": lambda inp, res: (
+            f"Checking the {'overall' if inp.get('region') == 'full_spectrum' else 'Z-peak-region'} "
+            f"shape of this batch against the reference"
+        ),
+        "check_occupancy": lambda inp, res: (
+            "Checking the total event count" if inp.get("region") == "total"
+            else "Checking the share of events landing near the Z mass"
+        ),
+        "apply_multiple_testing_correction": lambda inp, res: (
+            "Adjusting the significance bar since several checks were run this chunk"
+        ),
+        "check_drift": lambda inp, res: (
+            "Comparing against recent chunks for a developing trend, not just this one"
+        ),
+        "escalate_finding": lambda inp, res: "Writing the final verdict",
+    }
+    steps = []
+    for call in tool_calls:
+        caption_fn = captions.get(call["tool"])
+        caption = caption_fn(call["input"], call["result"]) if caption_fn else call["tool"]
+        steps.append({
+            "tool": call["tool"],
+            "input": call["input"],
+            "result": call["result"],
+            "caption": caption,
+        })
+    return steps
+
+
 def export_reports_to_json(reports: list[dict], path: str) -> None:
     chunks_out = []
     for r in reports:
@@ -74,6 +110,7 @@ def export_reports_to_json(reports: list[dict], path: str) -> None:
             "mean_mass": _extract_mean_masses(r["chunk_summary"]),
             "n_events": r["chunk_summary"].get("n_events"),
             "n_events_near_z_peak": r["chunk_summary"].get("n_events_near_z_peak"),
+            "steps": _extract_steps(r["tool_calls"]),
         })
 
     with open(path, "w") as f:

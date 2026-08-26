@@ -1,0 +1,142 @@
+{
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "chunk_id": "chunk_1",
+      "severity": "normal",
+      "summary": "Chunk 1 is clean across all checks. Full-spectrum KS (p=0.91) and chi-square (p=0.56) show no shape anomalies. Z-peak KS (p=0.95) and chi-square (p=0.86) are consistent with reference \u2014 no momentum-scale miscalibration indicated; Z-peak mean mass of 90.985 GeV sits well within the expected window. Total occupancy is exact (400 observed vs. 400 expected, z=0.0), and the Z-peak proportion (21.0% vs. reference 19.75%) is well within statistical variation (p=0.53). No tests survive BH correction. Drift tracking initiated for z_peak_mean_mass; trend assessment requires at least 5 chunks.",
+      "pvalues": {
+        "full_spectrum:ks": 0.9067578225553679,
+        "full_spectrum:chi2": 0.555714791764516,
+        "z_peak:ks": 0.9484677937501571,
+        "z_peak:chi2": 0.8559013283768909,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.5300511351999827
+      },
+      "drift": {},
+      "mean_mass": {
+        "full_spectrum": 32.445,
+        "z_peak": 90.985
+      },
+      "n_events": 400,
+      "n_events_near_z_peak": 84
+    },
+    {
+      "chunk_index": 1,
+      "chunk_id": "chunk_2",
+      "severity": "normal",
+      "summary": "Chunk 2 is clean across all checks. Full-spectrum KS (p=0.52) and chi-square (p=0.29) show no shape anomalies. Z-peak KS (p=0.56) and chi-square (p=0.78) are consistent with reference. Total occupancy is exact (400 observed vs. 400 expected, z=0.0). Z-peak proportion (19.0% vs. reference 19.75%) passes the binomial test (p=0.75). No tests survive BH correction. Z-peak mean mass of 90.589 GeV is logged for drift tracking (only 2 chunks so far; trend assessment requires 5).",
+      "pvalues": {
+        "full_spectrum:ks": 0.5234101030810641,
+        "full_spectrum:chi2": 0.2929278250102702,
+        "z_peak:ks": 0.5601948263816019,
+        "z_peak:chi2": 0.776784007729725,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.7536251895146651
+      },
+      "drift": {},
+      "mean_mass": {
+        "full_spectrum": 33.913,
+        "z_peak": 90.589
+      },
+      "n_events": 400,
+      "n_events_near_z_peak": 76
+    },
+    {
+      "chunk_index": 2,
+      "chunk_id": "chunk_3",
+      "severity": "normal",
+      "summary": "Chunk 3 is clean across all checks. Full-spectrum KS (p=0.28) and chi-square (p=0.73) show no shape anomalies. Z-peak KS (p=0.70) and chi-square (p=0.25) show no momentum-scale issues; Z-peak mean mass sits at 91.178 GeV, right on the PDG value. Total occupancy is exactly on target (400 events, z-score=0.0), and the Z-peak fraction (21.0% vs. 19.75% reference) is consistent with statistical fluctuation (binomial p=0.53). No test survives Benjamini-Hochberg correction. Drift history is accumulating but too short (3 chunks) for trend assessment yet.",
+      "pvalues": {
+        "full_spectrum:ks": 0.28118158736530297,
+        "full_spectrum:chi2": 0.7268805599314303,
+        "z_peak:ks": 0.6970700415307366,
+        "z_peak:chi2": 0.25180635862457396,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.5300511351999827
+      },
+      "drift": {},
+      "mean_mass": {
+        "full_spectrum": 35.048,
+        "z_peak": 91.178
+      },
+      "n_events": 400,
+      "n_events_near_z_peak": 84
+    },
+    {
+      "chunk_index": 3,
+      "chunk_id": "chunk_4",
+      "severity": "normal",
+      "summary": "Chunk 4 is clean across all checks. Full-spectrum KS (p=0.58) and chi-square (p=0.73) show no shape anomalies in the continuum. Z-peak KS (p=0.49) and chi-square (p=0.24) show no momentum-scale or shape issues near the Z resonance. Total occupancy is exactly on target (400 events, z=0.0, p=1.0). Z-peak event share (20.25% vs. reference 19.75%) is fully consistent with the binomial proportion test (p=0.80). Z-peak mean mass of 91.29 GeV is nominal; drift tracker has 4 chunks of history and will begin formal trend assessment next chunk. No findings to escalate.",
+      "pvalues": {
+        "full_spectrum:ks": 0.5812138636684575,
+        "full_spectrum:chi2": 0.727606332730236,
+        "z_peak:ks": 0.488475542766498,
+        "z_peak:chi2": 0.23950908303359975,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.8016778835449214
+      },
+      "drift": {},
+      "mean_mass": {
+        "full_spectrum": 34.742,
+        "z_peak": 91.29
+      },
+      "n_events": 400,
+      "n_events_near_z_peak": 81
+    },
+    {
+      "chunk_index": 4,
+      "chunk_id": "chunk_5",
+      "severity": "normal",
+      "summary": "Chunk 5 is clean across all checks. Total occupancy is exactly on target (400 events, z=0.0, p=1.0). Z-peak occupancy is normal (21.0% vs 19.75% reference, binomial p=0.53). Full-spectrum shape looks healthy (KS p=0.078, chi-square p=0.67); the KS value is mildly low but does not survive BH correction. Z-peak KS had the lowest raw p-value (p=0.031, statistic=0.22), potentially hinting at a minor shape shift near the resonance, but it does not survive multiple-testing correction (BH-adjusted, not significant). The drift tracker shows the Z-peak mean mass (91.847 GeV) sits 3.1\u03c3 above the recent rolling baseline, but the linear trend slope is shallow (+0.24 GeV/chunk) with trend p=0.079, and the tool confirms no sustained drift. With only a few chunks of history, this is too early to call a trend \u2014 it is at most a point to watch. No action required this chunk.",
+      "pvalues": {
+        "full_spectrum:ks": 0.07829787069468755,
+        "full_spectrum:chi2": 0.6693715489962493,
+        "z_peak:ks": 0.030986056892267102,
+        "z_peak:chi2": 0.17067018349204727,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.5300511351999827
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.24249999999999972,
+          "trend_p_value": 0.07872655630522389,
+          "looks_like_sustained_drift": false
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 36.697,
+        "z_peak": 91.847
+      },
+      "n_events": 400,
+      "n_events_near_z_peak": 84
+    },
+    {
+      "chunk_index": 5,
+      "chunk_id": "chunk_6",
+      "severity": "anomaly",
+      "summary": "Chunk 6 shows a significant upward shift in the Z-peak invariant-mass distribution that survives multiple-testing correction and is confirmed as a developing trend by drift analysis.\n\n**What flagged:** Z-peak KS test (p=0.0024) and chi-square test (p=0.0062), both significant after Benjamini-Hochberg FDR correction. Full-spectrum shape, total occupancy (400 events, z=0.0), and Z-peak event share (20.75% vs 19.75% reference, p=0.62) are all clean \u2014 the anomaly is localized specifically to the shape of the Z-peak mass distribution.\n\n**The deviation:** Z-peak mean mass is 92.118 GeV, elevated above the nominal 91.19 GeV (~0.93 GeV high). The drift tracker reports a statistically significant upward linear trend across chunks (slope \u2248 +0.27 GeV/chunk, trend p=0.012, z=2.29 vs recent baseline), indicating this is not a one-off fluctuation but a sustained, progressive shift consistent with a momentum-scale miscalibration drifting upward over time.\n\n**Recommended action:** Escalate to detector operations / alignment & calibration team for investigation of muon momentum scale. Check for tracker alignment changes, magnetic field conditions, or a drifting calibration constant that could produce a progressive upward bias in reconstructed muon pT.",
+      "pvalues": {
+        "full_spectrum:ks": 0.13142600454226117,
+        "full_spectrum:chi2": 0.6946646912648136,
+        "z_peak:ks": 0.0023975550804973926,
+        "z_peak:chi2": 0.006245929579788302,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.6154229208012356
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.27288571428571357,
+          "trend_p_value": 0.012329332681411698,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 35.671,
+        "z_peak": 92.118
+      },
+      "n_events": 400,
+      "n_events_near_z_peak": 83
+    }
+  ]
+}

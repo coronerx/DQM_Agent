@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How the DQM agent thinks</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #f7f7f5; margin: 0; padding: 24px 24px 64px; color: #1a1a18; max-width: 980px; }
+  h1 { font-size: 22px; font-weight: 500; margin: 0 0 4px; }
+  h2 { font-size: 17px; font-weight: 500; margin: 40px 0 6px; }
+  .subtitle { font-size: 13px; color: #6b6a66; margin: 0 0 20px; max-width: 700px; line-height: 1.6; }
+  .card { background: white; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 20px; }
+
+  .nav { display: flex; gap: 16px; margin-bottom: 28px; font-size: 13px; }
+  .nav a { color: #185fa5; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+
+  .timeline { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .chunk-box { min-width: 90px; padding: 8px 10px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; font-size: 12px; text-align: center; }
+  .chunk-box.selected { border-color: #1a1a18; }
+  .chunk-box .id { font-weight: 500; }
+  .sev-normal { background: #EAF3DE; color: #27500A; }
+  .sev-watch  { background: #FAEEDA; color: #633806; }
+  .sev-anomaly{ background: #FCEBEB; color: #791F1F; }
+  .sev-unknown{ background: #F1EFE8; color: #444441; }
+
+  .replay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .replay-grid canvas { max-height: 280px; }
+  .controls { display: flex; gap: 8px; margin-bottom: 12px; }
+  .btn { font-size: 13px; padding: 6px 14px; border: 0.5px solid #b4b2a9; border-radius: 6px; background: white; cursor: pointer; }
+  .btn:hover { background: #f1efe8; }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .btn.active { background: #1a1a18; color: white; border-color: #1a1a18; }
+
+  .step { display: flex; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid #efeee8; font-size: 13px; opacity: 0; transform: translateY(4px); transition: opacity 0.3s, transform 0.3s; }
+  .step.shown { opacity: 1; transform: translateY(0); }
+  .step .icon { width: 18px; flex-shrink: 0; text-align: center; }
+  .step .caption { color: #1a1a18; }
+  .step .detail { color: #6b6a66; font-size: 12px; margin-top: 2px; }
+
+  .verdict-badge { display: inline-block; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; margin: 12px 0 10px; }
+  .summary-text { font-size: 13px; line-height: 1.6; color: #333; white-space: pre-wrap; }
+
+  .note { font-size: 12px; color: #6b6a66; margin-top: 10px; }
+  .status { font-size: 13px; color: #6b6a66; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<h1>How the DQM agent thinks</h1>
+<p class="subtitle">
+An agent (Claude) plays the role of a particle-detector data quality shift worker: given a batch of
+collision data, it decides which statistical checks to run, weighs the evidence, and writes a verdict --
+the same judgment a human shift worker would make, automated. This page has no live API calls -- it
+replays a real run's actual decisions, recorded exactly as they happened.
+</p>
+
+<div class="nav">
+  <a href="#workflow">The decision workflow</a>
+  <a href="#replay">Watch it work, chunk by chunk</a>
+  <a href="dashboard.html">Full multi-chart dashboard &#8594;</a>
+</div>
+
+<h2 id="workflow">The decision workflow</h2>
+<p class="subtitle">
+Each new batch of data only gives the agent a lightweight summary -- never the raw measurements
+directly. From that summary alone, it decides which of these checks are worth actually running.
+</p>
+<div class="card">
+<svg width="100%" viewBox="0 0 680 646" role="img">
+<title>DQM agent decision workflow</title>
+<desc>A new batch of data arrives as a lightweight summary. The agent decides what to check, runs four possible checks (overall shape, Z-peak shape, total count, Z-peak share), adjusts for having run several checks at once, compares against recent history for a developing trend, then writes a final verdict.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<g>
+  <rect x="260" y="40" width="160" height="56" rx="8" fill="#F1EFE8" stroke="#b4b2a9" stroke-width="0.5"/>
+  <text x="340" y="60" text-anchor="middle" font-size="14" fill="#2c2c2a">New batch arrives</text>
+  <text x="340" y="78" text-anchor="middle" font-size="12" fill="#5f5e5a">Only a short summary, not raw data</text>
+</g>
+<line x1="340" y1="96" x2="340" y2="140" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<g>
+  <rect x="230" y="140" width="220" height="56" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+  <text x="340" y="174" text-anchor="middle" font-size="14" fill="#0c447c">Agent decides what to check</text>
+</g>
+
+<line x1="340" y1="196" x2="115" y2="250" stroke="#888780" stroke-width="1" marker-end="url(#arrow)"/>
+<line x1="340" y1="196" x2="265" y2="250" stroke="#888780" stroke-width="1" marker-end="url(#arrow)"/>
+<line x1="340" y1="196" x2="415" y2="250" stroke="#888780" stroke-width="1" marker-end="url(#arrow)"/>
+<line x1="340" y1="196" x2="565" y2="250" stroke="#888780" stroke-width="1" marker-end="url(#arrow)"/>
+
+<g><rect x="50" y="250" width="130" height="56" rx="8" fill="#F1EFE8" stroke="#b4b2a9" stroke-width="0.5"/>
+  <text x="115" y="272" text-anchor="middle" font-size="13" fill="#2c2c2a">Overall shape</text>
+  <text x="115" y="289" text-anchor="middle" font-size="11" fill="#5f5e5a">Whole spectrum</text></g>
+<g><rect x="200" y="250" width="130" height="56" rx="8" fill="#F1EFE8" stroke="#b4b2a9" stroke-width="0.5"/>
+  <text x="265" y="272" text-anchor="middle" font-size="13" fill="#2c2c2a">Z-peak shape</text>
+  <text x="265" y="289" text-anchor="middle" font-size="11" fill="#5f5e5a">Near known mass</text></g>
+<g><rect x="350" y="250" width="130" height="56" rx="8" fill="#F1EFE8" stroke="#b4b2a9" stroke-width="0.5"/>
+  <text x="415" y="272" text-anchor="middle" font-size="13" fill="#2c2c2a">Total count</text>
+  <text x="415" y="289" text-anchor="middle" font-size="11" fill="#5f5e5a">Enough events?</text></g>
+<g><rect x="500" y="250" width="130" height="56" rx="8" fill="#F1EFE8" stroke="#b4b2a9" stroke-width="0.5"/>
+  <text x="565" y="272" text-anchor="middle" font-size="13" fill="#2c2c2a">Z-peak share</text>
+  <text x="565" y="289" text-anchor="middle" font-size="11" fill="#5f5e5a">Right proportion?</text></g>
+
+<line x1="115" y1="306" x2="340" y2="350" stroke="#888780" stroke-width="1"/>
+<line x1="265" y1="306" x2="340" y2="350" stroke="#888780" stroke-width="1"/>
+<line x1="415" y1="306" x2="340" y2="350" stroke="#888780" stroke-width="1"/>
+<line x1="565" y1="306" x2="340" y2="350" stroke="#888780" stroke-width="1" marker-end="url(#arrow)"/>
+
+<g><rect x="200" y="350" width="280" height="56" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+  <text x="340" y="372" text-anchor="middle" font-size="14" fill="#633806">Adjust for running several checks</text>
+  <text x="340" y="389" text-anchor="middle" font-size="12" fill="#854f0b">So chance alone doesn't trigger a false alarm</text></g>
+<line x1="340" y1="406" x2="340" y2="450" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<g><rect x="190" y="450" width="300" height="56" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+  <text x="340" y="472" text-anchor="middle" font-size="14" fill="#3c3489">Compare to recent history</text>
+  <text x="340" y="489" text-anchor="middle" font-size="12" fill="#534ab7">Real trend, or just one noisy batch?</text></g>
+<line x1="340" y1="506" x2="340" y2="550" stroke="#888780" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<g><rect x="220" y="550" width="240" height="56" rx="8" fill="#1a1a18"/>
+  <text x="340" y="572" text-anchor="middle" font-size="14" fill="white">Write the verdict</text>
+  <text x="340" y="589" text-anchor="middle" font-size="12" fill="#d3d1c7">Normal, watch, or anomaly -- with reasons</text></g>
+</svg>
+</div>
+
+<h2 id="replay">Watch it work, chunk by chunk</h2>
+<p class="subtitle">
+This replays a real run's actual recorded decisions on real CMS collision data -- not a live call, and
+not scripted. Each step below is exactly what the agent actually checked and found.
+</p>
+
+<div class="status" id="status">Loading...</div>
+<div class="controls" style="margin-bottom:12px">
+  <button class="btn" id="realBtn">Real CMS data</button>
+  <button class="btn" id="sampleBtn">Synthetic sample data</button>
+  <span style="font-size:12px;color:#6b6a66;margin-left:8px">or</span>
+  <input type="file" id="fileInput" accept="application/json">
+</div>
+<div class="timeline" id="timeline"></div>
+
+<div class="replay-grid">
+  <div class="card">
+    <div style="font-size:13px;color:#6b6a66;margin-bottom:8px">Dimuon mass spectrum for this chunk</div>
+    <canvas id="histChart"></canvas>
+    <div class="note" id="histNote"></div>
+  </div>
+  <div class="card">
+    <div class="controls">
+      <button class="btn" id="playBtn">Play reasoning</button>
+      <button class="btn" id="resetBtn">Reset</button>
+    </div>
+    <div id="stepsContainer"></div>
+    <div id="verdictContainer"></div>
+  </div>
+</div>
+
+<script>
+const Z_MASS = 91.1876;
+let decisionData = null;
+let histData = null;
+let selectedIndex = 0;
+let histChart = null;
+let stepTimer = null;
+let currentSource = null;
+
+const SOURCES = {
+  real: { file: 'real_data_drift_cheap_export.json', histFile: 'chunk_histograms_real.json', label: 'real CMS data' },
+  sample: { file: 'sample_shift_export.json', histFile: 'chunk_histograms_sample.json', label: 'synthetic sample data' },
+};
+
+async function loadSource(sourceKey) {
+  const source = SOURCES[sourceKey];
+  document.getElementById('status').textContent = `Loading ${source.label}...`;
+  try {
+    const decRes = await fetch(source.file);
+    if (!decRes.ok) throw new Error('not found');
+    decisionData = (await decRes.json()).chunks;
+  } catch (e) {
+    document.getElementById('status').textContent =
+      `Could not load ${source.file} -- needs to be served over HTTP (GitHub Pages or a local server; file:// blocks this) and present in the demo/ folder.`;
+    return;
+  }
+  currentSource = sourceKey;
+  updateSourceButtons();
+
+  // Histogram file is source-specific -- real and synthetic chunks use
+  // completely different generators despite sharing the same chunk_1..N
+  // naming, so loading the wrong one would silently show the wrong
+  // spectrum shape for whichever source is actually selected.
+  histData = null;
+  try {
+    const histRes = await fetch(source.histFile);
+    if (histRes.ok) histData = await histRes.json();
+  } catch (e) { /* optional -- fine if missing */ }
+
+  document.getElementById('status').textContent =
+    `Loaded ${decisionData.length} chunks of ${source.label}` + (histData ? ' with real mass spectra.' : ` (no spectrum data found -- run demo/export_chunk_histograms${sourceKey === 'sample' ? '_sample' : ''}.py locally to add it).`);
+  selectedIndex = 0;
+  renderTimeline();
+  selectChunk(0);
+}
+
+function updateSourceButtons() {
+  document.getElementById('realBtn').classList.toggle('active', currentSource === 'real');
+  document.getElementById('sampleBtn').classList.toggle('active', currentSource === 'sample');
+}
+
+async function loadData() {
+  // Try the real data first; if it's not present (e.g. you haven't generated
+  // it, or you're just browsing the public demo without it committed), fall
+  // back to the synthetic sample automatically.
+  await loadSource('real');
+  if (!decisionData) await loadSource('sample');
+}
+
+function sevClass(sev) {
+  return { normal: 'sev-normal', watch: 'sev-watch', anomaly: 'sev-anomaly' }[sev] || 'sev-unknown';
+}
+
+function renderTimeline() {
+  const timeline = document.getElementById('timeline');
+  timeline.innerHTML = '';
+  decisionData.forEach((c, i) => {
+    const box = document.createElement('div');
+    box.className = 'chunk-box ' + sevClass(c.severity) + (i === selectedIndex ? ' selected' : '');
+    box.innerHTML = `<div class="id">${c.chunk_id}</div><div>${c.severity}</div>`;
+    box.onclick = () => selectChunk(i);
+    timeline.appendChild(box);
+  });
+}
+
+function fmtP(p) {
+  if (p == null) return 'n/a';
+  return p < 0.001 ? p.toExponential(2) : p.toFixed(3);
+}
+
+function buildSteps(chunk) {
+  if (chunk.steps && chunk.steps.length) {
+    return chunk.steps.map(s => ({
+      caption: s.caption,
+      detail: JSON.stringify(s.input) + ' -> ' + (s.result.p_value !== undefined ? 'p=' + fmtP(s.result.p_value) : 'logged'),
+    }));
+  }
+  const steps = [];
+  const pv = chunk.pvalues || {};
+  if ('full_spectrum:ks' in pv) steps.push({ caption: 'Checking the overall shape of this batch against the reference', detail: `full-spectrum KS p=${fmtP(pv['full_spectrum:ks'])}, chi-square p=${fmtP(pv['full_spectrum:chi2'])}` });
+  if ('z_peak:ks' in pv) steps.push({ caption: 'Checking the shape specifically near the Z mass', detail: `Z-peak KS p=${fmtP(pv['z_peak:ks'])}, chi-square p=${fmtP(pv['z_peak:chi2'])}` });
+  if ('occupancy:total' in pv) steps.push({ caption: 'Checking the total number of events', detail: `p=${fmtP(pv['occupancy:total'])}` });
+  if ('occupancy:z_peak' in pv) steps.push({ caption: 'Checking the share of events landing near the Z mass', detail: `p=${fmtP(pv['occupancy:z_peak'])}` });
+  steps.push({ caption: 'Adjusting the significance bar since several checks ran this chunk', detail: 'Benjamini-Hochberg correction' });
+  const driftKeys = Object.keys(chunk.drift || {});
+  if (driftKeys.length) {
+    driftKeys.forEach(k => {
+      const d = chunk.drift[k];
+      steps.push({ caption: 'Comparing against recent chunks for a developing trend', detail: `${k}: slope=${d.slope != null ? d.slope.toFixed(3) : 'n/a'}, trend p=${fmtP(d.trend_p_value)}, sustained=${d.looks_like_sustained_drift}` });
+    });
+  } else {
+    steps.push({ caption: 'Comparing against recent chunks for a developing trend', detail: 'not enough history yet this early in the shift' });
+  }
+  steps.push({ caption: 'Writing the final verdict', detail: chunk.severity.toUpperCase() });
+  return steps;
+}
+
+function selectChunk(i) {
+  selectedIndex = i;
+  clearTimeout(stepTimer);
+  renderTimeline();
+  renderHistogram(decisionData[i]);
+  renderSteps(decisionData[i]);
+}
+
+function renderHistogram(chunk) {
+  const note = document.getElementById('histNote');
+  if (!histData) {
+    if (histChart) { histChart.destroy(); histChart = null; }
+    note.textContent = 'Spectrum not available for this export.';
+    return;
+  }
+  const entry = histData.chunks.find(c => c.chunk_id === chunk.chunk_id);
+  if (!entry) { note.textContent = 'No spectrum recorded for this chunk.'; return; }
+
+  const zPeakMask = histData.mass_bins.map(m => Math.abs(m - Z_MASS) < 10);
+  const colors = histData.mass_bins.map((m, idx) => zPeakMask[idx] ? '#378ADD' : '#B4B2A9');
+
+  if (histChart) histChart.destroy();
+  histChart = new Chart(document.getElementById('histChart'), {
+    type: 'bar',
+    data: { labels: histData.mass_bins.map(m => m.toFixed(0)), datasets: [{ data: entry.counts, backgroundColor: colors }] },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { x: { title: { display: true, text: 'dimuon mass (GeV)' } }, y: { title: { display: true, text: 'events' } } },
+    },
+  });
+  note.textContent = 'Blue bars = Z-peak window (81-101 GeV). Watch it shift across chunks.';
+}
+
+function renderSteps(chunk) {
+  const steps = buildSteps(chunk);
+  const container = document.getElementById('stepsContainer');
+  container.innerHTML = steps.map(s => `
+    <div class="step">
+      <div class="icon">-</div>
+      <div><div class="caption">${s.caption}</div><div class="detail">${s.detail}</div></div>
+    </div>`).join('');
+  document.getElementById('verdictContainer').innerHTML = '';
+  document.getElementById('playBtn').disabled = false;
+}
+
+function playSteps() {
+  const stepEls = document.querySelectorAll('#stepsContainer .step');
+  stepEls.forEach(el => el.classList.remove('shown'));
+  document.getElementById('verdictContainer').innerHTML = '';
+  document.getElementById('playBtn').disabled = true;
+
+  let i = 0;
+  function next() {
+    if (i < stepEls.length) {
+      stepEls[i].classList.add('shown');
+      i++;
+      stepTimer = setTimeout(next, 550);
+    } else {
+      const chunk = decisionData[selectedIndex];
+      document.getElementById('verdictContainer').innerHTML = `
+        <div class="verdict-badge ${sevClass(chunk.severity)}">${chunk.severity.toUpperCase()}</div>
+        <div class="summary-text">${chunk.summary}</div>`;
+      document.getElementById('playBtn').disabled = false;
+    }
+  }
+  next();
+}
+
+document.getElementById('playBtn').addEventListener('click', playSteps);
+document.getElementById('resetBtn').addEventListener('click', () => selectChunk(selectedIndex));
+document.getElementById('realBtn').addEventListener('click', () => loadSource('real'));
+document.getElementById('sampleBtn').addEventListener('click', () => loadSource('sample'));
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      decisionData = data.chunks;
+      currentSource = null;  // custom file -- neither toggle button is "active"
+      updateSourceButtons();
+      selectedIndex = 0;
+      document.getElementById('status').textContent = `Loaded ${decisionData.length} chunks from ${file.name}`;
+      renderTimeline();
+      selectChunk(0);
+    } catch (err) {
+      document.getElementById('status').textContent = 'Could not parse JSON: ' + err.message;
+    }
+  };
+  reader.readAsText(file);
+});
+
+loadData();
+</script>
+
+</body>
+</html>
