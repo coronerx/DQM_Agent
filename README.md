@@ -92,7 +92,6 @@ not an arbitrary injected anomaly — see `LAB_MANUAL.md` Section 2.1 and 2.5.
   to real physics data
 - ⬜ Real-data drift tracking (only tested on synthetic data so far)
 
-## Findings worth knowing before extending this
 
 See `LAB_MANUAL.md` Section 5 for full detail, but briefly:
 
