@@ -8,22 +8,54 @@ plain-language shift report — the same judgment a real ATLAS/CMS shift
 crew makes, automated.
 
 Validated end-to-end against **real CMS 2012 collision data**
-(`Run2012BC_DoubleMuParked`), not just synthetic data. See
-[`LAB_MANUAL.md`](./LAB_MANUAL.md) for full background, theory, and
-procedure — this file is the quick-start / results summary.
+(`Run2012BC_DoubleMuParked`) and, separately, against live agent runs on
+synthetic data designed to exercise specific behaviors. Four real bugs
+were found and fixed along the way — not simulated ones. See
+[`NOTES.md`](./NOTES.md) for the full chronological debugging log, and
+[`LAB_MANUAL.md`](./LAB_MANUAL.md) for background theory and procedure.
+This file is the results summary.
 
-## Headline result
+## Headline results
 
 Using real dimuon events from the CMS Open Data Portal:
 
 - **0 / 12 false alarms** on unperturbed real data (specificity baseline)
 - **Detects a muon momentum-scale miscalibration down to ~1.0–1.5%** at a
-  chunk size of 1500 events, with clean separation from the false-alarm
-  baseline (sensitivity, quantified via a full detection curve, not a
-  single pass/fail case)
+  chunk size of 1500 events, quantified via a full detection curve
+
+Using live agent runs (synthetic and real data):
+
+- **Correctly identifies a background-only anomaly** confined outside the
+  Z-peak window, after a system-prompt fix closed a real detection blind
+  spot (see findings below)
+- **Correctly recognizes a recurring problem** across non-adjacent chunks
+  and escalates severity appropriately, using only a compact context
+  digest — not a full conversation transcript
+- **Formally confirms a real, developing drift** (momentum-scale
+  miscalibration) using a proper statistical trend test, after a bug in
+  the original threshold logic was found and fixed
+
+**[Open the interactive 3D spectrum drift visualization →](./demo/spectrum_waterfall_3d.html)**
+*(GitHub won't render this inline — it's a standalone interactive page. Click through.)*
 
 ![Detection sensitivity curve](./sensitivity_curve.png)
 ![Real CMS dimuon spectrum](./dimuon_spectrum_real_data.png)
+
+## Four real bugs found and fixed
+
+This project's most substantive engineering content came from running the
+agent for real and finding out where the statistics were actually wrong —
+not from getting everything right on the first attempt.
+
+| # | Bug | How it was found | Fix |
+|---|---|---|---|
+| 1 | `check_occupancy` used a naive ratio threshold, couldn't distinguish "fewer events overall" from "events migrating out of one region" | Manual review after a real run flagged an unfounded "concern" | Replaced with a Poisson test (total count) + binomial proportion test (regional share) |
+| 2 | Agent never checked the full mass spectrum, only the Z-peak window — structurally blind to any problem outside it | Deliberately designed adversarial test (background-only anomaly, Z-peak untouched) | System prompt now requires `region='full_spectrum'` every chunk, no exceptions |
+| 3 | Chi-square test could return a statistic of ~1,000,000 from a single stray event, and separately had a **~50% false-positive rate** (should be ~5%) — the whole implementation used the wrong statistical test (one-sample GOF instead of two-sample homogeneity) | Live 12-chunk real-data run produced a nonsensical "recurring catastrophic anomaly" the agent spent multiple chunks investigating | Switched to a proper two-sample chi-square test of homogeneity |
+| 4 | Drift-detection boolean essentially never fired — even given an obvious, agent-identified +3.4 GeV drift over 12 real chunks | Repeatedly observed across several live runs before being traced to two compounding bugs | Replaced heuristic threshold with a real linear regression significance test |
+
+Each of these has a dedicated regression test (see `tests/`) tied
+specifically to the real case that revealed it.
 
 ## Structure
 
@@ -37,69 +69,80 @@ dqm_agent/
 │   ├── real_data_sensitivity_test.py      single-case detection on real data
 │   └── real_data_sensitivity_curve.py     full detection-threshold curve
 ├── monitors/
-│   ├── distribution_shift.py       KS test, chi-square, Benjamini-Hochberg
-│   └── drift_tracker.py            rolling-window trend vs. fluctuation
-├── tests/
-│   └── test_dimuon_pipeline.py     fast, free, deterministic (no API calls)
+│   ├── distribution_shift.py       KS test, two-sample chi-square, Benjamini-Hochberg
+│   ├── occupancy.py                Poisson (total) + binomial (regional) tests
+│   └── drift_tracker.py            linear-regression trend significance test
+├── agent/
+│   ├── data_context.py             holds current chunk's raw data
+│   ├── tools.py                    tool schemas + dispatcher
+│   └── loop.py                     Claude tool-use loop, prompt caching, cost-aware history
+├── demo/
+│   ├── test_full_spectrum_blind_spot.py   adversarial test for bug #2
+│   ├── test_recurring_anomaly.py          recurrence-recognition test
+│   ├── test_drift_threshold_fix.py        live confirmation of bug #4's fix
+│   ├── dashboard.html                     interactive shift-by-shift dashboard
+│   ├── spectrum_waterfall_3d.html         3D visualization of the drift
+│   └── export_shift_json.py               converts a run into dashboard-ready JSON
+├── tests/                          fast, free, deterministic (no API calls)
 ├── LAB_MANUAL.md                   background, theory, full procedure
+├── NOTES.md                        chronological debugging log
 └── README.md                       this file
 ```
-
-`agent/` (the Claude tool-use loop connecting the above into an actual
-autonomous agent) is scaffolded but not yet wired to real dimuon chunks —
-see "Status" below.
 
 ## Quick start
 
 ```bash
-pip install -r requirements.txt   # numpy, scipy, matplotlib, uproot, awkward
+pip install -r requirements.txt
 ```
 
-**Run the free/fast test suite** (synthetic data, no API calls, no network):
+**Free/fast test suite** (no API calls, no network, runs in ~2 seconds):
 ```bash
-PYTHONPATH=. pytest tests/test_dimuon_pipeline.py -v
+PYTHONPATH=. pytest tests/ -v
 ```
 
-**Validate against real data** (requires downloading ~2GB from CERN Open Data):
+**Live agent run** (costs real API calls — start small):
 ```bash
-pip install cernopendata-client
-cernopendata-client get-file-locations --recid 12341 --protocol http
-curl <the-url-it-prints> -o Run2012BC_DoubleMuParked_Muons.root
-
-PYTHONPATH=. python3 dimuon/real_data_loader.py Run2012BC_DoubleMuParked_Muons.root
-PYTHONPATH=. python3 dimuon/real_data_false_positive_test.py Run2012BC_DoubleMuParked_Muons.root
-PYTHONPATH=. python3 dimuon/real_data_sensitivity_curve.py Run2012BC_DoubleMuParked_Muons.root
+export ANTHROPIC_API_KEY=your_key_here
+PYTHONPATH=. python3 demo/test_drift_threshold_fix.py
 ```
 
-## Why dimuon events
+**Visualize a run:**
+```bash
+PYTHONPATH=. python3 demo/export_shift_json.py   # after a run_shift() call
+open demo/dashboard.html                          # load the exported JSON
+open demo/spectrum_waterfall_3d.html               # interactive 3D view
+```
 
-Rather than an invented sensor scenario, this project uses real dimuon
-invariant mass — the same quantity the official CMS Open Data outreach
-example computes, and the same quantity real experiments use to calibrate
-muon momentum scale off the known Z boson mass (91.19 GeV). The synthetic
-"miscalibration" tested throughout this project is a real detector effect,
-not an arbitrary injected anomaly — see `LAB_MANUAL.md` Section 2.1 and 2.5.
+## Why dimuon events, and why real data
+
+Rather than an invented scenario, this project uses real dimuon invariant
+mass — the same quantity the official CMS Open Data outreach example
+computes, and the same quantity real experiments use to calibrate muon
+momentum scale off the known Z boson mass (91.19 GeV). Testing against
+real CMS 2012 collision data (not just synthetic data engineered to pass)
+is what actually surfaced bugs #3 and #4 above — synthetic-only testing
+would very likely have missed both.
+
+## Cost lessons (also real, also worth knowing)
+
+An early 12-chunk live run cost several dollars, traced to `run_shift()`
+threading the full raw conversation transcript forward across chunks —
+cost grew roughly quadratically with shift length. Fixed by having each
+chunk start fresh, with a short plain-text digest of recent verdicts
+instead of the full transcript, plus prompt caching on the (large,
+per-call-identical) system prompt and tool schemas. See `NOTES.md` for
+the full story.
 
 ## Status
 
-- ✅ Kinematics — validated against hand-computed cases and real CMS data
-- ✅ Statistics layer (KS test, chi-square, BH correction) — validated on
-  synthetic and real data, specificity + sensitivity both confirmed
-- ✅ Drift tracking — validated on synthetic data (see LAB_MANUAL.md 5.1)
-- ⬜ Full agent loop (Claude tool-use) wired to real dimuon chunks — the
-  loop/tools scaffolding exists but hasn't yet been re-connected to the
-  dimuon pipeline after the project moved from synthetic sensor channels
-  to real physics data
-- ⬜ Real-data drift tracking (only tested on synthetic data so far)
-
-
-See `LAB_MANUAL.md` Section 5 for full detail, but briefly:
-
-- Shape-based tests (KS, chi-square) cannot detect pure occupancy/count
-  loss — a channel that goes mostly dead but keeps the same distribution
-  shape among survivors passes both tests. Occupancy needs its own check.
-- The choice of *what quantity to monitor* matters as much as the
-  statistical test itself — tracking a whole-spectrum mean was too noisy to
-  see a real drift; narrowing to the physically-relevant region (the Z peak)
-  fixed it. This mirrors real calibration practice, not just an engineering
-  workaround.
+- Kinematics — validated against hand-computed cases and real CMS data
+- Statistics layer — validated on synthetic and real data, all four
+  bugs above fixed and regression-tested
+- Full agent loop — validated live on both synthetic (blind-spot,
+  recurrence, drift-threshold scenarios) and real CMS data
+- Cost-aware design — no-history-carryover + prompt caching, confirmed
+  working via mocked tests (zero API cost) before real validation
+- A "narrative trap" guardrail (don't claim a periodic pattern from
+  only 2 occurrences) was added to the system prompt and shows up
+  correctly in live transcripts, but has no automated regression test —
+  it's a language-quality property, not a computation to assert on
