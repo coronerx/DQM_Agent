@@ -1,0 +1,3557 @@
+{
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "chunk_id": "chunk_1",
+      "severity": "normal",
+      "summary": "Chunk 1 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). The Z-peak share (20.6% vs. 19.9% reference) passes the binomial proportion test comfortably (p=0.52). Full-spectrum shape looks good (KS p=0.13, chi2 p=0.55). The Z-peak shape and calibration are also healthy (KS p=0.96; chi2 p=0.055 is the lowest of the batch but does not survive BH correction). Z-peak mean mass of 90.478 GeV is close to the nominal 91.19 GeV; drift baseline established \u2014 trend assessment requires at least 5 chunks. No anomalies to report.",
+      "pvalues": {
+        "full_spectrum:ks": 0.13032656194739392,
+        "full_spectrum:chi2": 0.5458618313657368,
+        "z_peak:ks": 0.9583874324991759,
+        "z_peak:chi2": 0.054906893411062585,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.5180888583190746
+      },
+      "drift": {},
+      "mean_mass": {
+        "full_spectrum": 35.267,
+        "z_peak": 90.478
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 309,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.042666666666666686,
+              "p_value": 0.13032656194739392
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 4.02472391840977,
+              "p_value": 0.5458618313657368,
+              "dof": 5,
+              "bins_used": 6,
+              "bins_excluded_both_empty": 4
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 309,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.03976577805197479,
+              "p_value": 0.9583874324991759
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 16.625904710707076,
+              "p_value": 0.054906893411062585,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 309,
+            "observed_n": 1500,
+            "observed_proportion": 0.206,
+            "reference_proportion": 0.1993,
+            "p_value": 0.5180888583190746,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 0.13032656194739392,
+              "full_spectrum:chi2": 0.5458618313657368,
+              "z_peak:ks": 0.9583874324991759,
+              "z_peak:chi2": 0.054906893411062585,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.5180888583190746
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:chi2": {
+              "p_value": 0.054906893411062585,
+              "rank": 1,
+              "significant_after_correction": false
+            },
+            "full_spectrum:ks": {
+              "p_value": 0.13032656194739392,
+              "rank": 2,
+              "significant_after_correction": false
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.5180888583190746,
+              "rank": 3,
+              "significant_after_correction": false
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.5458618313657368,
+              "rank": 4,
+              "significant_after_correction": false
+            },
+            "z_peak:ks": {
+              "p_value": 0.9583874324991759,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 90.478
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 90.478,
+            "window_size": 1,
+            "trend_detectable": false,
+            "note": "only 1 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "normal",
+            "summary": "Chunk 1 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). The Z-peak share (20.6% vs. 19.9% reference) passes the binomial proportion test comfortably (p=0.52). Full-spectrum shape looks good (KS p=0.13, chi2 p=0.55). The Z-peak shape and calibration are also healthy (KS p=0.96; chi2 p=0.055 is the lowest of the batch but does not survive BH correction). Z-peak mean mass of 90.478 GeV is close to the nominal 91.19 GeV; drift baseline established \u2014 trend assessment requires at least 5 chunks. No anomalies to report."
+          },
+          "result": {
+            "logged": true,
+            "severity": "normal",
+            "summary": "Chunk 1 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). The Z-peak share (20.6% vs. 19.9% reference) passes the binomial proportion test comfortably (p=0.52). Full-spectrum shape looks good (KS p=0.13, chi2 p=0.55). The Z-peak shape and calibration are also healthy (KS p=0.96; chi2 p=0.055 is the lowest of the batch but does not survive BH correction). Z-peak mean mass of 90.478 GeV is close to the nominal 91.19 GeV; drift baseline established \u2014 trend assessment requires at least 5 chunks. No anomalies to report."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 1,
+      "chunk_id": "chunk_2",
+      "severity": "normal",
+      "summary": "Chunk 2 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). The Z-peak share (20.7% vs. 19.9% reference) passes the binomial proportion test comfortably (p=0.48). Both full-spectrum and Z-peak distribution tests (KS and chi-square) return p-values well above 0.3 \u2014 no shape anomaly detected anywhere in the spectrum. The Z-peak mean mass of 90.51 GeV is being tracked for drift; only 2 chunks of history so far, so no trend assessment is yet possible. No concerns this chunk.",
+      "pvalues": {
+        "full_spectrum:ks": 0.32832428797462926,
+        "full_spectrum:chi2": 0.39719824014811267,
+        "z_peak:ks": 0.9310994870905387,
+        "z_peak:chi2": 0.5388311939569378,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.4771325952322194
+      },
+      "drift": {},
+      "mean_mass": {
+        "full_spectrum": 35.248,
+        "z_peak": 90.51
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 310,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.034666666666666734,
+              "p_value": 0.32832428797462926
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 7.311345675369203,
+              "p_value": 0.39719824014811267,
+              "dof": 7,
+              "bins_used": 8,
+              "bins_excluded_both_empty": 2
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 310,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.042431761786600464,
+              "p_value": 0.9310994870905387
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 7.953577550608479,
+              "p_value": 0.5388311939569378,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 310,
+            "observed_n": 1500,
+            "observed_proportion": 0.2067,
+            "reference_proportion": 0.1993,
+            "p_value": 0.4771325952322194,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 0.32832428797462926,
+              "full_spectrum:chi2": 0.39719824014811267,
+              "z_peak:ks": 0.9310994870905387,
+              "z_peak:chi2": 0.5388311939569378,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.4771325952322194
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "full_spectrum:ks": {
+              "p_value": 0.32832428797462926,
+              "rank": 1,
+              "significant_after_correction": false
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.39719824014811267,
+              "rank": 2,
+              "significant_after_correction": false
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.4771325952322194,
+              "rank": 3,
+              "significant_after_correction": false
+            },
+            "z_peak:chi2": {
+              "p_value": 0.5388311939569378,
+              "rank": 4,
+              "significant_after_correction": false
+            },
+            "z_peak:ks": {
+              "p_value": 0.9310994870905387,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 90.51
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 90.51,
+            "window_size": 2,
+            "trend_detectable": false,
+            "note": "only 2 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "normal",
+            "summary": "Chunk 2 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). The Z-peak share (20.7% vs. 19.9% reference) passes the binomial proportion test comfortably (p=0.48). Both full-spectrum and Z-peak distribution tests (KS and chi-square) return p-values well above 0.3 \u2014 no shape anomaly detected anywhere in the spectrum. The Z-peak mean mass of 90.51 GeV is being tracked for drift; only 2 chunks of history so far, so no trend assessment is yet possible. No concerns this chunk."
+          },
+          "result": {
+            "logged": true,
+            "severity": "normal",
+            "summary": "Chunk 2 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). The Z-peak share (20.7% vs. 19.9% reference) passes the binomial proportion test comfortably (p=0.48). Both full-spectrum and Z-peak distribution tests (KS and chi-square) return p-values well above 0.3 \u2014 no shape anomaly detected anywhere in the spectrum. The Z-peak mean mass of 90.51 GeV is being tracked for drift; only 2 chunks of history so far, so no trend assessment is yet possible. No concerns this chunk."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 2,
+      "chunk_id": "chunk_3",
+      "severity": "normal",
+      "summary": "Chunk 3 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). Full-spectrum shape is healthy (KS p=0.91, \u03c7\u00b2 p=0.64). Z-peak shape is also healthy (KS p=0.96, \u03c7\u00b2 p=0.72). The Z-peak mean mass at 90.63 GeV shows no sign of momentum-scale miscalibration. The one marginally soft result \u2014 Z-peak occupancy binomial proportion (18.1% observed vs. 19.9% reference, raw p=0.070) \u2014 does not survive Benjamini-Hochberg FDR correction and is not statistically significant. No escalation warranted; will continue watching the Z-peak share across future chunks to determine if this mild under-population persists.",
+      "pvalues": {
+        "full_spectrum:ks": 0.9060256294988647,
+        "full_spectrum:chi2": 0.6391838555054475,
+        "z_peak:ks": 0.9616641597815443,
+        "z_peak:chi2": 0.7185650762354194,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.07038962475547103
+      },
+      "drift": {},
+      "mean_mass": {
+        "full_spectrum": 32.996,
+        "z_peak": 90.632
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 271,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.020666666666666722,
+              "p_value": 0.9060256294988647
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 3.395969465382499,
+              "p_value": 0.6391838555054475,
+              "dof": 5,
+              "bins_used": 6,
+              "bins_excluded_both_empty": 4
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 271,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.040726159769958914,
+              "p_value": 0.9616641597815443
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 6.2116276621233535,
+              "p_value": 0.7185650762354194,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 271,
+            "observed_n": 1500,
+            "observed_proportion": 0.1807,
+            "reference_proportion": 0.1993,
+            "p_value": 0.07038962475547103,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 0.9060256294988647,
+              "full_spectrum:chi2": 0.6391838555054475,
+              "z_peak:ks": 0.9616641597815443,
+              "z_peak:chi2": 0.7185650762354194,
+              "total_occupancy:poisson": 1.0,
+              "z_peak_occupancy:binomial": 0.07038962475547103
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak_occupancy:binomial": {
+              "p_value": 0.07038962475547103,
+              "rank": 1,
+              "significant_after_correction": false
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.6391838555054475,
+              "rank": 2,
+              "significant_after_correction": false
+            },
+            "z_peak:chi2": {
+              "p_value": 0.7185650762354194,
+              "rank": 3,
+              "significant_after_correction": false
+            },
+            "full_spectrum:ks": {
+              "p_value": 0.9060256294988647,
+              "rank": 4,
+              "significant_after_correction": false
+            },
+            "z_peak:ks": {
+              "p_value": 0.9616641597815443,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "total_occupancy:poisson": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 90.632
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 90.632,
+            "window_size": 3,
+            "trend_detectable": false,
+            "note": "only 3 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "normal",
+            "summary": "Chunk 3 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). Full-spectrum shape is healthy (KS p=0.91, \u03c7\u00b2 p=0.64). Z-peak shape is also healthy (KS p=0.96, \u03c7\u00b2 p=0.72). The Z-peak mean mass at 90.63 GeV shows no sign of momentum-scale miscalibration. The one marginally soft result \u2014 Z-peak occupancy binomial proportion (18.1% observed vs. 19.9% reference, raw p=0.070) \u2014 does not survive Benjamini-Hochberg FDR correction and is not statistically significant. No escalation warranted; will continue watching the Z-peak share across future chunks to determine if this mild under-population persists."
+          },
+          "result": {
+            "logged": true,
+            "severity": "normal",
+            "summary": "Chunk 3 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). Full-spectrum shape is healthy (KS p=0.91, \u03c7\u00b2 p=0.64). Z-peak shape is also healthy (KS p=0.96, \u03c7\u00b2 p=0.72). The Z-peak mean mass at 90.63 GeV shows no sign of momentum-scale miscalibration. The one marginally soft result \u2014 Z-peak occupancy binomial proportion (18.1% observed vs. 19.9% reference, raw p=0.070) \u2014 does not survive Benjamini-Hochberg FDR correction and is not statistically significant. No escalation warranted; will continue watching the Z-peak share across future chunks to determine if this mild under-population persists."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 3,
+      "chunk_id": "chunk_4",
+      "severity": "normal",
+      "summary": "Chunk 4 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). Full-spectrum shape is healthy (KS p=0.45, \u03c7\u00b2 p=0.33). Z-peak distribution is healthy (KS p=0.80, \u03c7\u00b2 p=0.81), and the Z-peak mean mass of 90.785 GeV shows no sign of momentum-scale drift. The Z-peak occupancy proportion (18.6% vs. 19.9% reference) is a modest dip but passes the binomial proportion test comfortably (raw p=0.21, not significant after BH correction). No anomalies to report. Drift history now covers 4 chunks \u2014 trend assessment will be available from chunk 5 onward.",
+      "pvalues": {
+        "full_spectrum:ks": 0.45322464101722376,
+        "full_spectrum:chi2": 0.3265433546466144,
+        "z_peak:ks": 0.803793377904834,
+        "z_peak:chi2": 0.8094512554343979,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.20749378244890176
+      },
+      "drift": {},
+      "mean_mass": {
+        "full_spectrum": 33.638,
+        "z_peak": 90.785
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 279,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.031333333333333324,
+              "p_value": 0.45322464101722376
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 5.796337053768288,
+              "p_value": 0.3265433546466144,
+              "dof": 5,
+              "bins_used": 6,
+              "bins_excluded_both_empty": 4
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 279,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.05195334508097471,
+              "p_value": 0.803793377904834
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 5.277792150510969,
+              "p_value": 0.8094512554343979,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 279,
+            "observed_n": 1500,
+            "observed_proportion": 0.186,
+            "reference_proportion": 0.1993,
+            "p_value": 0.20749378244890176,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 0.45322464101722376,
+              "full_spectrum:chi2": 0.3265433546466144,
+              "z_peak:ks": 0.803793377904834,
+              "z_peak:chi2": 0.8094512554343979,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.20749378244890176
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "occupancy:z_peak": {
+              "p_value": 0.20749378244890176,
+              "rank": 1,
+              "significant_after_correction": false
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.3265433546466144,
+              "rank": 2,
+              "significant_after_correction": false
+            },
+            "full_spectrum:ks": {
+              "p_value": 0.45322464101722376,
+              "rank": 3,
+              "significant_after_correction": false
+            },
+            "z_peak:ks": {
+              "p_value": 0.803793377904834,
+              "rank": 4,
+              "significant_after_correction": false
+            },
+            "z_peak:chi2": {
+              "p_value": 0.8094512554343979,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 90.785
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 90.785,
+            "window_size": 4,
+            "trend_detectable": false,
+            "note": "only 4 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "normal",
+            "summary": "Chunk 4 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). Full-spectrum shape is healthy (KS p=0.45, \u03c7\u00b2 p=0.33). Z-peak distribution is healthy (KS p=0.80, \u03c7\u00b2 p=0.81), and the Z-peak mean mass of 90.785 GeV shows no sign of momentum-scale drift. The Z-peak occupancy proportion (18.6% vs. 19.9% reference) is a modest dip but passes the binomial proportion test comfortably (raw p=0.21, not significant after BH correction). No anomalies to report. Drift history now covers 4 chunks \u2014 trend assessment will be available from chunk 5 onward."
+          },
+          "result": {
+            "logged": true,
+            "severity": "normal",
+            "summary": "Chunk 4 is clean across all checks. Total occupancy is exactly on target (1500 events, z=0.0). Full-spectrum shape is healthy (KS p=0.45, \u03c7\u00b2 p=0.33). Z-peak distribution is healthy (KS p=0.80, \u03c7\u00b2 p=0.81), and the Z-peak mean mass of 90.785 GeV shows no sign of momentum-scale drift. The Z-peak occupancy proportion (18.6% vs. 19.9% reference) is a modest dip but passes the binomial proportion test comfortably (raw p=0.21, not significant after BH correction). No anomalies to report. Drift history now covers 4 chunks \u2014 trend assessment will be available from chunk 5 onward."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 4,
+      "chunk_id": "chunk_5",
+      "severity": "anomaly",
+      "summary": "Chunk 5 flags two correlated concerns that together suggest a developing momentum-scale miscalibration:\n\n1. **Z-peak event share depleted (survives FDR correction):** The binomial proportion test finds only 248/1500 events (16.5%) near the Z peak, vs. the reference share of 19.9% (raw p=0.00086, significant after Benjamini-Hochberg correction). Total occupancy is perfectly nominal (1500 events, z=0.0), so this is not a global rate drop \u2014 events are specifically migrating *out* of the Z-peak window.\n\n2. **Z-peak mean mass drifting upward:** The drift tracker reports a statistically significant positive slope of +0.138 GeV/chunk across the rolling window (trend p=0.0087, z=+3.55 vs. recent baseline). The chunk's Z-peak mean is 91.03 GeV. A sustained upward drift in peak mass, coinciding with reduced peak occupancy, is the classic signature of a momentum-scale shift pushing events out of the \u00b110 GeV window on the high side.\n\nThe full-spectrum shape tests (KS p=0.076, \u03c7\u00b2 p=0.309) and Z-peak shape tests (KS p=0.079, \u03c7\u00b2 p=0.392) do not individually flag after correction, consistent with the shape of surviving Z-peak events still looking normal \u2014 only the count and centroid are shifting. Recommend flagging for detector/calibration expert review of the muon momentum scale.",
+      "pvalues": {
+        "full_spectrum:ks": 0.07625509724687272,
+        "full_spectrum:chi2": 0.3087322300206867,
+        "z_peak:ks": 0.07902013069971474,
+        "z_peak:chi2": 0.39214600688664697,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.0008643963998802053
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.1379000000000005,
+          "trend_p_value": 0.008682051957916702,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 31.186,
+        "z_peak": 91.03
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 248,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.046666666666666634,
+              "p_value": 0.07625509724687272
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 5.9742535319914545,
+              "p_value": 0.3087322300206867,
+              "dof": 5,
+              "bins_used": 6,
+              "bins_excluded_both_empty": 4
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 248,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.10754935807530477,
+              "p_value": 0.07902013069971474
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 9.503566674626214,
+              "p_value": 0.39214600688664697,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 248,
+            "observed_n": 1500,
+            "observed_proportion": 0.1653,
+            "reference_proportion": 0.1993,
+            "p_value": 0.0008643963998802053,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 0.07625509724687272,
+              "full_spectrum:chi2": 0.3087322300206867,
+              "z_peak:ks": 0.07902013069971474,
+              "z_peak:chi2": 0.39214600688664697,
+              "z_peak_occupancy:binomial": 0.0008643963998802053,
+              "total_occupancy:poisson": 1.0
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak_occupancy:binomial": {
+              "p_value": 0.0008643963998802053,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 0.07625509724687272,
+              "rank": 2,
+              "significant_after_correction": false
+            },
+            "z_peak:ks": {
+              "p_value": 0.07902013069971474,
+              "rank": 3,
+              "significant_after_correction": false
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.3087322300206867,
+              "rank": 4,
+              "significant_after_correction": false
+            },
+            "z_peak:chi2": {
+              "p_value": 0.39214600688664697,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "total_occupancy:poisson": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 91.03
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 91.03,
+            "window_size": 5,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 3.553635286793074,
+            "linear_trend_slope": 0.1379000000000005,
+            "trend_p_value": 0.008682051957916702,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_event_share",
+            "value": 0.1653
+          },
+          "result": {
+            "channel": "z_peak_event_share",
+            "value": 0.1653,
+            "window_size": 1,
+            "trend_detectable": false,
+            "note": "only 1 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 5 flags two correlated concerns that together suggest a developing momentum-scale miscalibration:\n\n1. **Z-peak event share depleted (survives FDR correction):** The binomial proportion test finds only 248/1500 events (16.5%) near the Z peak, vs. the reference share of 19.9% (raw p=0.00086, significant after Benjamini-Hochberg correction). Total occupancy is perfectly nominal (1500 events, z=0.0), so this is not a global rate drop \u2014 events are specifically migrating *out* of the Z-peak window.\n\n2. **Z-peak mean mass drifting upward:** The drift tracker reports a statistically significant positive slope of +0.138 GeV/chunk across the rolling window (trend p=0.0087, z=+3.55 vs. recent baseline). The chunk's Z-peak mean is 91.03 GeV. A sustained upward drift in peak mass, coinciding with reduced peak occupancy, is the classic signature of a momentum-scale shift pushing events out of the \u00b110 GeV window on the high side.\n\nThe full-spectrum shape tests (KS p=0.076, \u03c7\u00b2 p=0.309) and Z-peak shape tests (KS p=0.079, \u03c7\u00b2 p=0.392) do not individually flag after correction, consistent with the shape of surviving Z-peak events still looking normal \u2014 only the count and centroid are shifting. Recommend flagging for detector/calibration expert review of the muon momentum scale."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 5 flags two correlated concerns that together suggest a developing momentum-scale miscalibration:\n\n1. **Z-peak event share depleted (survives FDR correction):** The binomial proportion test finds only 248/1500 events (16.5%) near the Z peak, vs. the reference share of 19.9% (raw p=0.00086, significant after Benjamini-Hochberg correction). Total occupancy is perfectly nominal (1500 events, z=0.0), so this is not a global rate drop \u2014 events are specifically migrating *out* of the Z-peak window.\n\n2. **Z-peak mean mass drifting upward:** The drift tracker reports a statistically significant positive slope of +0.138 GeV/chunk across the rolling window (trend p=0.0087, z=+3.55 vs. recent baseline). The chunk's Z-peak mean is 91.03 GeV. A sustained upward drift in peak mass, coinciding with reduced peak occupancy, is the classic signature of a momentum-scale shift pushing events out of the \u00b110 GeV window on the high side.\n\nThe full-spectrum shape tests (KS p=0.076, \u03c7\u00b2 p=0.309) and Z-peak shape tests (KS p=0.079, \u03c7\u00b2 p=0.392) do not individually flag after correction, consistent with the shape of surviving Z-peak events still looking normal \u2014 only the count and centroid are shifting. Recommend flagging for detector/calibration expert review of the muon momentum scale."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 5,
+      "chunk_id": "chunk_6",
+      "severity": "anomaly",
+      "summary": "Chunk 6 confirms and strengthens the momentum-scale miscalibration anomaly first flagged in chunk_5. Four tests survive Benjamini-Hochberg FDR correction:\n\n1. **Z-peak shape distorted (both KS and \u03c7\u00b2 survive correction):** KS p=1.9e-05, \u03c7\u00b2 p=0.0043 \u2014 the shape of the Z-peak mass distribution is significantly inconsistent with the reference. This is the sharpest signal of a momentum-scale problem.\n\n2. **Z-peak event share depleted (survives correction):** Binomial proportion test p=0.017 \u2014 only 17.5% of events fall in the Z-peak window vs. the reference 19.9% (262 vs. expected ~299). Events are continuing to migrate out of the Z-peak window, consistent with a momentum-scale shift pulling muon masses away from 91 GeV.\n\n3. **Full-spectrum KS test marginally significant (survives correction):** KS p=0.020 \u2014 the broad-spectrum shape is now showing a detectable distortion as well, though the \u03c7\u00b2 is not significant (p=0.22), suggesting the effect is subtle at large scales but real.\n\n4. **Sustained drift in Z-peak mean mass confirmed:** z_peak_mean_mass=91.577 GeV (chunk_5 was already elevated). Drift tracker reports a statistically significant positive slope of +0.206 GeV/chunk (trend p=0.008, z=4.39 vs. recent baseline, 'looks_like_sustained_drift': True). This is not a one-off fluctuation \u2014 it is a developing, monotonic upward drift in the reconstructed Z mass, exactly what a momentum scale overcalibration would produce.\n\n**Total occupancy is perfectly normal** (z=0.0, p=1.0) \u2014 this is not a data-loss event; it is a genuine shape/calibration problem.\n\n**Recommended action:** Escalate to detector operations / muon alignment team immediately. The combination of a significant Z-peak shape distortion, depleted Z-peak event fraction, and a confirmed multi-chunk upward drift in the mean Z mass (+0.206 GeV/chunk slope, two consecutive anomaly verdicts) is consistent with a real momentum-scale miscalibration developing in the muon system. Cross-check tracker alignment constants and HV status.",
+      "pvalues": {
+        "full_spectrum:ks": 0.020235149901825886,
+        "full_spectrum:chi2": 0.22222981927645646,
+        "z_peak:ks": 1.935297183777476e-05,
+        "z_peak:chi2": 0.004326797715106229,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.016743407205272287
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.20594285714285712,
+          "trend_p_value": 0.007987008830227746,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 32.448,
+        "z_peak": 91.577
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 262,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.055333333333333345,
+              "p_value": 0.020235149901825886
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 6.978692288398834,
+              "p_value": 0.22222981927645646,
+              "dof": 5,
+              "bins_used": 6,
+              "bins_excluded_both_empty": 4
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 262,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.2012433301845848,
+              "p_value": 1.935297183777476e-05
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 23.98392490854181,
+              "p_value": 0.004326797715106229,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 262,
+            "observed_n": 1500,
+            "observed_proportion": 0.1747,
+            "reference_proportion": 0.1993,
+            "p_value": 0.016743407205272287,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 0.020235149901825886,
+              "full_spectrum:chi2": 0.22222981927645646,
+              "z_peak:ks": 1.935297183777476e-05,
+              "z_peak:chi2": 0.004326797715106229,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.016743407205272287
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 1.935297183777476e-05,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 0.004326797715106229,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.016743407205272287,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 0.020235149901825886,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.22222981927645646,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 91.577
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 91.577,
+            "window_size": 6,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 4.392312456282308,
+            "linear_trend_slope": 0.20594285714285712,
+            "trend_p_value": 0.007987008830227746,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 32.448
+          },
+          "result": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 32.448,
+            "window_size": 1,
+            "trend_detectable": false,
+            "note": "only 1 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 6 confirms and strengthens the momentum-scale miscalibration anomaly first flagged in chunk_5. Four tests survive Benjamini-Hochberg FDR correction:\n\n1. **Z-peak shape distorted (both KS and \u03c7\u00b2 survive correction):** KS p=1.9e-05, \u03c7\u00b2 p=0.0043 \u2014 the shape of the Z-peak mass distribution is significantly inconsistent with the reference. This is the sharpest signal of a momentum-scale problem.\n\n2. **Z-peak event share depleted (survives correction):** Binomial proportion test p=0.017 \u2014 only 17.5% of events fall in the Z-peak window vs. the reference 19.9% (262 vs. expected ~299). Events are continuing to migrate out of the Z-peak window, consistent with a momentum-scale shift pulling muon masses away from 91 GeV.\n\n3. **Full-spectrum KS test marginally significant (survives correction):** KS p=0.020 \u2014 the broad-spectrum shape is now showing a detectable distortion as well, though the \u03c7\u00b2 is not significant (p=0.22), suggesting the effect is subtle at large scales but real.\n\n4. **Sustained drift in Z-peak mean mass confirmed:** z_peak_mean_mass=91.577 GeV (chunk_5 was already elevated). Drift tracker reports a statistically significant positive slope of +0.206 GeV/chunk (trend p=0.008, z=4.39 vs. recent baseline, 'looks_like_sustained_drift': True). This is not a one-off fluctuation \u2014 it is a developing, monotonic upward drift in the reconstructed Z mass, exactly what a momentum scale overcalibration would produce.\n\n**Total occupancy is perfectly normal** (z=0.0, p=1.0) \u2014 this is not a data-loss event; it is a genuine shape/calibration problem.\n\n**Recommended action:** Escalate to detector operations / muon alignment team immediately. The combination of a significant Z-peak shape distortion, depleted Z-peak event fraction, and a confirmed multi-chunk upward drift in the mean Z mass (+0.206 GeV/chunk slope, two consecutive anomaly verdicts) is consistent with a real momentum-scale miscalibration developing in the muon system. Cross-check tracker alignment constants and HV status."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 6 confirms and strengthens the momentum-scale miscalibration anomaly first flagged in chunk_5. Four tests survive Benjamini-Hochberg FDR correction:\n\n1. **Z-peak shape distorted (both KS and \u03c7\u00b2 survive correction):** KS p=1.9e-05, \u03c7\u00b2 p=0.0043 \u2014 the shape of the Z-peak mass distribution is significantly inconsistent with the reference. This is the sharpest signal of a momentum-scale problem.\n\n2. **Z-peak event share depleted (survives correction):** Binomial proportion test p=0.017 \u2014 only 17.5% of events fall in the Z-peak window vs. the reference 19.9% (262 vs. expected ~299). Events are continuing to migrate out of the Z-peak window, consistent with a momentum-scale shift pulling muon masses away from 91 GeV.\n\n3. **Full-spectrum KS test marginally significant (survives correction):** KS p=0.020 \u2014 the broad-spectrum shape is now showing a detectable distortion as well, though the \u03c7\u00b2 is not significant (p=0.22), suggesting the effect is subtle at large scales but real.\n\n4. **Sustained drift in Z-peak mean mass confirmed:** z_peak_mean_mass=91.577 GeV (chunk_5 was already elevated). Drift tracker reports a statistically significant positive slope of +0.206 GeV/chunk (trend p=0.008, z=4.39 vs. recent baseline, 'looks_like_sustained_drift': True). This is not a one-off fluctuation \u2014 it is a developing, monotonic upward drift in the reconstructed Z mass, exactly what a momentum scale overcalibration would produce.\n\n**Total occupancy is perfectly normal** (z=0.0, p=1.0) \u2014 this is not a data-loss event; it is a genuine shape/calibration problem.\n\n**Recommended action:** Escalate to detector operations / muon alignment team immediately. The combination of a significant Z-peak shape distortion, depleted Z-peak event fraction, and a confirmed multi-chunk upward drift in the mean Z mass (+0.206 GeV/chunk slope, two consecutive anomaly verdicts) is consistent with a real momentum-scale miscalibration developing in the muon system. Cross-check tracker alignment constants and HV status."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 6,
+      "chunk_id": "chunk_7",
+      "severity": "anomaly",
+      "summary": "Chunk 7 sustains and deepens the momentum-scale miscalibration anomaly flagged in chunks 5 and 6. Three consecutive anomaly verdicts now point to a genuine, developing problem.\n\n**Tests surviving Benjamini-Hochberg FDR correction:**\n1. Z-peak binomial occupancy (p = 1.68e-6): The Z-peak event share has fallen to 15.13% (227/1500) vs. the reference proportion of 19.93% (227 vs. 299 reference events in window). This is a highly significant depletion of events in the Z resonance window.\n2. Z-peak KS distribution test (p = 4.82e-4): The shape of the mass distribution *within* the Z-peak window is significantly distorted compared to reference \u2014 consistent with the peak shifting out of the window.\n\n**Total occupancy is exactly nominal** (1500 events, z=0.0), confirming events are not being lost globally \u2014 they are migrating out of the Z-peak window specifically, the hallmark signature of a momentum-scale shift.\n\n**Drift analysis on Z-peak mean mass confirms a sustained trend:** slope = +0.194 GeV/chunk over the rolling window, trend p = 0.0014, flagged as sustained drift. The mean Z-peak mass of 91.447 GeV is nominally close to the PDG value, but the progressive depletion of the Z-peak *event share* across chunks 5\u21926\u21927 indicates the peak is being pushed out of the \u00b110 GeV window rather than simply broadened in place.\n\n**Full-spectrum shape checks are marginal but do not survive correction** (KS p=0.047 raw, not significant after BH), suggesting the anomaly remains localized to the Z resonance region rather than affecting the broad continuum.\n\n**Action recommended:** This is now a 3-chunk confirmed trend. Escalate to detector operations for immediate investigation of muon momentum scale calibration. The consistent pattern of Z-peak depletion with normal total occupancy is strongly indicative of a tracker or alignment issue causing a systematic momentum bias.",
+      "pvalues": {
+        "full_spectrum:ks": 0.04702018270311612,
+        "full_spectrum:chi2": 0.12297290475915086,
+        "z_peak:ks": 0.00048152265776634504,
+        "z_peak:chi2": 0.028367908244666583,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 1.6763085132199895e-06
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.19425000000000026,
+          "trend_p_value": 0.0013941465764026836,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 30.663,
+        "z_peak": 91.447
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 227,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.050000000000000044,
+              "p_value": 0.04702018270311612
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 8.67000408286022,
+              "p_value": 0.12297290475915086,
+              "dof": 5,
+              "bins_used": 6,
+              "bins_excluded_both_empty": 4
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 227,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.17771426045702993,
+              "p_value": 0.00048152265776634504
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 18.64694634637008,
+              "p_value": 0.028367908244666583,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 227,
+            "observed_n": 1500,
+            "observed_proportion": 0.1513,
+            "reference_proportion": 0.1993,
+            "p_value": 1.6763085132199895e-06,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 0.04702018270311612,
+              "full_spectrum:chi2": 0.12297290475915086,
+              "z_peak:ks": 0.00048152265776634504,
+              "z_peak:chi2": 0.028367908244666583,
+              "total_occupancy:poisson": 1.0,
+              "z_peak_occupancy:binomial": 1.6763085132199895e-06
+            }
+          },
+          "result": {
+            "z_peak_occupancy:binomial": {
+              "p_value": 1.6763085132199895e-06,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:ks": {
+              "p_value": 0.00048152265776634504,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 0.028367908244666583,
+              "rank": 3,
+              "significant_after_correction": false
+            },
+            "full_spectrum:ks": {
+              "p_value": 0.04702018270311612,
+              "rank": 4,
+              "significant_after_correction": false
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.12297290475915086,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "total_occupancy:poisson": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 91.447
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 91.447,
+            "window_size": 7,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 1.6106055334056861,
+            "linear_trend_slope": 0.19425000000000026,
+            "trend_p_value": 0.0013941465764026836,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_occupancy_proportion",
+            "value": 0.1513
+          },
+          "result": {
+            "channel": "z_peak_occupancy_proportion",
+            "value": 0.1513,
+            "window_size": 1,
+            "trend_detectable": false,
+            "note": "only 1 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 7 sustains and deepens the momentum-scale miscalibration anomaly flagged in chunks 5 and 6. Three consecutive anomaly verdicts now point to a genuine, developing problem.\n\n**Tests surviving Benjamini-Hochberg FDR correction:**\n1. Z-peak binomial occupancy (p = 1.68e-6): The Z-peak event share has fallen to 15.13% (227/1500) vs. the reference proportion of 19.93% (227 vs. 299 reference events in window). This is a highly significant depletion of events in the Z resonance window.\n2. Z-peak KS distribution test (p = 4.82e-4): The shape of the mass distribution *within* the Z-peak window is significantly distorted compared to reference \u2014 consistent with the peak shifting out of the window.\n\n**Total occupancy is exactly nominal** (1500 events, z=0.0), confirming events are not being lost globally \u2014 they are migrating out of the Z-peak window specifically, the hallmark signature of a momentum-scale shift.\n\n**Drift analysis on Z-peak mean mass confirms a sustained trend:** slope = +0.194 GeV/chunk over the rolling window, trend p = 0.0014, flagged as sustained drift. The mean Z-peak mass of 91.447 GeV is nominally close to the PDG value, but the progressive depletion of the Z-peak *event share* across chunks 5\u21926\u21927 indicates the peak is being pushed out of the \u00b110 GeV window rather than simply broadened in place.\n\n**Full-spectrum shape checks are marginal but do not survive correction** (KS p=0.047 raw, not significant after BH), suggesting the anomaly remains localized to the Z resonance region rather than affecting the broad continuum.\n\n**Action recommended:** This is now a 3-chunk confirmed trend. Escalate to detector operations for immediate investigation of muon momentum scale calibration. The consistent pattern of Z-peak depletion with normal total occupancy is strongly indicative of a tracker or alignment issue causing a systematic momentum bias."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 7 sustains and deepens the momentum-scale miscalibration anomaly flagged in chunks 5 and 6. Three consecutive anomaly verdicts now point to a genuine, developing problem.\n\n**Tests surviving Benjamini-Hochberg FDR correction:**\n1. Z-peak binomial occupancy (p = 1.68e-6): The Z-peak event share has fallen to 15.13% (227/1500) vs. the reference proportion of 19.93% (227 vs. 299 reference events in window). This is a highly significant depletion of events in the Z resonance window.\n2. Z-peak KS distribution test (p = 4.82e-4): The shape of the mass distribution *within* the Z-peak window is significantly distorted compared to reference \u2014 consistent with the peak shifting out of the window.\n\n**Total occupancy is exactly nominal** (1500 events, z=0.0), confirming events are not being lost globally \u2014 they are migrating out of the Z-peak window specifically, the hallmark signature of a momentum-scale shift.\n\n**Drift analysis on Z-peak mean mass confirms a sustained trend:** slope = +0.194 GeV/chunk over the rolling window, trend p = 0.0014, flagged as sustained drift. The mean Z-peak mass of 91.447 GeV is nominally close to the PDG value, but the progressive depletion of the Z-peak *event share* across chunks 5\u21926\u21927 indicates the peak is being pushed out of the \u00b110 GeV window rather than simply broadened in place.\n\n**Full-spectrum shape checks are marginal but do not survive correction** (KS p=0.047 raw, not significant after BH), suggesting the anomaly remains localized to the Z resonance region rather than affecting the broad continuum.\n\n**Action recommended:** This is now a 3-chunk confirmed trend. Escalate to detector operations for immediate investigation of muon momentum scale calibration. The consistent pattern of Z-peak depletion with normal total occupancy is strongly indicative of a tracker or alignment issue causing a systematic momentum bias."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 7,
+      "chunk_id": "chunk_8",
+      "severity": "anomaly",
+      "summary": "Chunk 8 sustains and extends the momentum-scale miscalibration anomaly running continuously since chunk 5 \u2014 now four consecutive anomaly verdicts.\n\n**What the tests show:**\n- **Z-peak KS test** (p = 2.4\u00d710\u207b\u2075, rank 1, survives FDR): Strongest signal this chunk. The Z-peak mass distribution shape remains significantly displaced from reference.\n- **Full-spectrum KS test** (p = 3.4\u00d710\u207b\u2074, rank 2, survives FDR): The distortion extends across the full dimuon spectrum, not only the Z-peak window.\n- **Z-peak chi-square** (p = 1.2\u00d710\u207b\u00b3, rank 3, survives FDR): Bin-by-bin shape anomaly in the Z-peak region confirmed by an independent test.\n- **Z-peak occupancy \u2014 binomial proportion** (p = 1.4\u00d710\u207b\u00b3, rank 4, survives FDR): Observed Z-peak share is 16.67% vs. expected 19.93% \u2014 events continue to be depressed in the Z-peak window, consistent with a momentum-scale shift pushing events out of the 81\u2013101 GeV window.\n- **Full-spectrum chi-square** (p = 1.8\u00d710\u207b\u00b3, rank 5, survives FDR): Corroborates KS finding for the full spectrum.\n- **Total occupancy** (p = 1.0, Poisson): Total event count is perfectly normal (1500 vs. 1500 expected), confirming this is not a data-throughput or DAQ issue.\n\n**Drift analysis:** The Z-peak mean mass (91.617 GeV this chunk) shows a statistically significant upward linear trend across the 8-chunk window (slope \u2248 +0.187 GeV/chunk, trend p = 1.8\u00d710\u207b\u2074, `looks_like_sustained_drift = True`). This is a monotonic drift, not a fluctuation.\n\n**Assessment:** All five flagged tests are mutually consistent and point to a single coherent explanation \u2014 a progressive upward momentum-scale miscalibration that is shifting the Z-peak mean mass and depleting the Z-peak event share as events migrate out of the standard window. Four consecutive anomaly chunks with a confirmed monotonic trend constitute a clear, developing hardware or alignment problem. **Immediate expert review of muon momentum calibration and alignment conditions is strongly warranted.**",
+      "pvalues": {
+        "full_spectrum:ks": 0.0003435022259959776,
+        "full_spectrum:chi2": 0.0017800361801352173,
+        "z_peak:ks": 2.426326588732404e-05,
+        "z_peak:chi2": 0.0011838942266394527,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.001367317933066399
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.18735714285714336,
+          "trend_p_value": 0.00018484990731895194,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 32.047,
+        "z_peak": 91.617
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 250,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.07599999999999998,
+              "p_value": 0.0003435022259959776
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 19.178954643940337,
+              "p_value": 0.0017800361801352173,
+              "dof": 5,
+              "bins_used": 6,
+              "bins_excluded_both_empty": 4
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 250,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.20175250836120395,
+              "p_value": 2.426326588732404e-05
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 27.43691023226046,
+              "p_value": 0.0011838942266394527,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 250,
+            "observed_n": 1500,
+            "observed_proportion": 0.1667,
+            "reference_proportion": 0.1993,
+            "p_value": 0.001367317933066399,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 0.0003435022259959776,
+              "full_spectrum:chi2": 0.0017800361801352173,
+              "z_peak:ks": 2.426326588732404e-05,
+              "z_peak:chi2": 0.0011838942266394527,
+              "z_peak_occupancy:binomial": 0.001367317933066399,
+              "total_occupancy:poisson": 1.0
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 2.426326588732404e-05,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 0.0003435022259959776,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 0.0011838942266394527,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "z_peak_occupancy:binomial": {
+              "p_value": 0.001367317933066399,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.0017800361801352173,
+              "rank": 5,
+              "significant_after_correction": true
+            },
+            "total_occupancy:poisson": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 91.617
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 91.617,
+            "window_size": 8,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 1.6866851608818823,
+            "linear_trend_slope": 0.18735714285714336,
+            "trend_p_value": 0.00018484990731895194,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 8 sustains and extends the momentum-scale miscalibration anomaly running continuously since chunk 5 \u2014 now four consecutive anomaly verdicts.\n\n**What the tests show:**\n- **Z-peak KS test** (p = 2.4\u00d710\u207b\u2075, rank 1, survives FDR): Strongest signal this chunk. The Z-peak mass distribution shape remains significantly displaced from reference.\n- **Full-spectrum KS test** (p = 3.4\u00d710\u207b\u2074, rank 2, survives FDR): The distortion extends across the full dimuon spectrum, not only the Z-peak window.\n- **Z-peak chi-square** (p = 1.2\u00d710\u207b\u00b3, rank 3, survives FDR): Bin-by-bin shape anomaly in the Z-peak region confirmed by an independent test.\n- **Z-peak occupancy \u2014 binomial proportion** (p = 1.4\u00d710\u207b\u00b3, rank 4, survives FDR): Observed Z-peak share is 16.67% vs. expected 19.93% \u2014 events continue to be depressed in the Z-peak window, consistent with a momentum-scale shift pushing events out of the 81\u2013101 GeV window.\n- **Full-spectrum chi-square** (p = 1.8\u00d710\u207b\u00b3, rank 5, survives FDR): Corroborates KS finding for the full spectrum.\n- **Total occupancy** (p = 1.0, Poisson): Total event count is perfectly normal (1500 vs. 1500 expected), confirming this is not a data-throughput or DAQ issue.\n\n**Drift analysis:** The Z-peak mean mass (91.617 GeV this chunk) shows a statistically significant upward linear trend across the 8-chunk window (slope \u2248 +0.187 GeV/chunk, trend p = 1.8\u00d710\u207b\u2074, `looks_like_sustained_drift = True`). This is a monotonic drift, not a fluctuation.\n\n**Assessment:** All five flagged tests are mutually consistent and point to a single coherent explanation \u2014 a progressive upward momentum-scale miscalibration that is shifting the Z-peak mean mass and depleting the Z-peak event share as events migrate out of the standard window. Four consecutive anomaly chunks with a confirmed monotonic trend constitute a clear, developing hardware or alignment problem. **Immediate expert review of muon momentum calibration and alignment conditions is strongly warranted.**"
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 8 sustains and extends the momentum-scale miscalibration anomaly running continuously since chunk 5 \u2014 now four consecutive anomaly verdicts.\n\n**What the tests show:**\n- **Z-peak KS test** (p = 2.4\u00d710\u207b\u2075, rank 1, survives FDR): Strongest signal this chunk. The Z-peak mass distribution shape remains significantly displaced from reference.\n- **Full-spectrum KS test** (p = 3.4\u00d710\u207b\u2074, rank 2, survives FDR): The distortion extends across the full dimuon spectrum, not only the Z-peak window.\n- **Z-peak chi-square** (p = 1.2\u00d710\u207b\u00b3, rank 3, survives FDR): Bin-by-bin shape anomaly in the Z-peak region confirmed by an independent test.\n- **Z-peak occupancy \u2014 binomial proportion** (p = 1.4\u00d710\u207b\u00b3, rank 4, survives FDR): Observed Z-peak share is 16.67% vs. expected 19.93% \u2014 events continue to be depressed in the Z-peak window, consistent with a momentum-scale shift pushing events out of the 81\u2013101 GeV window.\n- **Full-spectrum chi-square** (p = 1.8\u00d710\u207b\u00b3, rank 5, survives FDR): Corroborates KS finding for the full spectrum.\n- **Total occupancy** (p = 1.0, Poisson): Total event count is perfectly normal (1500 vs. 1500 expected), confirming this is not a data-throughput or DAQ issue.\n\n**Drift analysis:** The Z-peak mean mass (91.617 GeV this chunk) shows a statistically significant upward linear trend across the 8-chunk window (slope \u2248 +0.187 GeV/chunk, trend p = 1.8\u00d710\u207b\u2074, `looks_like_sustained_drift = True`). This is a monotonic drift, not a fluctuation.\n\n**Assessment:** All five flagged tests are mutually consistent and point to a single coherent explanation \u2014 a progressive upward momentum-scale miscalibration that is shifting the Z-peak mean mass and depleting the Z-peak event share as events migrate out of the standard window. Four consecutive anomaly chunks with a confirmed monotonic trend constitute a clear, developing hardware or alignment problem. **Immediate expert review of muon momentum calibration and alignment conditions is strongly warranted.**"
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 8,
+      "chunk_id": "chunk_9",
+      "severity": "anomaly",
+      "summary": "Chunk 9 extends the momentum-scale miscalibration anomaly to FIVE consecutive anomaly verdicts (chunks 5\u20139), with the drift analysis now confirming a sustained, statistically significant upward trend in the Z-peak mean mass.\n\nKEY NUMBERS THIS CHUNK:\n\u2022 Z-peak mean mass: 92.545 GeV (nominal: 91.19 GeV; deviation: +1.355 GeV)\n\u2022 Full-spectrum mean mass: 34.582 GeV\n\u2022 Total event count: 1500 (perfectly normal; Poisson p=1.0)\n\u2022 Z-peak event share: 17.93% vs. reference 19.93% (binomial p=0.053 \u2014 does NOT survive BH correction; Z-peak occupancy alone is not a confirmed finding this chunk)\n\nTESTS SURVIVING BH CORRECTION (4/6):\n1. z_peak:KS \u2014 p=5.3e-15 (rank 1) \u2713\n2. z_peak:chi2 \u2014 p=5.9e-12 (rank 2) \u2713\n3. full_spectrum:KS \u2014 p=1.1e-6 (rank 3) \u2713\n4. full_spectrum:chi2 \u2014 p=1.3e-4 (rank 4) \u2713\n\nDRIFT ANALYSIS \u2014 z_peak_mean_mass:\n\u2022 Trend slope: +0.234 GeV/chunk over 9-chunk window\n\u2022 Z-score vs. recent baseline: 3.43\u03c3\n\u2022 Trend p-value: 0.000165 \u2192 sustained_drift = TRUE\n\u2022 This is not a one-off fluctuation; it is a monotonically developing miscalibration\n\nDIAGNOSIS: The upward shift in the Z-peak mean mass (~+1.4 GeV above nominal) has now persisted for five consecutive chunks with a confirmed linear drift slope. The shape distortions in both the Z-peak and full spectrum are independently and strongly significant. Total event count remains normal, ruling out a DAQ/trigger issue. The pattern is fully consistent with a progressive momentum-scale miscalibration in the muon tracking system. Immediate escalation to detector experts and the on-call muon alignment/calibration team is warranted.",
+      "pvalues": {
+        "full_spectrum:ks": 1.0879918115274966e-06,
+        "full_spectrum:chi2": 0.00013414912014055697,
+        "z_peak:ks": 5.3457907432307565e-15,
+        "z_peak:chi2": 5.943146595936772e-12,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.052515165260506244
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.23351666666666707,
+          "trend_p_value": 0.0001652086529015282,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 34.582,
+        "z_peak": 92.545
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 269,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.09800000000000003,
+              "p_value": 1.0879918115274966e-06
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 27.1771532282357,
+              "p_value": 0.00013414912014055697,
+              "dof": 6,
+              "bins_used": 7,
+              "bins_excluded_both_empty": 3
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 269,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.3395332645373053,
+              "p_value": 5.3457907432307565e-15
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 72.08068710090451,
+              "p_value": 5.943146595936772e-12,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 269,
+            "observed_n": 1500,
+            "observed_proportion": 0.1793,
+            "reference_proportion": 0.1993,
+            "p_value": 0.052515165260506244,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 1.0879918115274966e-06,
+              "full_spectrum:chi2": 0.00013414912014055697,
+              "z_peak:ks": 5.3457907432307565e-15,
+              "z_peak:chi2": 5.943146595936772e-12,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.052515165260506244
+            }
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 5.3457907432307565e-15,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 5.943146595936772e-12,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 1.0879918115274966e-06,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.00013414912014055697,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.052515165260506244,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 92.545
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 92.545,
+            "window_size": 9,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 3.4251032663960075,
+            "linear_trend_slope": 0.23351666666666707,
+            "trend_p_value": 0.0001652086529015282,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 34.582
+          },
+          "result": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 34.582,
+            "window_size": 2,
+            "trend_detectable": false,
+            "note": "only 2 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 9 extends the momentum-scale miscalibration anomaly to FIVE consecutive anomaly verdicts (chunks 5\u20139), with the drift analysis now confirming a sustained, statistically significant upward trend in the Z-peak mean mass.\n\nKEY NUMBERS THIS CHUNK:\n\u2022 Z-peak mean mass: 92.545 GeV (nominal: 91.19 GeV; deviation: +1.355 GeV)\n\u2022 Full-spectrum mean mass: 34.582 GeV\n\u2022 Total event count: 1500 (perfectly normal; Poisson p=1.0)\n\u2022 Z-peak event share: 17.93% vs. reference 19.93% (binomial p=0.053 \u2014 does NOT survive BH correction; Z-peak occupancy alone is not a confirmed finding this chunk)\n\nTESTS SURVIVING BH CORRECTION (4/6):\n1. z_peak:KS \u2014 p=5.3e-15 (rank 1) \u2713\n2. z_peak:chi2 \u2014 p=5.9e-12 (rank 2) \u2713\n3. full_spectrum:KS \u2014 p=1.1e-6 (rank 3) \u2713\n4. full_spectrum:chi2 \u2014 p=1.3e-4 (rank 4) \u2713\n\nDRIFT ANALYSIS \u2014 z_peak_mean_mass:\n\u2022 Trend slope: +0.234 GeV/chunk over 9-chunk window\n\u2022 Z-score vs. recent baseline: 3.43\u03c3\n\u2022 Trend p-value: 0.000165 \u2192 sustained_drift = TRUE\n\u2022 This is not a one-off fluctuation; it is a monotonically developing miscalibration\n\nDIAGNOSIS: The upward shift in the Z-peak mean mass (~+1.4 GeV above nominal) has now persisted for five consecutive chunks with a confirmed linear drift slope. The shape distortions in both the Z-peak and full spectrum are independently and strongly significant. Total event count remains normal, ruling out a DAQ/trigger issue. The pattern is fully consistent with a progressive momentum-scale miscalibration in the muon tracking system. Immediate escalation to detector experts and the on-call muon alignment/calibration team is warranted."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 9 extends the momentum-scale miscalibration anomaly to FIVE consecutive anomaly verdicts (chunks 5\u20139), with the drift analysis now confirming a sustained, statistically significant upward trend in the Z-peak mean mass.\n\nKEY NUMBERS THIS CHUNK:\n\u2022 Z-peak mean mass: 92.545 GeV (nominal: 91.19 GeV; deviation: +1.355 GeV)\n\u2022 Full-spectrum mean mass: 34.582 GeV\n\u2022 Total event count: 1500 (perfectly normal; Poisson p=1.0)\n\u2022 Z-peak event share: 17.93% vs. reference 19.93% (binomial p=0.053 \u2014 does NOT survive BH correction; Z-peak occupancy alone is not a confirmed finding this chunk)\n\nTESTS SURVIVING BH CORRECTION (4/6):\n1. z_peak:KS \u2014 p=5.3e-15 (rank 1) \u2713\n2. z_peak:chi2 \u2014 p=5.9e-12 (rank 2) \u2713\n3. full_spectrum:KS \u2014 p=1.1e-6 (rank 3) \u2713\n4. full_spectrum:chi2 \u2014 p=1.3e-4 (rank 4) \u2713\n\nDRIFT ANALYSIS \u2014 z_peak_mean_mass:\n\u2022 Trend slope: +0.234 GeV/chunk over 9-chunk window\n\u2022 Z-score vs. recent baseline: 3.43\u03c3\n\u2022 Trend p-value: 0.000165 \u2192 sustained_drift = TRUE\n\u2022 This is not a one-off fluctuation; it is a monotonically developing miscalibration\n\nDIAGNOSIS: The upward shift in the Z-peak mean mass (~+1.4 GeV above nominal) has now persisted for five consecutive chunks with a confirmed linear drift slope. The shape distortions in both the Z-peak and full spectrum are independently and strongly significant. Total event count remains normal, ruling out a DAQ/trigger issue. The pattern is fully consistent with a progressive momentum-scale miscalibration in the muon tracking system. Immediate escalation to detector experts and the on-call muon alignment/calibration team is warranted."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 9,
+      "chunk_id": "chunk_10",
+      "severity": "anomaly",
+      "summary": "Chunk 10 extends the momentum-scale miscalibration anomaly to SIX consecutive anomaly verdicts (chunks 5\u201310), with all key indicators continuing to worsen.\n\nWHAT FLAGGED:\n- Z-peak distribution: KS p = 8.4e-20, chi\u00b2 p = 3.7e-14 \u2014 both survive BH correction with enormous margin. The shape of the Z-peak mass distribution is severely distorted relative to reference.\n- Full-spectrum distribution: KS p = 2.1e-5, chi\u00b2 p = 0.0013 \u2014 both survive correction. The anomaly is not confined to the Z-peak window; the broader spectrum is also affected.\n- Occupancy: Total event count (n=1500) is exactly nominal (Poisson z=0.0, p=1.0). Z-peak proportion (18.8% vs 19.9% reference) is not significantly shifted (binomial p=0.29, does not survive correction). The problem is a shape/scale distortion, not an event-loss.\n\nDRIFT ANALYSIS:\n- Z-peak mean mass = 92.702 GeV, continuing its upward climb above the nominal 91.19 GeV.\n- Drift slope = +0.253 GeV/chunk, z-score vs. recent baseline = 2.37, trend p = 1.8e-5.\n- check_drift confirms this is a sustained, monotonically worsening drift \u2014 not a fluctuation.\n\nASSESSMENT:\nSix consecutive anomaly verdicts driven by a progressively worsening upward shift in the reconstructed Z-peak mass. The momentum scale is drifting high in a way that is highly unlikely to self-correct. This has crossed well beyond the threshold for immediate escalation to on-call detector experts. Recommend halting data-quality certification for this run segment and investigating the muon momentum calibration constants urgently.",
+      "pvalues": {
+        "full_spectrum:ks": 2.1268575056037592e-05,
+        "full_spectrum:chi2": 0.0012558936025564862,
+        "z_peak:ks": 8.357774913049954e-20,
+        "z_peak:chi2": 3.729695751344701e-14,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.2861995775045907
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.2528424242424244,
+          "trend_p_value": 1.764229166466797e-05,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 34.36,
+        "z_peak": 92.702
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 282,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.08733333333333332,
+              "p_value": 2.1268575056037592e-05
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 21.91247615737703,
+              "p_value": 0.0012558936025564862,
+              "dof": 6,
+              "bins_used": 7,
+              "bins_excluded_both_empty": 3
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 282,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.3858132308641097,
+              "p_value": 8.357774913049954e-20
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 83.2001809053784,
+              "p_value": 3.729695751344701e-14,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 282,
+            "observed_n": 1500,
+            "observed_proportion": 0.188,
+            "reference_proportion": 0.1993,
+            "p_value": 0.2861995775045907,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 2.1268575056037592e-05,
+              "full_spectrum:chi2": 0.0012558936025564862,
+              "z_peak:ks": 8.357774913049954e-20,
+              "z_peak:chi2": 3.729695751344701e-14,
+              "total_occupancy": 1.0,
+              "z_peak_occupancy": 0.2861995775045907
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 8.357774913049954e-20,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 3.729695751344701e-14,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 2.1268575056037592e-05,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.0012558936025564862,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "z_peak_occupancy": {
+              "p_value": 0.2861995775045907,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "total_occupancy": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 92.702
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 92.702,
+            "window_size": 10,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 2.372415233759478,
+            "linear_trend_slope": 0.2528424242424244,
+            "trend_p_value": 1.764229166466797e-05,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 10 extends the momentum-scale miscalibration anomaly to SIX consecutive anomaly verdicts (chunks 5\u201310), with all key indicators continuing to worsen.\n\nWHAT FLAGGED:\n- Z-peak distribution: KS p = 8.4e-20, chi\u00b2 p = 3.7e-14 \u2014 both survive BH correction with enormous margin. The shape of the Z-peak mass distribution is severely distorted relative to reference.\n- Full-spectrum distribution: KS p = 2.1e-5, chi\u00b2 p = 0.0013 \u2014 both survive correction. The anomaly is not confined to the Z-peak window; the broader spectrum is also affected.\n- Occupancy: Total event count (n=1500) is exactly nominal (Poisson z=0.0, p=1.0). Z-peak proportion (18.8% vs 19.9% reference) is not significantly shifted (binomial p=0.29, does not survive correction). The problem is a shape/scale distortion, not an event-loss.\n\nDRIFT ANALYSIS:\n- Z-peak mean mass = 92.702 GeV, continuing its upward climb above the nominal 91.19 GeV.\n- Drift slope = +0.253 GeV/chunk, z-score vs. recent baseline = 2.37, trend p = 1.8e-5.\n- check_drift confirms this is a sustained, monotonically worsening drift \u2014 not a fluctuation.\n\nASSESSMENT:\nSix consecutive anomaly verdicts driven by a progressively worsening upward shift in the reconstructed Z-peak mass. The momentum scale is drifting high in a way that is highly unlikely to self-correct. This has crossed well beyond the threshold for immediate escalation to on-call detector experts. Recommend halting data-quality certification for this run segment and investigating the muon momentum calibration constants urgently."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 10 extends the momentum-scale miscalibration anomaly to SIX consecutive anomaly verdicts (chunks 5\u201310), with all key indicators continuing to worsen.\n\nWHAT FLAGGED:\n- Z-peak distribution: KS p = 8.4e-20, chi\u00b2 p = 3.7e-14 \u2014 both survive BH correction with enormous margin. The shape of the Z-peak mass distribution is severely distorted relative to reference.\n- Full-spectrum distribution: KS p = 2.1e-5, chi\u00b2 p = 0.0013 \u2014 both survive correction. The anomaly is not confined to the Z-peak window; the broader spectrum is also affected.\n- Occupancy: Total event count (n=1500) is exactly nominal (Poisson z=0.0, p=1.0). Z-peak proportion (18.8% vs 19.9% reference) is not significantly shifted (binomial p=0.29, does not survive correction). The problem is a shape/scale distortion, not an event-loss.\n\nDRIFT ANALYSIS:\n- Z-peak mean mass = 92.702 GeV, continuing its upward climb above the nominal 91.19 GeV.\n- Drift slope = +0.253 GeV/chunk, z-score vs. recent baseline = 2.37, trend p = 1.8e-5.\n- check_drift confirms this is a sustained, monotonically worsening drift \u2014 not a fluctuation.\n\nASSESSMENT:\nSix consecutive anomaly verdicts driven by a progressively worsening upward shift in the reconstructed Z-peak mass. The momentum scale is drifting high in a way that is highly unlikely to self-correct. This has crossed well beyond the threshold for immediate escalation to on-call detector experts. Recommend halting data-quality certification for this run segment and investigating the muon momentum calibration constants urgently."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 10,
+      "chunk_id": "chunk_11",
+      "severity": "anomaly",
+      "summary": "Chunk 11 extends the momentum-scale miscalibration anomaly to SEVEN consecutive anomaly verdicts (chunks 5\u201311). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (post-FDR correction):\n- Z-peak KS test: p = 2.4e-29 \u2717 (significant after correction) \u2014 the Z-peak shape is severely distorted relative to reference.\n- Z-peak chi-square: p = 3.1e-23 \u2717 (significant after correction) \u2014 consistent confirmation of the shape anomaly.\n- Full-spectrum KS test: p = 3.2e-08 \u2717 (significant after correction) \u2014 the distortion is also detectable at full-spectrum level, confirming the effect is not confined to the Z-peak window.\n- Full-spectrum chi-square: p = 0.27 (not significant) \u2014 consistent with a smooth, broad shift rather than a localized artifact.\n\nOCCUPANCY: Total event count is exactly nominal (z=0.0, p=1.0). Z-peak occupancy proportion is also normal (p=0.65). Events are neither lost nor migrating out of the Z-peak window in count terms \u2014 the problem is purely a shape/mass-scale shift.\n\nZ-PEAK MEAN MASS: 93.541 GeV (reference ~91.19 GeV), a +2.35 GeV upward displacement. Drift analysis (window=11 chunks) confirms a sustained, statistically significant upward trend: slope = +0.29 GeV/chunk, trend p = 6.7e-06, z-score vs. recent baseline = 2.90. This is a steadily worsening, not static, miscalibration.\n\nSUMMARY: The evidence is unambiguous \u2014 a progressive momentum-scale miscalibration has been running continuously for seven chunks. The Z-peak mean mass has drifted significantly above the nominal Z-boson mass (91.19 GeV) with no sign of recovery. Immediate intervention is required: alert the on-call detector expert and investigate the muon momentum calibration constants.",
+      "pvalues": {
+        "full_spectrum:ks": 3.168561499389783e-08,
+        "full_spectrum:chi2": 0.2689618303347917,
+        "z_peak:ks": 2.423697301485182e-29,
+        "z_peak:chi2": 3.1089364886045285e-23,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.650975202710182
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.2900272727272727,
+          "trend_p_value": 6.734586928352435e-06,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 38.412,
+        "z_peak": 93.541
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 306,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.1093333333333334,
+              "p_value": 3.168561499389783e-08
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 3.9314521324571574,
+              "p_value": 0.2689618303347917,
+              "dof": 3,
+              "bins_used": 4,
+              "bins_excluded_both_empty": 6
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 306,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.45907928388746805,
+              "p_value": 2.423697301485182e-29
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 127.96374116671603,
+              "p_value": 3.1089364886045285e-23,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 306,
+            "observed_n": 1500,
+            "observed_proportion": 0.204,
+            "reference_proportion": 0.1993,
+            "p_value": 0.650975202710182,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 3.168561499389783e-08,
+              "full_spectrum:chi2": 0.2689618303347917,
+              "z_peak:ks": 2.423697301485182e-29,
+              "z_peak:chi2": 3.1089364886045285e-23,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.650975202710182
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 2.423697301485182e-29,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 3.1089364886045285e-23,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 3.168561499389783e-08,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.2689618303347917,
+              "rank": 4,
+              "significant_after_correction": false
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.650975202710182,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 93.541
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 93.541,
+            "window_size": 11,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 2.903130869065993,
+            "linear_trend_slope": 0.2900272727272727,
+            "trend_p_value": 6.734586928352435e-06,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 11 extends the momentum-scale miscalibration anomaly to SEVEN consecutive anomaly verdicts (chunks 5\u201311). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (post-FDR correction):\n- Z-peak KS test: p = 2.4e-29 \u2717 (significant after correction) \u2014 the Z-peak shape is severely distorted relative to reference.\n- Z-peak chi-square: p = 3.1e-23 \u2717 (significant after correction) \u2014 consistent confirmation of the shape anomaly.\n- Full-spectrum KS test: p = 3.2e-08 \u2717 (significant after correction) \u2014 the distortion is also detectable at full-spectrum level, confirming the effect is not confined to the Z-peak window.\n- Full-spectrum chi-square: p = 0.27 (not significant) \u2014 consistent with a smooth, broad shift rather than a localized artifact.\n\nOCCUPANCY: Total event count is exactly nominal (z=0.0, p=1.0). Z-peak occupancy proportion is also normal (p=0.65). Events are neither lost nor migrating out of the Z-peak window in count terms \u2014 the problem is purely a shape/mass-scale shift.\n\nZ-PEAK MEAN MASS: 93.541 GeV (reference ~91.19 GeV), a +2.35 GeV upward displacement. Drift analysis (window=11 chunks) confirms a sustained, statistically significant upward trend: slope = +0.29 GeV/chunk, trend p = 6.7e-06, z-score vs. recent baseline = 2.90. This is a steadily worsening, not static, miscalibration.\n\nSUMMARY: The evidence is unambiguous \u2014 a progressive momentum-scale miscalibration has been running continuously for seven chunks. The Z-peak mean mass has drifted significantly above the nominal Z-boson mass (91.19 GeV) with no sign of recovery. Immediate intervention is required: alert the on-call detector expert and investigate the muon momentum calibration constants."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 11 extends the momentum-scale miscalibration anomaly to SEVEN consecutive anomaly verdicts (chunks 5\u201311). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (post-FDR correction):\n- Z-peak KS test: p = 2.4e-29 \u2717 (significant after correction) \u2014 the Z-peak shape is severely distorted relative to reference.\n- Z-peak chi-square: p = 3.1e-23 \u2717 (significant after correction) \u2014 consistent confirmation of the shape anomaly.\n- Full-spectrum KS test: p = 3.2e-08 \u2717 (significant after correction) \u2014 the distortion is also detectable at full-spectrum level, confirming the effect is not confined to the Z-peak window.\n- Full-spectrum chi-square: p = 0.27 (not significant) \u2014 consistent with a smooth, broad shift rather than a localized artifact.\n\nOCCUPANCY: Total event count is exactly nominal (z=0.0, p=1.0). Z-peak occupancy proportion is also normal (p=0.65). Events are neither lost nor migrating out of the Z-peak window in count terms \u2014 the problem is purely a shape/mass-scale shift.\n\nZ-PEAK MEAN MASS: 93.541 GeV (reference ~91.19 GeV), a +2.35 GeV upward displacement. Drift analysis (window=11 chunks) confirms a sustained, statistically significant upward trend: slope = +0.29 GeV/chunk, trend p = 6.7e-06, z-score vs. recent baseline = 2.90. This is a steadily worsening, not static, miscalibration.\n\nSUMMARY: The evidence is unambiguous \u2014 a progressive momentum-scale miscalibration has been running continuously for seven chunks. The Z-peak mean mass has drifted significantly above the nominal Z-boson mass (91.19 GeV) with no sign of recovery. Immediate intervention is required: alert the on-call detector expert and investigate the muon momentum calibration constants."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 11,
+      "chunk_id": "chunk_12",
+      "severity": "anomaly",
+      "summary": "Chunk 12 extends the momentum-scale miscalibration anomaly to EIGHT consecutive anomaly verdicts (chunks 5\u201312). All key indicators remain deeply alarming:\n\n**Distribution tests (both survive BH correction):**\n- Z-peak KS test: p = 8.1e-36 \u2014 catastrophically significant; the Z-peak mass distribution remains severely distorted vs. reference.\n- Z-peak chi-square: p = 4.9e-28 \u2014 independently confirms the same shape anomaly.\n- Full-spectrum KS test: p = 1.95e-6 \u2014 also survives correction, confirming the distortion is not confined to the Z-peak window and is visible across the broader spectrum.\n\n**Z-peak mean mass: 93.746 GeV** \u2014 elevated ~2.6 GeV above the nominal Z mass of 91.19 GeV. This is consistent with a persistent positive momentum-scale bias (muon pT is being overestimated).\n\n**Drift analysis:** Slope = +0.31 GeV/chunk, trend p = 6.7e-7. The drift tracker confirms this is a sustained, worsening upward trend across the 12-chunk window \u2014 not a fluctuation.\n\n**Occupancy:** Total event count is perfectly nominal (1500, z=0.0). Z-peak proportion is slightly low but does not survive correction (p=0.21) \u2014 the concern here is entirely shape/scale, not event loss.\n\n**Summary:** Eight consecutive chunks with a confirmed, drifting momentum-scale miscalibration of increasing magnitude. Immediate intervention is required. This is a developing, worsening systematic problem that has now persisted across the entire latter half of this shift.",
+      "pvalues": {
+        "full_spectrum:ks": 1.950281539848842e-06,
+        "full_spectrum:chi2": 0.5712146504451246,
+        "z_peak:ks": 8.089299611135695e-36,
+        "z_peak:chi2": 4.942410716344534e-28,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.20749378244890176
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.30820979020978995,
+          "trend_p_value": 6.736165945466511e-07,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 34.719,
+        "z_peak": 93.746
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 279,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.096,
+              "p_value": 1.950281539848842e-06
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 3.84995618782537,
+              "p_value": 0.5712146504451246,
+              "dof": 5,
+              "bins_used": 6,
+              "bins_excluded_both_empty": 4
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 279,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.5173877081310461,
+              "p_value": 8.089299611135695e-36
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 151.21391077530427,
+              "p_value": 4.942410716344534e-28,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 279,
+            "observed_n": 1500,
+            "observed_proportion": 0.186,
+            "reference_proportion": 0.1993,
+            "p_value": 0.20749378244890176,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 1.950281539848842e-06,
+              "full_spectrum:chi2": 0.5712146504451246,
+              "z_peak:ks": 8.089299611135695e-36,
+              "z_peak:chi2": 4.942410716344534e-28,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.20749378244890176
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 8.089299611135695e-36,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 4.942410716344534e-28,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 1.950281539848842e-06,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.20749378244890176,
+              "rank": 4,
+              "significant_after_correction": false
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.5712146504451246,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 93.746
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 93.746,
+            "window_size": 12,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 2.2954625197798664,
+            "linear_trend_slope": 0.30820979020978995,
+            "trend_p_value": 6.736165945466511e-07,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 12 extends the momentum-scale miscalibration anomaly to EIGHT consecutive anomaly verdicts (chunks 5\u201312). All key indicators remain deeply alarming:\n\n**Distribution tests (both survive BH correction):**\n- Z-peak KS test: p = 8.1e-36 \u2014 catastrophically significant; the Z-peak mass distribution remains severely distorted vs. reference.\n- Z-peak chi-square: p = 4.9e-28 \u2014 independently confirms the same shape anomaly.\n- Full-spectrum KS test: p = 1.95e-6 \u2014 also survives correction, confirming the distortion is not confined to the Z-peak window and is visible across the broader spectrum.\n\n**Z-peak mean mass: 93.746 GeV** \u2014 elevated ~2.6 GeV above the nominal Z mass of 91.19 GeV. This is consistent with a persistent positive momentum-scale bias (muon pT is being overestimated).\n\n**Drift analysis:** Slope = +0.31 GeV/chunk, trend p = 6.7e-7. The drift tracker confirms this is a sustained, worsening upward trend across the 12-chunk window \u2014 not a fluctuation.\n\n**Occupancy:** Total event count is perfectly nominal (1500, z=0.0). Z-peak proportion is slightly low but does not survive correction (p=0.21) \u2014 the concern here is entirely shape/scale, not event loss.\n\n**Summary:** Eight consecutive chunks with a confirmed, drifting momentum-scale miscalibration of increasing magnitude. Immediate intervention is required. This is a developing, worsening systematic problem that has now persisted across the entire latter half of this shift."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 12 extends the momentum-scale miscalibration anomaly to EIGHT consecutive anomaly verdicts (chunks 5\u201312). All key indicators remain deeply alarming:\n\n**Distribution tests (both survive BH correction):**\n- Z-peak KS test: p = 8.1e-36 \u2014 catastrophically significant; the Z-peak mass distribution remains severely distorted vs. reference.\n- Z-peak chi-square: p = 4.9e-28 \u2014 independently confirms the same shape anomaly.\n- Full-spectrum KS test: p = 1.95e-6 \u2014 also survives correction, confirming the distortion is not confined to the Z-peak window and is visible across the broader spectrum.\n\n**Z-peak mean mass: 93.746 GeV** \u2014 elevated ~2.6 GeV above the nominal Z mass of 91.19 GeV. This is consistent with a persistent positive momentum-scale bias (muon pT is being overestimated).\n\n**Drift analysis:** Slope = +0.31 GeV/chunk, trend p = 6.7e-7. The drift tracker confirms this is a sustained, worsening upward trend across the 12-chunk window \u2014 not a fluctuation.\n\n**Occupancy:** Total event count is perfectly nominal (1500, z=0.0). Z-peak proportion is slightly low but does not survive correction (p=0.21) \u2014 the concern here is entirely shape/scale, not event loss.\n\n**Summary:** Eight consecutive chunks with a confirmed, drifting momentum-scale miscalibration of increasing magnitude. Immediate intervention is required. This is a developing, worsening systematic problem that has now persisted across the entire latter half of this shift."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 12,
+      "chunk_id": "chunk_13",
+      "severity": "anomaly",
+      "summary": "Chunk 13 extends the momentum-scale miscalibration anomaly to NINE consecutive anomaly verdicts (chunks 5\u201313). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 2.4e-6; chi-square: p = 2.7e-14 \u2014 the entire mass spectrum shape remains heavily distorted vs. reference.\n- Z-peak KS: p = 1.2e-27; chi-square: p = 1.1e-25 \u2014 the Z-peak region is catastrophically displaced from its nominal position.\n\nZ-PEAK SHAPE & CALIBRATION:\n- Z-peak mean mass = 93.397 GeV, vs. nominal 91.19 GeV \u2014 a sustained upward shift of ~+2.2 GeV, well outside acceptable calibration tolerance.\n- Drift tracker confirms a statistically significant and sustained upward slope of +0.298 GeV/chunk over 13 chunks (trend p = 1.04e-7), consistent with a progressive momentum-scale miscalibration that is still growing rather than stabilizing.\n\nOCCUPANCY:\n- Total event count is perfectly nominal (n=1500, z=0.0, p=1.0) \u2014 no event loss.\n- Z-peak proportion is slightly low (18.1% vs. reference 19.9%, p=0.08) but does not survive BH correction; this is consistent with events migrating away from the Z-peak window due to the mass shift itself rather than a genuine rate anomaly.\n\nCONCLUSION: This is a deep, confirmed, and worsening momentum-scale miscalibration. Nine consecutive chunks with identical pathology, and the drift slope is still positive. The calibration fault has not resolved and is continuing to evolve. Immediate intervention from the detector operations/alignment team is required.",
+      "pvalues": {
+        "full_spectrum:ks": 2.3627581809222524e-06,
+        "full_spectrum:chi2": 2.6623338016850816e-14,
+        "z_peak:ks": 1.193070630645029e-27,
+        "z_peak:chi2": 1.0613702962724669e-25,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.08104374336432321
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.297532967032967,
+          "trend_p_value": 1.0387034912949134e-07,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 34.839,
+        "z_peak": 93.397
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 272,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.09533333333333335,
+              "p_value": 2.3627581809222524e-06
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 75.77151654233452,
+              "p_value": 2.6623338016850816e-14,
+              "dof": 6,
+              "bins_used": 7,
+              "bins_excluded_both_empty": 3
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 272,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.45907928388746805,
+              "p_value": 1.193070630645029e-27
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 139.94023329401895,
+              "p_value": 1.0613702962724669e-25,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 272,
+            "observed_n": 1500,
+            "observed_proportion": 0.1813,
+            "reference_proportion": 0.1993,
+            "p_value": 0.08104374336432321,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 93.397
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 93.397,
+            "window_size": 13,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 1.5168271260042656,
+            "linear_trend_slope": 0.297532967032967,
+            "trend_p_value": 1.0387034912949134e-07,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 34.839
+          },
+          "result": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 34.839,
+            "window_size": 3,
+            "trend_detectable": false,
+            "note": "only 3 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 2.3627581809222524e-06,
+              "full_spectrum:chi2": 2.6623338016850816e-14,
+              "z_peak:ks": 1.193070630645029e-27,
+              "z_peak:chi2": 1.0613702962724669e-25,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak_proportion": 0.08104374336432321
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 1.193070630645029e-27,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 1.0613702962724669e-25,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 2.6623338016850816e-14,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 2.3627581809222524e-06,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "occupancy:z_peak_proportion": {
+              "p_value": 0.08104374336432321,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 13 extends the momentum-scale miscalibration anomaly to NINE consecutive anomaly verdicts (chunks 5\u201313). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 2.4e-6; chi-square: p = 2.7e-14 \u2014 the entire mass spectrum shape remains heavily distorted vs. reference.\n- Z-peak KS: p = 1.2e-27; chi-square: p = 1.1e-25 \u2014 the Z-peak region is catastrophically displaced from its nominal position.\n\nZ-PEAK SHAPE & CALIBRATION:\n- Z-peak mean mass = 93.397 GeV, vs. nominal 91.19 GeV \u2014 a sustained upward shift of ~+2.2 GeV, well outside acceptable calibration tolerance.\n- Drift tracker confirms a statistically significant and sustained upward slope of +0.298 GeV/chunk over 13 chunks (trend p = 1.04e-7), consistent with a progressive momentum-scale miscalibration that is still growing rather than stabilizing.\n\nOCCUPANCY:\n- Total event count is perfectly nominal (n=1500, z=0.0, p=1.0) \u2014 no event loss.\n- Z-peak proportion is slightly low (18.1% vs. reference 19.9%, p=0.08) but does not survive BH correction; this is consistent with events migrating away from the Z-peak window due to the mass shift itself rather than a genuine rate anomaly.\n\nCONCLUSION: This is a deep, confirmed, and worsening momentum-scale miscalibration. Nine consecutive chunks with identical pathology, and the drift slope is still positive. The calibration fault has not resolved and is continuing to evolve. Immediate intervention from the detector operations/alignment team is required."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 13 extends the momentum-scale miscalibration anomaly to NINE consecutive anomaly verdicts (chunks 5\u201313). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 2.4e-6; chi-square: p = 2.7e-14 \u2014 the entire mass spectrum shape remains heavily distorted vs. reference.\n- Z-peak KS: p = 1.2e-27; chi-square: p = 1.1e-25 \u2014 the Z-peak region is catastrophically displaced from its nominal position.\n\nZ-PEAK SHAPE & CALIBRATION:\n- Z-peak mean mass = 93.397 GeV, vs. nominal 91.19 GeV \u2014 a sustained upward shift of ~+2.2 GeV, well outside acceptable calibration tolerance.\n- Drift tracker confirms a statistically significant and sustained upward slope of +0.298 GeV/chunk over 13 chunks (trend p = 1.04e-7), consistent with a progressive momentum-scale miscalibration that is still growing rather than stabilizing.\n\nOCCUPANCY:\n- Total event count is perfectly nominal (n=1500, z=0.0, p=1.0) \u2014 no event loss.\n- Z-peak proportion is slightly low (18.1% vs. reference 19.9%, p=0.08) but does not survive BH correction; this is consistent with events migrating away from the Z-peak window due to the mass shift itself rather than a genuine rate anomaly.\n\nCONCLUSION: This is a deep, confirmed, and worsening momentum-scale miscalibration. Nine consecutive chunks with identical pathology, and the drift slope is still positive. The calibration fault has not resolved and is continuing to evolve. Immediate intervention from the detector operations/alignment team is required."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 13,
+      "chunk_id": "chunk_14",
+      "severity": "anomaly",
+      "summary": "Chunk 14 extends the momentum-scale miscalibration anomaly to TEN consecutive anomaly verdicts (chunks 5\u201314). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 6.0e-7; chi-square: p = 1.4e-21 \u2014 the entire dimuon mass spectrum is significantly distorted relative to reference.\n- Z-peak KS: p = 3.2e-35; chi-square: p = 3.9e-31 \u2014 the Z-resonance window is catastrophically misshapen, consistent with an ongoing momentum-scale miscalibration.\n\nOCCUPANCY:\n- Total event count: 1500 observed vs. 1500 expected (z = 0.0, p = 1.0) \u2014 nominal; no hardware loss.\n- Z-peak proportion: 271/1500 (18.1%) vs. reference 19.9% \u2014 p = 0.070, does not survive BH correction this chunk; not escalated on its own.\n\nMOMENTUM SCALE / DRIFT:\n- Z-peak mean mass: 94.114 GeV (nominal ~91.19 GeV), a shift of ~+2.9 GeV (~+3.2%).\n- Drift tracker confirms sustained upward trend over 14 chunks: slope = +0.303 GeV/chunk, trend p = 6.9e-9. This is a long-running, monotonically worsening calibration drift \u2014 not a statistical fluctuation.\n\nSUMMARY: The momentum scale has been progressively mis-calibrated since chunk 5 and continues to worsen. Ten consecutive anomaly verdicts with a statistically confirmed linear drift slope demand immediate escalation to detector operations / alignment and calibration teams. This is not self-correcting and the full-spectrum shape distortion confirms the effect extends beyond the Z-peak alone.",
+      "pvalues": {
+        "full_spectrum:ks": 5.996442268077744e-07,
+        "full_spectrum:chi2": 1.355841001249547e-21,
+        "z_peak:ks": 3.2411139742745763e-35,
+        "z_peak:chi2": 3.9009088966535984e-31,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.07038962475547103
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.3028065934065935,
+          "trend_p_value": 6.866068686620453e-09,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 33.279,
+        "z_peak": 94.114
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 271,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.1,
+              "p_value": 5.996442268077744e-07
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 110.84555557957394,
+              "p_value": 1.355841001249547e-21,
+              "dof": 6,
+              "bins_used": 7,
+              "bins_excluded_both_empty": 3
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 271,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.5169260388256056,
+              "p_value": 3.2411139742745763e-35
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 166.15375691192668,
+              "p_value": 3.9009088966535984e-31,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 271,
+            "observed_n": 1500,
+            "observed_proportion": 0.1807,
+            "reference_proportion": 0.1993,
+            "p_value": 0.07038962475547103,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 5.996442268077744e-07,
+              "full_spectrum:chi2": 1.355841001249547e-21,
+              "z_peak:ks": 3.2411139742745763e-35,
+              "z_peak:chi2": 3.9009088966535984e-31,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak_proportion": 0.07038962475547103
+            }
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 3.2411139742745763e-35,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 3.9009088966535984e-31,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 1.355841001249547e-21,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 5.996442268077744e-07,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "occupancy:z_peak_proportion": {
+              "p_value": 0.07038962475547103,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 94.114
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 94.114,
+            "window_size": 14,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 1.964548266954187,
+            "linear_trend_slope": 0.3028065934065935,
+            "trend_p_value": 6.866068686620453e-09,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 33.279
+          },
+          "result": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 33.279,
+            "window_size": 4,
+            "trend_detectable": false,
+            "note": "only 4 chunks of history so far, need 5 before trend assessment is meaningful"
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 14 extends the momentum-scale miscalibration anomaly to TEN consecutive anomaly verdicts (chunks 5\u201314). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 6.0e-7; chi-square: p = 1.4e-21 \u2014 the entire dimuon mass spectrum is significantly distorted relative to reference.\n- Z-peak KS: p = 3.2e-35; chi-square: p = 3.9e-31 \u2014 the Z-resonance window is catastrophically misshapen, consistent with an ongoing momentum-scale miscalibration.\n\nOCCUPANCY:\n- Total event count: 1500 observed vs. 1500 expected (z = 0.0, p = 1.0) \u2014 nominal; no hardware loss.\n- Z-peak proportion: 271/1500 (18.1%) vs. reference 19.9% \u2014 p = 0.070, does not survive BH correction this chunk; not escalated on its own.\n\nMOMENTUM SCALE / DRIFT:\n- Z-peak mean mass: 94.114 GeV (nominal ~91.19 GeV), a shift of ~+2.9 GeV (~+3.2%).\n- Drift tracker confirms sustained upward trend over 14 chunks: slope = +0.303 GeV/chunk, trend p = 6.9e-9. This is a long-running, monotonically worsening calibration drift \u2014 not a statistical fluctuation.\n\nSUMMARY: The momentum scale has been progressively mis-calibrated since chunk 5 and continues to worsen. Ten consecutive anomaly verdicts with a statistically confirmed linear drift slope demand immediate escalation to detector operations / alignment and calibration teams. This is not self-correcting and the full-spectrum shape distortion confirms the effect extends beyond the Z-peak alone."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 14 extends the momentum-scale miscalibration anomaly to TEN consecutive anomaly verdicts (chunks 5\u201314). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 6.0e-7; chi-square: p = 1.4e-21 \u2014 the entire dimuon mass spectrum is significantly distorted relative to reference.\n- Z-peak KS: p = 3.2e-35; chi-square: p = 3.9e-31 \u2014 the Z-resonance window is catastrophically misshapen, consistent with an ongoing momentum-scale miscalibration.\n\nOCCUPANCY:\n- Total event count: 1500 observed vs. 1500 expected (z = 0.0, p = 1.0) \u2014 nominal; no hardware loss.\n- Z-peak proportion: 271/1500 (18.1%) vs. reference 19.9% \u2014 p = 0.070, does not survive BH correction this chunk; not escalated on its own.\n\nMOMENTUM SCALE / DRIFT:\n- Z-peak mean mass: 94.114 GeV (nominal ~91.19 GeV), a shift of ~+2.9 GeV (~+3.2%).\n- Drift tracker confirms sustained upward trend over 14 chunks: slope = +0.303 GeV/chunk, trend p = 6.9e-9. This is a long-running, monotonically worsening calibration drift \u2014 not a statistical fluctuation.\n\nSUMMARY: The momentum scale has been progressively mis-calibrated since chunk 5 and continues to worsen. Ten consecutive anomaly verdicts with a statistically confirmed linear drift slope demand immediate escalation to detector operations / alignment and calibration teams. This is not self-correcting and the full-spectrum shape distortion confirms the effect extends beyond the Z-peak alone."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 14,
+      "chunk_id": "chunk_15",
+      "severity": "anomaly",
+      "summary": "Chunk 15 extends the momentum-scale miscalibration anomaly to ELEVEN consecutive anomaly verdicts (chunks 5\u201315). All key indicators remain deeply alarming and show no sign of recovery:\n\nDISTRIBUTION TESTS (both survive BH correction):\n\u2022 Full-spectrum KS: p = 2.0e-08; chi\u00b2 (\u03c7\u00b2=146.2, 5 dof): p = 8.6e-30\n\u2022 Z-peak KS: p = 6.5e-48 (statistic = 0.596 \u2014 enormous shape deviation); chi\u00b2 (\u03c7\u00b2=216.3, 9 dof): p = 1.3e-41\n\nOCCUPANCY:\n\u2022 Total event count: 1500 \u2014 perfectly nominal (Poisson z=0.0, p=1.0). No data loss.\n\u2022 Z-peak proportion: 18.4% vs reference 19.9% \u2014 the modest reduction is not statistically significant after correction (p=0.15), consistent with a mass-scale shift moving events out rather than dropping them.\n\nMOMENTUM SCALE / DRIFT:\n\u2022 Z-peak mean mass: 94.795 GeV \u2014 elevated ~3.6 GeV above the PDG Z mass (91.19 GeV), consistent with a persistent positive momentum-scale bias.\n\u2022 Drift check: slope = +0.316 GeV/chunk, sustained trend p = 6.6e-10, z-score vs. recent baseline = 2.2. The drift is statistically confirmed as a real, developing trend \u2014 not a fluctuation.\n\nASSESSMENT: Eleven consecutive chunks with the same anomaly signature. The full-spectrum and Z-peak shape deviations are catastrophic (p-values in the range 1e-30 to 1e-48). Total event count is healthy, ruling out readout/DAQ loss. The pattern is a systematic upward shift in reconstructed dimuon mass consistent with a momentum-scale miscalibration of approximately +3\u20134%. This requires immediate escalation to the on-call detector expert and/or muon alignment/calibration team. Data from chunks 5\u201315 should be flagged for reprocessing.",
+      "pvalues": {
+        "full_spectrum:ks": 2.037326479367113e-08,
+        "full_spectrum:chi2": 8.592224657332167e-30,
+        "z_peak:ks": 6.523324896292158e-48,
+        "z_peak:chi2": 1.254751133009638e-41,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.1458067227575762
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.3156892857142858,
+          "trend_p_value": 6.58988736036043e-10,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 34.243,
+        "z_peak": 94.795
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 276,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.11066666666666669,
+              "p_value": 2.037326479367113e-08
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 146.20041546195432,
+              "p_value": 8.592224657332167e-30,
+              "dof": 5,
+              "bins_used": 6,
+              "bins_excluded_both_empty": 4
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 276,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.5958751393534003,
+              "p_value": 6.523324896292158e-48
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 216.30044696213568,
+              "p_value": 1.254751133009638e-41,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 276,
+            "observed_n": 1500,
+            "observed_proportion": 0.184,
+            "reference_proportion": 0.1993,
+            "p_value": 0.1458067227575762,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 2.037326479367113e-08,
+              "full_spectrum:chi2": 8.592224657332167e-30,
+              "z_peak:ks": 6.523324896292158e-48,
+              "z_peak:chi2": 1.254751133009638e-41,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.1458067227575762
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 6.523324896292158e-48,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 1.254751133009638e-41,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 8.592224657332167e-30,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 2.037326479367113e-08,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.1458067227575762,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 94.795
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 94.795,
+            "window_size": 15,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 2.2182543625315443,
+            "linear_trend_slope": 0.3156892857142858,
+            "trend_p_value": 6.58988736036043e-10,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 15 extends the momentum-scale miscalibration anomaly to ELEVEN consecutive anomaly verdicts (chunks 5\u201315). All key indicators remain deeply alarming and show no sign of recovery:\n\nDISTRIBUTION TESTS (both survive BH correction):\n\u2022 Full-spectrum KS: p = 2.0e-08; chi\u00b2 (\u03c7\u00b2=146.2, 5 dof): p = 8.6e-30\n\u2022 Z-peak KS: p = 6.5e-48 (statistic = 0.596 \u2014 enormous shape deviation); chi\u00b2 (\u03c7\u00b2=216.3, 9 dof): p = 1.3e-41\n\nOCCUPANCY:\n\u2022 Total event count: 1500 \u2014 perfectly nominal (Poisson z=0.0, p=1.0). No data loss.\n\u2022 Z-peak proportion: 18.4% vs reference 19.9% \u2014 the modest reduction is not statistically significant after correction (p=0.15), consistent with a mass-scale shift moving events out rather than dropping them.\n\nMOMENTUM SCALE / DRIFT:\n\u2022 Z-peak mean mass: 94.795 GeV \u2014 elevated ~3.6 GeV above the PDG Z mass (91.19 GeV), consistent with a persistent positive momentum-scale bias.\n\u2022 Drift check: slope = +0.316 GeV/chunk, sustained trend p = 6.6e-10, z-score vs. recent baseline = 2.2. The drift is statistically confirmed as a real, developing trend \u2014 not a fluctuation.\n\nASSESSMENT: Eleven consecutive chunks with the same anomaly signature. The full-spectrum and Z-peak shape deviations are catastrophic (p-values in the range 1e-30 to 1e-48). Total event count is healthy, ruling out readout/DAQ loss. The pattern is a systematic upward shift in reconstructed dimuon mass consistent with a momentum-scale miscalibration of approximately +3\u20134%. This requires immediate escalation to the on-call detector expert and/or muon alignment/calibration team. Data from chunks 5\u201315 should be flagged for reprocessing."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 15 extends the momentum-scale miscalibration anomaly to ELEVEN consecutive anomaly verdicts (chunks 5\u201315). All key indicators remain deeply alarming and show no sign of recovery:\n\nDISTRIBUTION TESTS (both survive BH correction):\n\u2022 Full-spectrum KS: p = 2.0e-08; chi\u00b2 (\u03c7\u00b2=146.2, 5 dof): p = 8.6e-30\n\u2022 Z-peak KS: p = 6.5e-48 (statistic = 0.596 \u2014 enormous shape deviation); chi\u00b2 (\u03c7\u00b2=216.3, 9 dof): p = 1.3e-41\n\nOCCUPANCY:\n\u2022 Total event count: 1500 \u2014 perfectly nominal (Poisson z=0.0, p=1.0). No data loss.\n\u2022 Z-peak proportion: 18.4% vs reference 19.9% \u2014 the modest reduction is not statistically significant after correction (p=0.15), consistent with a mass-scale shift moving events out rather than dropping them.\n\nMOMENTUM SCALE / DRIFT:\n\u2022 Z-peak mean mass: 94.795 GeV \u2014 elevated ~3.6 GeV above the PDG Z mass (91.19 GeV), consistent with a persistent positive momentum-scale bias.\n\u2022 Drift check: slope = +0.316 GeV/chunk, sustained trend p = 6.6e-10, z-score vs. recent baseline = 2.2. The drift is statistically confirmed as a real, developing trend \u2014 not a fluctuation.\n\nASSESSMENT: Eleven consecutive chunks with the same anomaly signature. The full-spectrum and Z-peak shape deviations are catastrophic (p-values in the range 1e-30 to 1e-48). Total event count is healthy, ruling out readout/DAQ loss. The pattern is a systematic upward shift in reconstructed dimuon mass consistent with a momentum-scale miscalibration of approximately +3\u20134%. This requires immediate escalation to the on-call detector expert and/or muon alignment/calibration team. Data from chunks 5\u201315 should be flagged for reprocessing."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 15,
+      "chunk_id": "chunk_16",
+      "severity": "anomaly",
+      "summary": "Chunk 16 extends the momentum-scale miscalibration anomaly to TWELVE consecutive anomaly verdicts (chunks 5\u201316). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 1.0e-13 | Chi\u00b2: p = 4.8e-41 \u2014 severe shape deviation across the entire spectrum.\n- Z-peak KS: p = 3.8e-54 | Chi\u00b2: p = 3.7e-47 \u2014 the Z-peak shape is catastrophically inconsistent with reference, the most sensitive indicator of a momentum-scale miscalibration.\n\nOCCUPANCY:\n- Total event count: 1500 observed vs. 1500 expected \u2014 perfectly normal (p = 1.0). No event loss.\n- Z-peak share: 20.7% vs. reference 19.9% \u2014 not significantly different (p = 0.44). The anomaly is a shape/scale shift, not an occupancy deficit.\n\nZ-PEAK MEAN MASS:\n- Observed: 95.122 GeV \u2014 nearly 4 GeV ABOVE the nominal Z mass of 91.19 GeV. This is a large, sustained upward shift.\n- Drift analysis (16-chunk window): linear slope = +0.325 GeV/chunk, trend p = 4.6e-11. This is a confirmed, statistically robust developing drift \u2014 the miscalibration is not static, it appears to be worsening progressively across chunks.\n\nFULL-SPECTRUM MEAN MASS:\n- Observed: 36.881 GeV \u2014 elevated vs. recent baseline (z = +3.2), though the linear drift trend does not yet reach significance for this channel in isolation (p = 0.18).\n\nSUMMARY: Twelve straight anomaly chunks with an actively worsening, statistically confirmed upward drift in the Z-peak mean mass. This is a critical, unresolved detector calibration issue requiring immediate escalation to on-call detector experts. The muon momentum scale is miscalibrated and deteriorating \u2014 data taken during chunks 5\u201316 should be flagged for quality review.",
+      "pvalues": {
+        "full_spectrum:ks": 1.0019466031495281e-13,
+        "full_spectrum:chi2": 4.759021114010013e-41,
+        "z_peak:ks": 3.8419881642355013e-54,
+        "z_peak:chi2": 3.6894330948232495e-47,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.4380153262190616
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.32455882352941184,
+          "trend_p_value": 4.618103609899314e-11,
+          "looks_like_sustained_drift": true
+        },
+        "full_spectrum_mean_mass": {
+          "slope": 0.7563000000000002,
+          "trend_p_value": 0.18191788950560017,
+          "looks_like_sustained_drift": false
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 36.881,
+        "z_peak": 95.122
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 311,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.14266666666666672,
+              "p_value": 1.0019466031495281e-13
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 202.82176181537935,
+              "p_value": 4.759021114010013e-41,
+              "dof": 6,
+              "bins_used": 7,
+              "bins_excluded_both_empty": 3
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 311,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.6133628708772005,
+              "p_value": 3.8419881642355013e-54
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 242.569640241981,
+              "p_value": 3.6894330948232495e-47,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 311,
+            "observed_n": 1500,
+            "observed_proportion": 0.2073,
+            "reference_proportion": 0.1993,
+            "p_value": 0.4380153262190616,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 1.0019466031495281e-13,
+              "full_spectrum:chi2": 4.759021114010013e-41,
+              "z_peak:ks": 3.8419881642355013e-54,
+              "z_peak:chi2": 3.6894330948232495e-47,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.4380153262190616
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 3.8419881642355013e-54,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 3.6894330948232495e-47,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 4.759021114010013e-41,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 1.0019466031495281e-13,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.4380153262190616,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 95.122
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 95.122,
+            "window_size": 16,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 2.0934460032400413,
+            "linear_trend_slope": 0.32455882352941184,
+            "trend_p_value": 4.618103609899314e-11,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 36.881
+          },
+          "result": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 36.881,
+            "window_size": 5,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 3.178682031752818,
+            "linear_trend_slope": 0.7563000000000002,
+            "trend_p_value": 0.18191788950560017,
+            "looks_like_sustained_drift": false
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 16 extends the momentum-scale miscalibration anomaly to TWELVE consecutive anomaly verdicts (chunks 5\u201316). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 1.0e-13 | Chi\u00b2: p = 4.8e-41 \u2014 severe shape deviation across the entire spectrum.\n- Z-peak KS: p = 3.8e-54 | Chi\u00b2: p = 3.7e-47 \u2014 the Z-peak shape is catastrophically inconsistent with reference, the most sensitive indicator of a momentum-scale miscalibration.\n\nOCCUPANCY:\n- Total event count: 1500 observed vs. 1500 expected \u2014 perfectly normal (p = 1.0). No event loss.\n- Z-peak share: 20.7% vs. reference 19.9% \u2014 not significantly different (p = 0.44). The anomaly is a shape/scale shift, not an occupancy deficit.\n\nZ-PEAK MEAN MASS:\n- Observed: 95.122 GeV \u2014 nearly 4 GeV ABOVE the nominal Z mass of 91.19 GeV. This is a large, sustained upward shift.\n- Drift analysis (16-chunk window): linear slope = +0.325 GeV/chunk, trend p = 4.6e-11. This is a confirmed, statistically robust developing drift \u2014 the miscalibration is not static, it appears to be worsening progressively across chunks.\n\nFULL-SPECTRUM MEAN MASS:\n- Observed: 36.881 GeV \u2014 elevated vs. recent baseline (z = +3.2), though the linear drift trend does not yet reach significance for this channel in isolation (p = 0.18).\n\nSUMMARY: Twelve straight anomaly chunks with an actively worsening, statistically confirmed upward drift in the Z-peak mean mass. This is a critical, unresolved detector calibration issue requiring immediate escalation to on-call detector experts. The muon momentum scale is miscalibrated and deteriorating \u2014 data taken during chunks 5\u201316 should be flagged for quality review."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 16 extends the momentum-scale miscalibration anomaly to TWELVE consecutive anomaly verdicts (chunks 5\u201316). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 1.0e-13 | Chi\u00b2: p = 4.8e-41 \u2014 severe shape deviation across the entire spectrum.\n- Z-peak KS: p = 3.8e-54 | Chi\u00b2: p = 3.7e-47 \u2014 the Z-peak shape is catastrophically inconsistent with reference, the most sensitive indicator of a momentum-scale miscalibration.\n\nOCCUPANCY:\n- Total event count: 1500 observed vs. 1500 expected \u2014 perfectly normal (p = 1.0). No event loss.\n- Z-peak share: 20.7% vs. reference 19.9% \u2014 not significantly different (p = 0.44). The anomaly is a shape/scale shift, not an occupancy deficit.\n\nZ-PEAK MEAN MASS:\n- Observed: 95.122 GeV \u2014 nearly 4 GeV ABOVE the nominal Z mass of 91.19 GeV. This is a large, sustained upward shift.\n- Drift analysis (16-chunk window): linear slope = +0.325 GeV/chunk, trend p = 4.6e-11. This is a confirmed, statistically robust developing drift \u2014 the miscalibration is not static, it appears to be worsening progressively across chunks.\n\nFULL-SPECTRUM MEAN MASS:\n- Observed: 36.881 GeV \u2014 elevated vs. recent baseline (z = +3.2), though the linear drift trend does not yet reach significance for this channel in isolation (p = 0.18).\n\nSUMMARY: Twelve straight anomaly chunks with an actively worsening, statistically confirmed upward drift in the Z-peak mean mass. This is a critical, unresolved detector calibration issue requiring immediate escalation to on-call detector experts. The muon momentum scale is miscalibrated and deteriorating \u2014 data taken during chunks 5\u201316 should be flagged for quality review."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 16,
+      "chunk_id": "chunk_17",
+      "severity": "anomaly",
+      "summary": "Chunk 17 extends the momentum-scale miscalibration anomaly to THIRTEEN consecutive anomaly verdicts (chunks 5\u201317). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (post-BH correction):\n\u2022 Z-peak KS test: p = 5.4e-44 \u2717 (significant after correction) \u2014 catastrophically large shape deviation within the Z-peak window\n\u2022 Z-peak chi-square: p = 3.4e-38 \u2717 (significant after correction) \u2014 confirms severe Z-peak shape distortion\n\u2022 Full-spectrum KS test: p = 3.3e-09 \u2717 (significant after correction) \u2014 anomalous shape deviation persists across the entire spectrum\n\u2022 Full-spectrum chi-square: p = 0.077 \u2014 marginal, does NOT survive correction; no independent concern here\n\nOCCUPANCY CHECKS (post-BH correction):\n\u2022 Total event count: n = 1500, z-score = 0.0, p = 1.0 \u2014 perfectly normal; total throughput is unaffected\n\u2022 Z-peak proportion: observed 17.47% vs. reference 19.93%, p = 0.0167 \u2717 (significant after correction) \u2014 the share of events landing in the Z-peak window is significantly depleted, consistent with events migrating out of the Z-peak due to a mass scale shift\n\nDRIFT ANALYSIS:\n\u2022 Z-peak mean mass: 94.907 GeV (nominal: 91.19 GeV) \u2014 drift tracker confirms a sustained upward trend over 17 chunks with slope +0.320 GeV/chunk and trend p = 3.6e-12. This is a locked-in, monotonically worsening miscalibration, not a fluctuation.\n\u2022 Full-spectrum mean mass: 36.168 GeV \u2014 drift slope positive but trend p = 0.077; no independent concern here beyond the Z-peak signal.\n\nSUMMARY: The Z-peak mean mass sits ~3.7 GeV above the PDG value of 91.19 GeV. The miscalibration has now persisted for 13 consecutive chunks with a statistically confirmed positive drift trend. Total event throughput is nominal, ruling out a DAQ/trigger issue. The evidence overwhelmingly points to a worsening muon momentum-scale miscalibration. Immediate intervention \u2014 detector alignment check, tracker calibration review, or magnetic field validation \u2014 is strongly warranted. This should have been escalated to the on-call expert well before this chunk.",
+      "pvalues": {
+        "full_spectrum:ks": 3.299179441389421e-09,
+        "full_spectrum:chi2": 0.07729885245360324,
+        "z_peak:ks": 5.421028708571503e-44,
+        "z_peak:chi2": 3.392449830454296e-38,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.016743407205272287
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.3200661764705882,
+          "trend_p_value": 3.607321148879267e-12,
+          "looks_like_sustained_drift": true
+        },
+        "full_spectrum_mean_mass": {
+          "slope": 0.6839142857142857,
+          "trend_p_value": 0.07718159185762756,
+          "looks_like_sustained_drift": false
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 36.168,
+        "z_peak": 94.907
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 262,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.11599999999999999,
+              "p_value": 3.299179441389421e-09
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 11.380718227709046,
+              "p_value": 0.07729885245360324,
+              "dof": 6,
+              "bins_used": 7,
+              "bins_excluded_both_empty": 3
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 262,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.5795271771043427,
+              "p_value": 5.421028708571503e-44
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 199.95089765649055,
+              "p_value": 3.392449830454296e-38,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 262,
+            "observed_n": 1500,
+            "observed_proportion": 0.1747,
+            "reference_proportion": 0.1993,
+            "p_value": 0.016743407205272287,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 3.299179441389421e-09,
+              "full_spectrum:chi2": 0.07729885245360324,
+              "z_peak:ks": 5.421028708571503e-44,
+              "z_peak:chi2": 3.392449830454296e-38,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.016743407205272287
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 5.421028708571503e-44,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 3.392449830454296e-38,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 3.299179441389421e-09,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.016743407205272287,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 0.07729885245360324,
+              "rank": 5,
+              "significant_after_correction": false
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 94.907
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 94.907,
+            "window_size": 17,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 1.6552043731563826,
+            "linear_trend_slope": 0.3200661764705882,
+            "trend_p_value": 3.607321148879267e-12,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 36.168
+          },
+          "result": {
+            "channel": "full_spectrum_mean_mass",
+            "value": 36.168,
+            "window_size": 6,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 1.1645971284994803,
+            "linear_trend_slope": 0.6839142857142857,
+            "trend_p_value": 0.07718159185762756,
+            "looks_like_sustained_drift": false
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 17 extends the momentum-scale miscalibration anomaly to THIRTEEN consecutive anomaly verdicts (chunks 5\u201317). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (post-BH correction):\n\u2022 Z-peak KS test: p = 5.4e-44 \u2717 (significant after correction) \u2014 catastrophically large shape deviation within the Z-peak window\n\u2022 Z-peak chi-square: p = 3.4e-38 \u2717 (significant after correction) \u2014 confirms severe Z-peak shape distortion\n\u2022 Full-spectrum KS test: p = 3.3e-09 \u2717 (significant after correction) \u2014 anomalous shape deviation persists across the entire spectrum\n\u2022 Full-spectrum chi-square: p = 0.077 \u2014 marginal, does NOT survive correction; no independent concern here\n\nOCCUPANCY CHECKS (post-BH correction):\n\u2022 Total event count: n = 1500, z-score = 0.0, p = 1.0 \u2014 perfectly normal; total throughput is unaffected\n\u2022 Z-peak proportion: observed 17.47% vs. reference 19.93%, p = 0.0167 \u2717 (significant after correction) \u2014 the share of events landing in the Z-peak window is significantly depleted, consistent with events migrating out of the Z-peak due to a mass scale shift\n\nDRIFT ANALYSIS:\n\u2022 Z-peak mean mass: 94.907 GeV (nominal: 91.19 GeV) \u2014 drift tracker confirms a sustained upward trend over 17 chunks with slope +0.320 GeV/chunk and trend p = 3.6e-12. This is a locked-in, monotonically worsening miscalibration, not a fluctuation.\n\u2022 Full-spectrum mean mass: 36.168 GeV \u2014 drift slope positive but trend p = 0.077; no independent concern here beyond the Z-peak signal.\n\nSUMMARY: The Z-peak mean mass sits ~3.7 GeV above the PDG value of 91.19 GeV. The miscalibration has now persisted for 13 consecutive chunks with a statistically confirmed positive drift trend. Total event throughput is nominal, ruling out a DAQ/trigger issue. The evidence overwhelmingly points to a worsening muon momentum-scale miscalibration. Immediate intervention \u2014 detector alignment check, tracker calibration review, or magnetic field validation \u2014 is strongly warranted. This should have been escalated to the on-call expert well before this chunk."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 17 extends the momentum-scale miscalibration anomaly to THIRTEEN consecutive anomaly verdicts (chunks 5\u201317). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (post-BH correction):\n\u2022 Z-peak KS test: p = 5.4e-44 \u2717 (significant after correction) \u2014 catastrophically large shape deviation within the Z-peak window\n\u2022 Z-peak chi-square: p = 3.4e-38 \u2717 (significant after correction) \u2014 confirms severe Z-peak shape distortion\n\u2022 Full-spectrum KS test: p = 3.3e-09 \u2717 (significant after correction) \u2014 anomalous shape deviation persists across the entire spectrum\n\u2022 Full-spectrum chi-square: p = 0.077 \u2014 marginal, does NOT survive correction; no independent concern here\n\nOCCUPANCY CHECKS (post-BH correction):\n\u2022 Total event count: n = 1500, z-score = 0.0, p = 1.0 \u2014 perfectly normal; total throughput is unaffected\n\u2022 Z-peak proportion: observed 17.47% vs. reference 19.93%, p = 0.0167 \u2717 (significant after correction) \u2014 the share of events landing in the Z-peak window is significantly depleted, consistent with events migrating out of the Z-peak due to a mass scale shift\n\nDRIFT ANALYSIS:\n\u2022 Z-peak mean mass: 94.907 GeV (nominal: 91.19 GeV) \u2014 drift tracker confirms a sustained upward trend over 17 chunks with slope +0.320 GeV/chunk and trend p = 3.6e-12. This is a locked-in, monotonically worsening miscalibration, not a fluctuation.\n\u2022 Full-spectrum mean mass: 36.168 GeV \u2014 drift slope positive but trend p = 0.077; no independent concern here beyond the Z-peak signal.\n\nSUMMARY: The Z-peak mean mass sits ~3.7 GeV above the PDG value of 91.19 GeV. The miscalibration has now persisted for 13 consecutive chunks with a statistically confirmed positive drift trend. Total event throughput is nominal, ruling out a DAQ/trigger issue. The evidence overwhelmingly points to a worsening muon momentum-scale miscalibration. Immediate intervention \u2014 detector alignment check, tracker calibration review, or magnetic field validation \u2014 is strongly warranted. This should have been escalated to the on-call expert well before this chunk."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    },
+    {
+      "chunk_index": 17,
+      "chunk_id": "chunk_18",
+      "severity": "anomaly",
+      "summary": "Chunk 18 extends the momentum-scale miscalibration anomaly to FOURTEEN consecutive anomaly verdicts (chunks 5\u201318). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 5.2e-11; chi-square: p = 1.3e-41 \u2014 the global shape is grossly inconsistent with reference.\n- Z-peak KS: p = 3.2e-57; chi-square: p = 4.6e-49 \u2014 the Z-peak region is the most extreme signal in the batch, consistent with a large upward mass shift.\n\nOCCUPANCY:\n- Total event count: 1500 observed vs. 1500 expected (z = 0.0, p = 1.0) \u2014 perfectly normal. The detector is collecting events.\n- Z-peak proportion: 17.6% observed vs. 19.9% reference (p = 0.024, survives BH correction) \u2014 a statistically significant deficit of events falling within the Z-peak window, consistent with events migrating upward out of the canonical 81\u2013101 GeV window due to momentum scale inflation.\n\nDRIFT:\n- Z-peak mean mass: 95.833 GeV, vs. the nominal ~91.19 GeV. Drift check confirms a sustained upward linear trend across the 18-chunk window (slope = +0.33 GeV/chunk, trend p = 2.4e-13, z-score vs. recent baseline = 2.07). This is a firmly established, monotonically worsening miscalibration \u2014 not a fluctuation.\n\nSUMMARY: The muon momentum scale has been progressively inflated since chunk 5, now standing roughly +4.6 GeV above the Z-pole nominal mass. The event-collection rate is normal, ruling out a readout or trigger issue. This is a persistent, worsening calibration failure requiring immediate intervention by the on-call calibration expert. Fourteen consecutive anomaly verdicts with no sign of recovery.",
+      "pvalues": {
+        "full_spectrum:ks": 5.1703294469518483e-11,
+        "full_spectrum:chi2": 1.3114840010574478e-41,
+        "z_peak:ks": 3.1536496002628044e-57,
+        "z_peak:chi2": 4.611615565445362e-49,
+        "occupancy:total": 1.0,
+        "occupancy:z_peak": 0.023652392378519738
+      },
+      "drift": {
+        "z_peak_mean_mass": {
+          "slope": 0.32754385964912275,
+          "trend_p_value": 2.426140195764796e-13,
+          "looks_like_sustained_drift": true
+        }
+      },
+      "mean_mass": {
+        "full_spectrum": 34.471,
+        "z_peak": 95.833
+      },
+      "n_events": 1500,
+      "n_events_near_z_peak": 264,
+      "steps": [
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "full_spectrum"
+          },
+          "result": {
+            "region": "full_spectrum",
+            "chunk_n": 1500,
+            "reference_n": 1500,
+            "ks_test": {
+              "channel": "full_spectrum",
+              "test": "ks_2samp",
+              "statistic": 0.1273333333333334,
+              "p_value": 5.1703294469518483e-11
+            },
+            "chi_square_test": {
+              "channel": "full_spectrum",
+              "test": "chi_square_two_sample",
+              "statistic": 205.45053345608946,
+              "p_value": 1.3114840010574478e-41,
+              "dof": 6,
+              "bins_used": 7,
+              "bins_excluded_both_empty": 3
+            }
+          },
+          "caption": "Checking the overall shape of this batch against the reference"
+        },
+        {
+          "tool": "run_distribution_test",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "region": "z_peak",
+            "chunk_n": 264,
+            "reference_n": 299,
+            "ks_test": {
+              "channel": "z_peak",
+              "test": "ks_2samp",
+              "statistic": 0.6538968278098712,
+              "p_value": 3.1536496002628044e-57
+            },
+            "chi_square_test": {
+              "channel": "z_peak",
+              "test": "chi_square_two_sample",
+              "statistic": 251.58718145030792,
+              "p_value": 4.611615565445362e-49,
+              "dof": 9,
+              "bins_used": 10,
+              "bins_excluded_both_empty": 0
+            }
+          },
+          "caption": "Checking the Z-peak-region shape of this batch against the reference"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "total"
+          },
+          "result": {
+            "test": "poisson_count",
+            "observed_n": 1500,
+            "expected_n": 1500.0,
+            "z_score": 0.0,
+            "p_value": 1.0,
+            "region": "total"
+          },
+          "caption": "Checking the total event count"
+        },
+        {
+          "tool": "check_occupancy",
+          "input": {
+            "region": "z_peak"
+          },
+          "result": {
+            "test": "binomial_proportion",
+            "observed_k": 264,
+            "observed_n": 1500,
+            "observed_proportion": 0.176,
+            "reference_proportion": 0.1993,
+            "p_value": 0.023652392378519738,
+            "region": "z_peak"
+          },
+          "caption": "Checking the share of events landing near the Z mass"
+        },
+        {
+          "tool": "apply_multiple_testing_correction",
+          "input": {
+            "pvalues": {
+              "full_spectrum:ks": 5.1703294469518483e-11,
+              "full_spectrum:chi2": 1.3114840010574478e-41,
+              "z_peak:ks": 3.1536496002628044e-57,
+              "z_peak:chi2": 4.611615565445362e-49,
+              "occupancy:total": 1.0,
+              "occupancy:z_peak": 0.023652392378519738
+            },
+            "alpha": 0.05
+          },
+          "result": {
+            "z_peak:ks": {
+              "p_value": 3.1536496002628044e-57,
+              "rank": 1,
+              "significant_after_correction": true
+            },
+            "z_peak:chi2": {
+              "p_value": 4.611615565445362e-49,
+              "rank": 2,
+              "significant_after_correction": true
+            },
+            "full_spectrum:chi2": {
+              "p_value": 1.3114840010574478e-41,
+              "rank": 3,
+              "significant_after_correction": true
+            },
+            "full_spectrum:ks": {
+              "p_value": 5.1703294469518483e-11,
+              "rank": 4,
+              "significant_after_correction": true
+            },
+            "occupancy:z_peak": {
+              "p_value": 0.023652392378519738,
+              "rank": 5,
+              "significant_after_correction": true
+            },
+            "occupancy:total": {
+              "p_value": 1.0,
+              "rank": 6,
+              "significant_after_correction": false
+            }
+          },
+          "caption": "Adjusting the significance bar since several checks were run this chunk"
+        },
+        {
+          "tool": "check_drift",
+          "input": {
+            "channel": "z_peak_mean_mass",
+            "value": 95.833
+          },
+          "result": {
+            "channel": "z_peak_mean_mass",
+            "value": 95.833,
+            "window_size": 18,
+            "trend_detectable": true,
+            "z_score_vs_recent_baseline": 2.0697845408077784,
+            "linear_trend_slope": 0.32754385964912275,
+            "trend_p_value": 2.426140195764796e-13,
+            "looks_like_sustained_drift": true
+          },
+          "caption": "Comparing against recent chunks for a developing trend, not just this one"
+        },
+        {
+          "tool": "escalate_finding",
+          "input": {
+            "severity": "anomaly",
+            "summary": "Chunk 18 extends the momentum-scale miscalibration anomaly to FOURTEEN consecutive anomaly verdicts (chunks 5\u201318). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 5.2e-11; chi-square: p = 1.3e-41 \u2014 the global shape is grossly inconsistent with reference.\n- Z-peak KS: p = 3.2e-57; chi-square: p = 4.6e-49 \u2014 the Z-peak region is the most extreme signal in the batch, consistent with a large upward mass shift.\n\nOCCUPANCY:\n- Total event count: 1500 observed vs. 1500 expected (z = 0.0, p = 1.0) \u2014 perfectly normal. The detector is collecting events.\n- Z-peak proportion: 17.6% observed vs. 19.9% reference (p = 0.024, survives BH correction) \u2014 a statistically significant deficit of events falling within the Z-peak window, consistent with events migrating upward out of the canonical 81\u2013101 GeV window due to momentum scale inflation.\n\nDRIFT:\n- Z-peak mean mass: 95.833 GeV, vs. the nominal ~91.19 GeV. Drift check confirms a sustained upward linear trend across the 18-chunk window (slope = +0.33 GeV/chunk, trend p = 2.4e-13, z-score vs. recent baseline = 2.07). This is a firmly established, monotonically worsening miscalibration \u2014 not a fluctuation.\n\nSUMMARY: The muon momentum scale has been progressively inflated since chunk 5, now standing roughly +4.6 GeV above the Z-pole nominal mass. The event-collection rate is normal, ruling out a readout or trigger issue. This is a persistent, worsening calibration failure requiring immediate intervention by the on-call calibration expert. Fourteen consecutive anomaly verdicts with no sign of recovery."
+          },
+          "result": {
+            "logged": true,
+            "severity": "anomaly",
+            "summary": "Chunk 18 extends the momentum-scale miscalibration anomaly to FOURTEEN consecutive anomaly verdicts (chunks 5\u201318). All key indicators remain deeply alarming:\n\nDISTRIBUTION TESTS (all survive BH correction):\n- Full-spectrum KS: p = 5.2e-11; chi-square: p = 1.3e-41 \u2014 the global shape is grossly inconsistent with reference.\n- Z-peak KS: p = 3.2e-57; chi-square: p = 4.6e-49 \u2014 the Z-peak region is the most extreme signal in the batch, consistent with a large upward mass shift.\n\nOCCUPANCY:\n- Total event count: 1500 observed vs. 1500 expected (z = 0.0, p = 1.0) \u2014 perfectly normal. The detector is collecting events.\n- Z-peak proportion: 17.6% observed vs. 19.9% reference (p = 0.024, survives BH correction) \u2014 a statistically significant deficit of events falling within the Z-peak window, consistent with events migrating upward out of the canonical 81\u2013101 GeV window due to momentum scale inflation.\n\nDRIFT:\n- Z-peak mean mass: 95.833 GeV, vs. the nominal ~91.19 GeV. Drift check confirms a sustained upward linear trend across the 18-chunk window (slope = +0.33 GeV/chunk, trend p = 2.4e-13, z-score vs. recent baseline = 2.07). This is a firmly established, monotonically worsening miscalibration \u2014 not a fluctuation.\n\nSUMMARY: The muon momentum scale has been progressively inflated since chunk 5, now standing roughly +4.6 GeV above the Z-pole nominal mass. The event-collection rate is normal, ruling out a readout or trigger issue. This is a persistent, worsening calibration failure requiring immediate intervention by the on-call calibration expert. Fourteen consecutive anomaly verdicts with no sign of recovery."
+          },
+          "caption": "Writing the final verdict"
+        }
+      ]
+    }
+  ]
+}
