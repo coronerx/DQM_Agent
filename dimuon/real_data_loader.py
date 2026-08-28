@@ -31,24 +31,42 @@ REMOTE_URL = (
 # then pass that local filename as `source` below instead of REMOTE_URL.
 
 
-def load_events(source: str = REMOTE_URL, max_events: int | None = 50_000) -> dict:
+def load_events(source: str = REMOTE_URL, max_events: int | None = 50_000,
+                 entry_start: int = 0, return_raw_entry_index: bool = False) -> dict:
     """
     Selects events with exactly two opposite-charge muons (the standard
     dimuon selection) and returns their kinematics as plain numpy arrays,
     one entry per event: pt1, eta1, phi1, pt2, eta2, phi2.
+
+    entry_start: skip this many raw entries before reading -- lets you pull
+    an INDEPENDENT, non-overlapping slice further into the file, rather
+    than always the same first `max_events` entries.
+
+    return_raw_entry_index: if True, also returns "raw_entry_index" -- the
+    TRUE original raw tree entry number for each selected event (not the
+    post-selection position). Needed for anything that plots against
+    actual file position, since only ~35-40% of raw entries pass the
+    two-opposite-charge-muon cut -- conflating "post-selection count" with
+    "raw entry number" silently distorts any x-axis built from it.
     """
     tree = uproot.open(source)["Events"]
     arrays = tree.arrays(
         ["nMuon", "Muon_pt", "Muon_eta", "Muon_phi", "Muon_charge"],
-        entry_stop=max_events,
+        entry_start=entry_start,
+        entry_stop=entry_start + max_events if max_events is not None else None,
         library="ak",
     )
+    raw_entry_index = entry_start + np.arange(len(arrays))
 
-    two_muon = arrays[arrays["nMuon"] == 2]
-    opposite_charge = two_muon["Muon_charge"][:, 0] != two_muon["Muon_charge"][:, 1]
-    selected = two_muon[opposite_charge]
+    two_muon_mask = arrays["nMuon"] == 2
+    two_muon = arrays[two_muon_mask]
+    raw_entry_index = raw_entry_index[np.asarray(two_muon_mask)]
 
-    return {
+    opposite_charge_mask = two_muon["Muon_charge"][:, 0] != two_muon["Muon_charge"][:, 1]
+    selected = two_muon[opposite_charge_mask]
+    raw_entry_index = raw_entry_index[np.asarray(opposite_charge_mask)]
+
+    result = {
         "pt1": ak.to_numpy(selected["Muon_pt"][:, 0]),
         "eta1": ak.to_numpy(selected["Muon_eta"][:, 0]),
         "phi1": ak.to_numpy(selected["Muon_phi"][:, 0]),
@@ -56,6 +74,9 @@ def load_events(source: str = REMOTE_URL, max_events: int | None = 50_000) -> di
         "eta2": ak.to_numpy(selected["Muon_eta"][:, 1]),
         "phi2": ak.to_numpy(selected["Muon_phi"][:, 1]),
     }
+    if return_raw_entry_index:
+        result["raw_entry_index"] = raw_entry_index
+    return result
 
 
 def chunk_events(events: dict, chunk_size: int = 2000):
