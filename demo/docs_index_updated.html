@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>粒子加速器实验室 · DQM Agent</title>
+  <meta name="description" content="一座可以拆解、旋转和理解的 3D 粒子加速器。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#050810; --panel:#090e19; --panel-2:#0d1422; --line:#1b2940;
+      --text:#eef5ff; --muted:#8291a8; --cyan:#39d9ff; --blue:#4b7cff;
+      --violet:#a66cff; --amber:#ffcb45; --coral:#ff6577; --green:#4de3a2;
+    }
+    * { box-sizing:border-box; }
+    html, body { width:100%; height:100%; margin:0; overflow:hidden; background:var(--bg); color:var(--text); font-family:Inter,system-ui,sans-serif; }
+    button { font:inherit; }
+    .app { height:100vh; display:flex; flex-direction:column; background:radial-gradient(circle at 70% 20%,#0e1a30 0,transparent 34%),var(--bg); }
+    .topbar { height:48px; flex:0 0 48px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; border-bottom:1px solid #152036; background:#060a12dd; backdrop-filter:blur(16px); z-index:10; }
+    .crumb { padding-left:16px; color:#61708a; font:10px 'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; }
+    .brand { display:flex; align-items:center; gap:9px; font-size:12px; font-weight:700; letter-spacing:.03em; }
+    .brand-mark { width:20px; height:20px; position:relative; border:1px solid #45628d; border-radius:50%; }
+    .brand-mark::before,.brand-mark::after { content:""; position:absolute; inset:4px -3px; border:1px solid var(--cyan); border-radius:50%; transform:rotate(34deg); }
+    .brand-mark::after { border-color:var(--violet); transform:rotate(-34deg); }
+    .repo-link { justify-self:end; padding-right:16px; color:#75839a; font-size:11px; text-decoration:none; }
+    .repo-link:hover { color:var(--cyan); }
+    .workspace { flex:1; min-height:0; display:grid; grid-template-columns:minmax(350px,36%) 1fr; }
+    .learn { min-width:0; display:flex; flex-direction:column; border-right:1px solid #152036; background:linear-gradient(180deg,#090e18 0%,#070b13 100%); z-index:3; }
+    .chapter-nav { display:none; }
+    .nav-btn,.icon-btn { display:grid; place-items:center; width:28px; height:28px; padding:0; border:1px solid #22314a; border-radius:6px; background:#0c1320; color:#91a0b5; cursor:pointer; transition:.18s; }
+    .nav-btn:hover:not(:disabled),.icon-btn:hover { color:var(--cyan); border-color:#2e7491; background:#0b1c29; }
+    .nav-btn:disabled { opacity:.25; cursor:default; }
+    .chapter-label { flex:1; text-align:center; font:500 10px 'DM Mono',monospace; color:#8c9bb0; letter-spacing:.08em; text-transform:uppercase; }
+    .chapter-label strong { color:#d7e5f8; font-weight:500; }
+    .lesson { flex:1; min-height:0; overflow:auto; padding:54px 34px 28px; scrollbar-width:thin; scrollbar-color:#263650 transparent; }
+    .lesson-index { color:var(--cyan); font:500 10px 'DM Mono',monospace; letter-spacing:.13em; text-transform:uppercase; }
+    h1 { margin:10px 0 12px; max-width:430px; font-size:28px; line-height:1.13; letter-spacing:-.045em; }
+    .lede { margin:0; max-width:470px; color:#aebbd0; font-size:13px; line-height:1.75; }
+    .lede strong { color:#f5f9ff; font-weight:600; }
+    .equation { margin:18px 0; padding:12px 14px; border:1px solid #1e4260; border-left:2px solid var(--cyan); background:linear-gradient(90deg,#0b1d2b,#0b1420); color:#9ae9ff; font:500 14px Georgia,serif; box-shadow:inset 0 0 24px #0b6b8d12; }
+    .body-copy { margin:0 0 11px; color:#8d9bb0; font-size:12.5px; line-height:1.68; }
+    .body-copy strong { color:#d8e5f5; }
+    .component-label { margin:19px 0 8px; color:#5f6e84; font:500 9px 'DM Mono',monospace; letter-spacing:.14em; text-transform:uppercase; }
+    .components,.component-label { display:none; }
+    .component { min-height:70px; padding:10px 11px; text-align:left; border:1px solid #1b2940; border-radius:7px; background:#0b111c; color:var(--text); cursor:pointer; transition:.18s ease; position:relative; overflow:hidden; }
+    .component::after { content:""; position:absolute; inset:auto 0 0; height:2px; background:var(--part-color); transform:scaleX(0); transform-origin:left; transition:.2s; }
+    .component:hover,.component.active { border-color:color-mix(in srgb,var(--part-color) 50%,#25344b); background:#0e1725; transform:translateY(-1px); }
+    .component:hover::after,.component.active::after { transform:scaleX(1); }
+    .component-top { display:flex; justify-content:space-between; align-items:center; }
+    .component-num { color:#56667c; font:9px 'DM Mono',monospace; }
+    .component-dot { width:6px; height:6px; border-radius:50%; background:var(--part-color); box-shadow:0 0 10px var(--part-color); }
+    .component strong { display:block; margin:6px 0 3px; font-size:11.5px; }
+    .component small { display:block; color:#6f7e93; font-size:9.5px; line-height:1.35; }
+    .learn-footer { display:none; }
+    .direct-guide { margin-top:26px; padding:14px; border:1px solid #25445f; border-radius:8px; background:linear-gradient(135deg,#0b1826,#09111d); box-shadow:0 16px 36px #0007,inset 0 1px #ffffff0b; }
+    .direct-guide > span { color:#59dff8; font:8px 'DM Mono',monospace; letter-spacing:.12em; }
+    .direct-guide strong { display:block; margin:7px 0 10px; font-size:13px; }
+    .direct-guide ol { display:grid; gap:8px; margin:0; padding:0; list-style:none; counter-reset:guide; }
+    .direct-guide li { display:flex; align-items:center; gap:8px; color:#8297ad; font-size:10px; counter-increment:guide; }
+    .direct-guide li::before { content:"0" counter(guide); display:grid; place-items:center; width:22px; height:22px; flex:0 0 22px; border:1px solid #2b5872; border-radius:50%; color:#9fefff; font:7px 'DM Mono',monospace; }
+    .progress-line { display:flex; align-items:center; gap:9px; }
+    .progress-track { height:3px; flex:1; background:#172236; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--violet),var(--cyan)); box-shadow:0 0 8px #39d9ff88; transition:width .35s; }
+    .progress-count { color:#5f6e84; font:9px 'DM Mono',monospace; }
+    .footer-actions { display:flex; gap:7px; margin-top:9px; }
+    .continue { flex:1; height:36px; border:1px solid #476df5; border-radius:6px; background:linear-gradient(135deg,#315de9,#6847e8); color:#fff; font-size:11.5px; font-weight:600; cursor:pointer; box-shadow:0 5px 18px #345be933; transition:.18s; }
+    .continue:hover { filter:brightness(1.12); transform:translateY(-1px); }
+    .restart { width:72px; border:1px solid #263650; border-radius:6px; background:#0c1320; color:#8291a8; font-size:10px; cursor:pointer; }
+    .viz { min-width:0; position:relative; overflow:hidden; background:radial-gradient(circle at 52% 48%,#102443 0%,#081322 36%,#04070d 75%); }
+    #scene { position:absolute; inset:0; cursor:grab; touch-action:none; }
+    #scene canvas { width:100% !important; height:100% !important; display:block; }
+    #scene:active { cursor:grabbing; }
+    .viz.dragging #scene { cursor:grabbing; }
+    .viz::before { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background-image:linear-gradient(#16304b3b 1px,transparent 1px),linear-gradient(90deg,#16304b3b 1px,transparent 1px); background-size:52px 52px; mask-image:radial-gradient(circle at center,#000 0%,transparent 72%); }
+    .viz-head { position:absolute; top:20px; left:22px; z-index:4; pointer-events:none; }
+    .viz-kicker { color:#527194; font:500 9px 'DM Mono',monospace; letter-spacing:.15em; text-transform:uppercase; }
+    .viz-title { margin:7px 0 3px; font-size:16px; letter-spacing:-.02em; }
+    .viz-subtitle { color:#71819a; font-size:10.5px; }
+    .status-pill { display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:5px 8px; border:1px solid #24405b; border-radius:5px; background:#07121ee6; color:#9db2c9; font:9px 'DM Mono',monospace; }
+    .status-pill i { width:5px; height:5px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); }
+    .viz-actions { position:absolute; top:18px; right:18px; z-index:5; display:flex; gap:6px; }
+    .icon-btn { background:#08111ddd; backdrop-filter:blur(8px); }
+    .view-switch { position:absolute; left:50%; top:18px; z-index:8; transform:translateX(-50%); display:flex; gap:3px; padding:3px; border:1px solid #20334b; border-radius:7px; background:#07101be8; box-shadow:0 10px 28px #0008; }
+    .view-switch button { height:25px; padding:0 9px; border:0; border-radius:4px; background:transparent; color:#64768d; font:500 9px 'DM Mono',monospace; cursor:pointer; white-space:nowrap; }
+    .view-switch button:hover { color:#b6cce4; }
+    .view-switch button.active { background:#16324a; color:#9cecff; box-shadow:inset 0 0 0 1px #2a5874; }
+    .part-detail { position:absolute; right:18px; top:108px; z-index:5; width:270px; padding:13px 14px; border:1px solid #263b56; border-radius:8px; background:#07101cf2; backdrop-filter:blur(14px); box-shadow:0 18px 50px #000a,inset 0 1px #ffffff0b; }
+    .detail-top { display:flex; align-items:center; gap:7px; }
+    .detail-swatch { width:7px; height:7px; border-radius:50%; background:var(--detail-color); box-shadow:0 0 12px var(--detail-color); }
+    .detail-tag { color:var(--detail-color); font:500 9px 'DM Mono',monospace; letter-spacing:.1em; text-transform:uppercase; }
+    .part-detail h3 { margin:7px 0 4px; font-size:13px; }
+    .part-detail p { margin:0; color:#8291a8; font-size:10.5px; line-height:1.55; }
+    .detail-visual { height:108px; margin:10px 0 9px; position:relative; overflow:hidden; border:1px solid #21344c; border-radius:7px; background:radial-gradient(circle at 50% 45%,#14263c,#07101b 66%); box-shadow:inset 0 -16px 34px #0007,0 8px 22px #0006; }
+    .detail-visual::after { content:"剖面结构"; position:absolute; right:7px; top:6px; color:#58708d; font:8px 'DM Mono',monospace; letter-spacing:.1em; }
+    .detail-keys { display:flex; flex-wrap:wrap; gap:5px 10px; margin:0 0 9px; color:#72839b; font-size:8.5px; }
+    .detail-keys b { display:inline-flex; align-items:center; gap:4px; font-weight:500; }
+    .detail-keys i { width:5px; height:5px; border-radius:50%; background:var(--key); box-shadow:0 0 7px var(--key); }
+    .pipe-cutaway { position:absolute; width:116px; height:58px; left:50%; top:50%; transform:translate(-50%,-47%); border:10px solid #6d8195; border-radius:50%; box-shadow:0 0 0 5px #18293a,0 14px 18px #0009,inset 0 0 22px #39d9ff38; }
+    .pipe-cutaway::before { content:"近真空"; position:absolute; inset:0; display:grid; place-items:center; color:#6ccfe6; font:9px 'DM Mono',monospace; }
+    .beam-dot { position:absolute; width:7px; height:7px; top:49px; border-radius:50%; box-shadow:0 0 12px currentColor; }
+    .beam-dot.a { left:65px; color:#39d9ff; background:#39d9ff; } .beam-dot.b { right:65px; color:#ffcb45; background:#ffcb45; }
+    .rf-cutaway { position:absolute; left:32px; right:32px; top:34px; height:44px; display:flex; align-items:center; justify-content:center; filter:drop-shadow(0 12px 8px #0009); }
+    .rf-cutaway i { width:34px; height:52px; margin:-4px; border:5px solid #d69a2c; border-radius:48%; background:linear-gradient(90deg,#3b2709,#ffc847,#6f4708); box-shadow:inset 0 0 10px #fff5,0 0 13px #ffcb4530; }
+    .field-arrow { position:absolute; left:44px; right:44px; top:53px; height:2px; background:linear-gradient(90deg,transparent,#39d9ff 18%,#fff 55%,#39d9ff 82%,transparent); box-shadow:0 0 10px #39d9ff; }
+    .field-arrow::after { content:"›"; position:absolute; right:-2px; top:-11px; color:#bff5ff; font-size:19px; }
+    .magnet-cutaway { position:absolute; width:116px; height:76px; left:50%; top:53%; transform:translate(-50%,-50%); border:17px solid #50318e; border-radius:15px; box-shadow:inset 0 0 0 6px #162133,0 15px 18px #0009,0 0 18px #a66cff32; }
+    .magnet-cutaway .aperture { position:absolute; width:31px; height:31px; left:50%; top:50%; transform:translate(-50%,-50%); border:6px solid #94b1c8; border-radius:50%; background:#03070d; box-shadow:0 0 0 5px #26384b,inset 0 0 12px #39d9ff66; }
+    .magnet-cutaway .coil { position:absolute; width:17px; height:38px; top:2px; border:5px solid #ff9d45; border-radius:50%; box-shadow:0 0 10px #ff9d4544; }
+    .magnet-cutaway .coil.l { left:8px; } .magnet-cutaway .coil.r { right:8px; }
+    .magnet-cutaway .b-arrow { position:absolute; left:52px; top:13px; height:43px; width:2px; background:#39d9ff; box-shadow:0 0 9px #39d9ff; }
+    .magnet-cutaway .b-arrow::before { content:"▲ B"; position:absolute; left:-8px; top:-12px; color:#8ceaff; font:8px 'DM Mono',monospace; white-space:nowrap; }
+    .det-cutaway { position:absolute; width:92px; height:92px; left:50%; top:50%; transform:translate(-50%,-50%); border:7px solid #ff6577; border-radius:50%; box-shadow:0 0 0 9px #ff9d4555,0 0 0 18px #39d9ff55,0 0 0 26px #a66cff55,0 15px 20px #000a,inset 0 0 20px #ff657755; }
+    .det-cutaway::before { content:"IP1"; position:absolute; inset:0; display:grid; place-items:center; color:#fff; font:9px 'DM Mono',monospace; text-shadow:0 0 10px #ff6577; }
+    .det-track { position:absolute; width:96px; height:2px; left:50%; top:50%; transform-origin:left; background:linear-gradient(90deg,#fff,#ffcb45,transparent); box-shadow:0 0 7px #ffcb45; }
+    .detail-visual.detail-3d { height:148px; background:radial-gradient(circle at 48% 42%,#1a2b40,#070b12 72%); cursor:grab; touch-action:none; }
+    .detail-visual.detail-3d:active { cursor:grabbing; }
+    #detailScene canvas { width:100%; height:100%; display:block; }
+    .detail-zoom-tip { position:absolute; left:7px; bottom:6px; z-index:2; padding:4px 6px; border-radius:4px; background:#050a11cc; color:#7690aa; font:8px 'DM Mono',monospace; pointer-events:none; box-shadow:0 4px 12px #0008; }
+    .legend { position:absolute; left:20px; bottom:18px; z-index:4; display:flex; gap:13px; color:#64748b; font-size:9.5px; }
+    .legend span { display:flex; align-items:center; gap:5px; }
+    .legend i { width:5px; height:5px; border-radius:50%; background:var(--legend-color); box-shadow:0 0 7px var(--legend-color); }
+    .hint { position:absolute; left:50%; bottom:18px; z-index:4; transform:translateX(-50%); color:#7c91aa; font:9px 'DM Mono',monospace; letter-spacing:.04em; white-space:nowrap; padding:6px 9px; border:1px solid #1d3148; border-radius:5px; background:#07101bbf; transition:.18s; }
+    .viz.dragging .hint { color:var(--cyan); border-color:#236681; box-shadow:0 0 18px #39d9ff1c; }
+    .drag-exit { position:absolute; left:50%; bottom:52px; z-index:8; transform:translate(-50%,8px); padding:7px 11px; border:1px solid #3a718d; border-radius:6px; background:#092237ee; color:#a7efff; font:500 9px 'DM Mono',monospace; opacity:0; pointer-events:none; transition:.18s; box-shadow:0 8px 26px #0009,0 0 18px #39d9ff22; }
+    .viz.dragging .drag-exit { opacity:1; pointer-events:auto; transform:translate(-50%,0); }
+    .ring-badge { position:absolute; left:52%; top:51%; z-index:2; transform:translate(-50%,-50%); pointer-events:none; text-align:center; color:#31445d; font:500 8px 'DM Mono',monospace; letter-spacing:.18em; text-transform:uppercase; }
+    .ring-badge strong { display:block; margin-bottom:4px; color:#49627f; font-size:13px; letter-spacing:.06em; }
+    .collision-label { position:absolute; z-index:6; width:184px; padding:8px 10px; transform:translate(-50%,58px); pointer-events:none; border:1px solid #8d3f55; border-radius:6px; background:#190b13ee; box-shadow:0 0 24px #ff4f7038; opacity:0; transition:opacity .18s; }
+    .collision-label::after { content:""; position:absolute; left:50%; bottom:100%; width:1px; height:30px; background:linear-gradient(0deg,#ff6577,transparent); }
+    .collision-label i { display:inline-block; width:6px; height:6px; margin-right:6px; border-radius:50%; background:#fff; box-shadow:0 0 10px #ff6577,0 0 20px #ff6577; }
+    .collision-label strong { color:#ff9bad; font:500 10px 'DM Mono',monospace; letter-spacing:.08em; }
+    .collision-label span { display:block; margin-top:4px; color:#b98591; font-size:9px; line-height:1.4; }
+    .build-sequence { position:absolute; left:22px; top:170px; z-index:5; width:232px; padding:12px; border:1px solid #2b4664; border-radius:8px; background:#07101bf2; backdrop-filter:blur(10px); box-shadow:0 16px 38px #0009,inset 0 1px #ffffff0d; }
+    .build-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .build-head span { color:#7f91a8; font:500 9px 'DM Mono',monospace; letter-spacing:.08em; }
+    .build-head button { padding:6px 8px; border:1px solid #315779; border-radius:5px; background:#0b2234; color:#7fe7ff; font:500 9px 'DM Mono',monospace; cursor:pointer; box-shadow:0 0 16px #39d9ff18; }
+    .build-head button:hover { color:#fff; border-color:var(--cyan); background:#10314a; }
+    .build-dots { display:flex; gap:5px; margin-top:8px; }
+    .build-dots i { flex:1; height:3px; background:#1b293d; transition:.35s; }
+    .build-dots i.done { background:#47647f; }
+    .build-dots i.active { background:var(--stage-color); box-shadow:0 0 10px var(--stage-color); }
+    .build-caption { margin-top:7px; color:#9aacbf; font-size:9.5px; line-height:1.4; }
+    .hotspot { position:absolute; z-index:7; transform:translate(-50%,-50%); padding:5px 7px; border:1px solid #34506e; border-radius:5px; background:#07101dea; color:#a8bad0; font:500 8px 'DM Mono',monospace; cursor:pointer; box-shadow:0 7px 18px #0009; transition:border-color .16s,color .16s,opacity .16s; }
+    .hotspot::before { content:""; display:inline-block; width:5px; height:5px; margin-right:5px; border-radius:50%; background:var(--hotspot); box-shadow:0 0 9px var(--hotspot); }
+    .hotspot:hover,.hotspot.hover-3d { color:#fff; border-color:var(--hotspot); transform:translate(-50%,-50%) scale(1.07); box-shadow:0 0 0 3px color-mix(in srgb,var(--hotspot) 16%,transparent),0 0 24px color-mix(in srgb,var(--hotspot) 42%,transparent),0 9px 22px #000c; }
+    .particle-entry { position:absolute; z-index:9; transform:translate(-50%,-50%); padding:7px 10px 7px 8px; border:1px solid #55dff0; border-radius:18px; background:#071827ee; color:#d9fbff; font:500 8px 'DM Mono',monospace; cursor:pointer; box-shadow:0 0 0 4px #39d9ff12,0 0 26px #39d9ff55,0 9px 24px #000b; animation:entryPulse 1.9s ease-in-out infinite; }
+    .particle-entry::before { content:""; display:inline-block; width:8px; height:8px; margin-right:7px; vertical-align:-1px; border-radius:50%; background:#fff; box-shadow:0 0 5px #fff,0 0 14px #39d9ff,0 0 28px #39d9ff; }
+    .particle-entry:hover,.viz.particle-hover .particle-entry { color:#fff; border-color:#fff; transform:translate(-50%,-50%) scale(1.08); box-shadow:0 0 0 7px #39d9ff12,0 0 42px #39d9ffaa,0 9px 28px #000c; }
+    @keyframes entryPulse { 50% { box-shadow:0 0 0 8px #39d9ff08,0 0 34px #39d9ff7a,0 9px 24px #000b; } }
+    .flight-hud { position:absolute; z-index:10; left:22px; right:22px; bottom:24px; display:none; align-items:flex-end; justify-content:space-between; pointer-events:none; }
+    .flight-readout { width:430px; padding:12px 13px; border:1px solid #2c6077; border-radius:8px; background:#06101ce8; box-shadow:0 14px 40px #000b,0 0 30px #39d9ff16; backdrop-filter:blur(12px); }
+    .flight-kicker { color:#62dff7; font:8px 'DM Mono',monospace; letter-spacing:.1em; }
+    .flight-readout h3 { margin:6px 0 4px; font-size:15px; }
+    .flight-readout p { margin:0; color:#93a8bc; font-size:9.5px; line-height:1.5; }
+    .flight-gauges { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:9px; }
+    .flight-gauge { padding:7px 8px; border:1px solid #1e344b; border-radius:5px; background:#091522; }
+    .flight-gauge span { display:block; color:#5f7891; font:7px 'DM Mono',monospace; }
+    .flight-gauge strong { display:block; margin-top:3px; color:#fff; font:500 11px 'DM Mono',monospace; white-space:nowrap; }
+    .flight-gauge:nth-child(2) strong { color:#9cefff; }
+    .flight-gauge:nth-child(3) strong { color:#ffe182; }
+    .flight-gauge.rate-decel { border-color:#71394a; background:#1a0c14; }
+    .flight-gauge.rate-decel span,.flight-gauge.rate-decel strong { color:#ff9aaa; }
+    .flight-readout .physics-note { margin-top:7px; padding-top:6px; border-top:1px solid #20364b; color:#647e96; font-size:7.5px; }
+    .mission-progress { position:absolute; left:0; right:0; bottom:0; height:3px; background:#16263a; }
+    .mission-progress i { display:block; width:0; height:100%; background:linear-gradient(90deg,#39d9ff,#ffcb45,#ff6577); box-shadow:0 0 10px #39d9ff; transition:width .12s linear; }
+    .flight-controls { display:flex; gap:7px; pointer-events:auto; }
+    .flight-exit,.flight-skip { padding:8px 11px; border:1px solid #35546e; border-radius:6px; background:#07111ddd; color:#8da4ba; font:8px 'DM Mono',monospace; cursor:pointer; }
+    .flight-skip { border-color:#8e6f37; color:#ffe182; background:#211706dd; box-shadow:0 0 18px #ffcb4518; }
+    .flight-exit:hover,.flight-skip:hover { color:#fff; border-color:currentColor; }
+    .orbit-preview { position:absolute; z-index:10; top:62px; right:22px; width:218px; height:174px; display:none; overflow:hidden; border:1px solid #38566e; border-radius:9px; background:radial-gradient(circle at 50% 50%,#12243a,#060b13 72%); box-shadow:0 16px 42px #000c,0 0 28px #39d9ff16,inset 0 1px #ffffff12; pointer-events:none; }
+    .orbit-preview canvas { width:100% !important; height:100% !important; display:block; }
+    .preview-head { position:absolute; z-index:2; left:9px; right:9px; top:8px; display:flex; justify-content:space-between; color:#7390ab; font:7px 'DM Mono',monospace; letter-spacing:.08em; text-shadow:0 1px 4px #000; }
+    .preview-head strong { color:#b9f4ff; font-weight:500; }
+    .preview-marker { position:absolute; z-index:3; width:10px; height:10px; transform:translate(-50%,-50%); border:2px solid #fff; border-radius:50%; background:#39d9ff; box-shadow:0 0 5px #fff,0 0 16px #39d9ff,0 0 28px #39d9ff; }
+    .preview-marker::after { content:"YOU"; position:absolute; left:13px; top:-1px; color:#d9fbff; font:7px 'DM Mono',monospace; text-shadow:0 1px 4px #000; }
+    .preview-legend { position:absolute; z-index:2; left:9px; right:9px; bottom:7px; display:flex; justify-content:space-between; color:#657e96; font:7px 'DM Mono',monospace; }
+    .preview-legend b { color:#ff8292; font-weight:500; }
+    .impact-countdown { position:absolute; z-index:12; left:50%; top:58px; display:none; min-width:174px; transform:translateX(-50%); padding:7px 12px; border:1px solid #31536d; border-radius:7px; background:#06101cee; box-shadow:0 10px 28px #000a,0 0 20px #39d9ff18; text-align:center; pointer-events:none; backdrop-filter:blur(10px); }
+    .impact-countdown span { display:block; color:#718ba3; font:7px 'DM Mono',monospace; letter-spacing:.12em; }
+    .impact-countdown strong { display:block; margin-top:2px; color:#bdf7ff; font:500 16px 'DM Mono',monospace; }
+    .impact-countdown.imminent { border-color:#ff6577; box-shadow:0 10px 28px #000a,0 0 28px #ff516966; animation:countdownPulse .7s ease-in-out infinite alternate; }
+    .impact-countdown.imminent span,.impact-countdown.imminent strong { color:#ff9baa; }
+    .impact-countdown.hit { border-color:#ffcb45; background:#251504ee; animation:none; }
+    .impact-countdown.hit span,.impact-countdown.hit strong { color:#ffe182; }
+    @keyframes countdownPulse { to { transform:translateX(-50%) scale(1.045); } }
+    .collision-guide { position:absolute; z-index:11; left:50%; top:112px; display:none; width:330px; transform:translateX(-50%); padding:10px 12px; border:1px solid #4a6177; border-radius:8px; background:#06101ce8; box-shadow:0 14px 36px #000b; backdrop-filter:blur(10px); text-align:center; pointer-events:none; }
+    .viz.mission-collision .collision-guide { display:block; }
+    .collision-axis { display:grid; grid-template-columns:1fr 24px 58px 24px 1fr; align-items:center; gap:5px; font:8px 'DM Mono',monospace; }
+    .collision-axis .beam-a { color:#78ecff; } .collision-axis .beam-b { color:#ffe182; }
+    .collision-axis i { color:#fff; font-style:normal; font-size:15px; text-shadow:0 0 10px currentColor; }
+    .collision-axis b { padding:5px 6px; border:1px solid #a74b61; border-radius:4px; color:#ff94a4; background:#240c16; font-weight:500; }
+    .collision-guide p { margin:7px 0 5px; color:#b7c5d4; font-size:9px; }
+    .collision-guide strong { color:#fff; font:500 10px 'DM Mono',monospace; }
+    .collision-guide small { display:block; margin-top:3px; color:#6f8398; font-size:8px; }
+    .viz.impact-visible .collision-guide { border-color:#ff6577; box-shadow:0 14px 36px #000b,0 0 34px #ff516955; }
+    .viz.impact-visible .collision-axis b { color:#fff; border-color:#ff6577; background:#5b1022; box-shadow:0 0 18px #ff657788; }
+    .viz.impact-visible .collision-guide strong { color:#ffb0ba; text-shadow:0 0 12px #ff6577; }
+    .viz.mission-active .flight-hud { display:flex; }
+    .viz.mission-active .orbit-preview { display:block; }
+    .viz.mission-active .impact-countdown { display:block; }
+    .viz.mission-active .view-switch,.viz.mission-active .viz-head,.viz.mission-active .journey-panel,.viz.mission-active .legend,.viz.mission-active .hint,.viz.mission-active .viz-actions,.viz.mission-active .collision-label { opacity:0; pointer-events:none; }
+    .viz.mission-active .particle-entry { display:none; }
+    .viz.mission-active .collision-label,.viz.mission-active .ring-badge { display:none; }
+    .viz.mission-active #scene { filter:saturate(1.22) contrast(1.04); }
+    .viz.mission-collision #scene { filter:saturate(1.5) contrast(1.12) brightness(1.12); }
+    .journey-panel { position:absolute; left:22px; top:170px; z-index:6; width:270px; padding:13px; border:1px solid #294661; border-radius:8px; background:#07101bf2; box-shadow:0 16px 40px #000a; }
+    .journey-kicker { color:#5e7691; font:500 8px 'DM Mono',monospace; letter-spacing:.08em; }
+    .journey-panel h3 { margin:8px 0 7px; color:#f2f7ff; font-size:14px; line-height:1.35; }
+    .journey-panel > p { min-height:44px; margin:0; color:#8ea1b8; font-size:10px; line-height:1.5; }
+    .energy-row { display:flex; justify-content:space-between; margin-top:10px; color:#6f829b; font:9px 'DM Mono',monospace; }
+    .energy-row strong { color:#ffdc7a; font-weight:500; }
+    .energy-track { height:5px; margin-top:5px; overflow:hidden; border-radius:4px; background:#182337; }
+    .energy-track i { display:block; height:100%; background:linear-gradient(90deg,#39d9ff,#ffcb45); box-shadow:0 0 12px #ffcb4566; transition:width .45s; }
+    .life-steps { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-top:11px; }
+    .life-steps button { min-width:0; padding:5px 2px; border:1px solid #21344c; border-radius:4px; background:#0a1421; color:#526780; font:7px 'DM Mono',monospace; cursor:pointer; }
+    .life-steps button i { display:block; width:14px; height:14px; margin:0 auto 3px; border-radius:50%; line-height:14px; font-style:normal; background:#172438; }
+    .life-steps button span { display:block; white-space:nowrap; }
+    .life-steps button.active { color:#fff; border-color:#3a92b5; background:#123047; }
+    .life-steps button.active i { color:#07101b; background:#72e8ff; box-shadow:0 0 10px #39d9ff; }
+    .science-note { margin-top:9px; padding:7px 8px; border-left:2px solid #ffcb45; background:#141607; color:#d7c986; font-size:8.5px; line-height:1.45; }
+    .dqm-panel { position:absolute; z-index:6; left:22px; right:22px; top:92px; bottom:52px; padding:14px; border:1px solid #263e59; border-radius:9px; background:#060c15f2; box-shadow:0 18px 50px #000b; overflow:auto; scrollbar-width:thin; scrollbar-color:#35536d transparent; animation:dataArrival .72s cubic-bezier(.2,.8,.2,1) both; }
+    .dqm-panel::-webkit-scrollbar { width:6px; }
+    .dqm-panel::-webkit-scrollbar-track { background:transparent; }
+    .dqm-panel::-webkit-scrollbar-thumb { border-radius:6px; background:#35536d; }
+    @keyframes dataArrival { from { opacity:0; transform:translateY(20px) scale(.975); filter:blur(7px); } to { opacity:1; transform:none; filter:none; } }
+    .dqm-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+    .dqm-head h3 { margin:0 0 4px; font-size:15px; }
+    .dqm-head span { color:#5d7897; font:8px 'DM Mono',monospace; letter-spacing:.08em; }
+    .pipeline { max-width:255px; color:#7fe5ff; font:8px/1.5 'DM Mono',monospace; text-align:right; }
+    .dqm-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-top:12px; }
+    .metric-card { min-width:0; padding:10px; text-align:left; border:1px solid #21334b; border-radius:7px; background:#0a121e; color:#dce8f7; cursor:pointer; }
+    .metric-card { transition:.18s ease; }
+    .metric-card:hover,.metric-card.active { border-color:#5594bb; background:#0d1d2d; transform:translateY(-2px); box-shadow:0 12px 28px #0008,0 0 20px #39d9ff12; }
+    .metric-tag { display:block; margin-bottom:5px; color:#54718e; font:7px 'DM Mono',monospace; letter-spacing:.08em; }
+    .metric-card > strong { display:block; font-size:10.5px; }
+    .metric-card small { display:block; color:#677b94; font-size:8.5px; line-height:1.45; }
+    .metric-card svg { display:block; width:100%; height:88px; margin-top:6px; overflow:visible; }
+    .metric-card svg text { fill:#68809b; font:7px 'DM Mono',monospace; }
+    .gridline { fill:none; stroke:#1c2d43; stroke-width:1; }
+    .spectrum-area { fill:#39d9ff18; }
+    .spectrum-line { fill:none; stroke:#59dfff; stroke-width:2; filter:drop-shadow(0 0 3px #39d9ff88); }
+    .focus-line { stroke:#ffcb45; stroke-width:1; stroke-dasharray:3 3; }
+    .occupancy-chart { display:grid; gap:9px; margin:13px 0 15px; }
+    .occupancy-chart div { display:grid; grid-template-columns:54px 1fr 27px; align-items:center; gap:6px; color:#71859d; font:7px 'DM Mono',monospace; }
+    .occupancy-chart i { position:relative; height:6px; border-radius:3px; background:#18273a; overflow:hidden; }
+    .occupancy-chart i::after { content:""; display:block; width:var(--value); height:100%; background:linear-gradient(90deg,#a66cff,#39d9ff); box-shadow:0 0 8px #39d9ff77; }
+    .occupancy-chart b { color:#a9bfd5; font-weight:500; }
+    .drift-band { fill:#a66cff18; }
+    .drift-line { fill:none; stroke:#c08aff; stroke-width:2; }
+    .drift-points circle { fill:#fff; filter:drop-shadow(0 0 3px #a66cff); }
+    .dqm-explain { margin-top:10px; padding:10px 12px; border-left:2px solid #39d9ff; background:#0a1724; color:#9db0c7; font-size:10px; line-height:1.55; }
+    .dqm-explain span { display:block; color:#5f7f9e; font:8px 'DM Mono',monospace; }
+    .dqm-explain strong { display:block; margin:3px 0; color:#e8f4ff; }
+    .dqm-explain p { margin:0; }
+    .data-disclaimer { margin-top:8px; color:#546a82; font:8px 'DM Mono',monospace; }
+    .event-origin { display:flex; align-items:center; gap:7px; margin-top:7px; color:#87a0b8; font:8px 'DM Mono',monospace; }
+    .event-origin i { width:6px; height:6px; border-radius:50%; background:#ff6577; box-shadow:0 0 12px #ff6577; }
+    .detector-readout { margin-top:10px; padding:9px; border:1px solid #263d57; border-radius:7px; background:#080f19; }
+    .detector-overview { display:grid; grid-template-columns:82px 1fr; align-items:center; gap:9px; margin-bottom:8px; }
+    .detector-overview > div:last-child span { color:#5f7c98; font:7px 'DM Mono',monospace; letter-spacing:.08em; }
+    .detector-overview > div:last-child strong { display:block; margin-top:3px; color:#edf8ff; font-size:10px; }
+    .detector-overview > div:last-child p { margin:3px 0 0; color:#8198ae; font-size:8px; line-height:1.45; }
+    .detector-cutaway { position:relative; width:76px; height:76px; margin:auto; }
+    .detector-ring { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); border:5px solid var(--ring-color); border-radius:50%; opacity:.2; box-shadow:inset 0 0 13px color-mix(in srgb,var(--ring-color) 32%,transparent),0 0 10px color-mix(in srgb,var(--ring-color) 22%,transparent); transition:.22s ease; }
+    .detector-ring[data-layer="tracker"] { width:24px; height:24px; --ring-color:#ff8d6b; }
+    .detector-ring[data-layer="calorimeter"] { width:45px; height:45px; --ring-color:#55dff0; }
+    .detector-ring[data-layer="muon"] { width:67px; height:67px; --ring-color:#b98cff; }
+    .detector-ring.active { opacity:1; border-width:6px; box-shadow:inset 0 0 16px color-mix(in srgb,var(--ring-color) 52%,transparent),0 0 20px var(--ring-color); }
+    .detector-collision-dot { position:absolute; left:50%; top:50%; width:8px; height:8px; transform:translate(-50%,-50%); border-radius:50%; background:#fff; box-shadow:0 0 8px #fff,0 0 22px #ff6577; }
+    .detector-particle-path { position:absolute; left:5px; right:5px; top:38px; height:1px; background:linear-gradient(90deg,#39d9ff,#fff 48%,#fff 52%,#ffcb45); box-shadow:0 0 7px #fff; transform:rotate(-16deg); }
+    .detector-atlas { display:grid; gap:6px; }
+    .detector-layer-row { display:grid; grid-template-columns:58px 1fr; gap:8px; width:100%; padding:7px; border:1px solid #22364b; border-radius:5px; background:#0a131f; color:#d8e7f5; text-align:left; cursor:pointer; transition:.18s ease; }
+    .detector-layer-row:hover,.detector-layer-row.active { border-color:var(--layer-color); background:#0d1b29; box-shadow:inset 3px 0 var(--layer-color),0 0 16px color-mix(in srgb,var(--layer-color) 18%,transparent); }
+    .detector-layer-row[data-detector-layer="tracker"] { --layer-color:#ff8d6b; }
+    .detector-layer-row[data-detector-layer="calorimeter"] { --layer-color:#55dff0; }
+    .detector-layer-row[data-detector-layer="muon"] { --layer-color:#b98cff; }
+    .layer-sketch { width:58px; height:48px; align-self:center; overflow:visible; }
+    .layer-sketch .frame { fill:#09111b; stroke:#31465b; }
+    .layer-sketch .trace { fill:none; stroke:var(--layer-color); stroke-width:2; filter:drop-shadow(0 0 3px var(--layer-color)); }
+    .layer-sketch .hit { fill:#fff; stroke:var(--layer-color); stroke-width:1.5; filter:drop-shadow(0 0 3px var(--layer-color)); }
+    .layer-sketch .cell { fill:var(--layer-color); opacity:.3; }
+    .layer-sketch .cell.hot { opacity:1; filter:drop-shadow(0 0 4px var(--layer-color)); }
+    .layer-text > span { color:var(--layer-color); font:7px 'DM Mono',monospace; letter-spacing:.05em; }
+    .layer-text > strong { display:block; margin:2px 0; color:#f0f7ff; font-size:9px; }
+    .layer-text > p { margin:0; color:#8298ad; font-size:7.5px; line-height:1.4; }
+    .layer-flow { display:flex; align-items:center; gap:5px; margin-top:4px; color:#b7c9da; font:7px 'DM Mono',monospace; flex-wrap:wrap; }
+    .layer-flow i { color:var(--layer-color); font-style:normal; }
+    .detector-callout { position:absolute; z-index:8; display:none; transform:translate(-100%,-50%); min-width:142px; padding:6px 8px; border:1px solid var(--callout-color); border-radius:5px; background:#07101bea; color:#dceaf7; text-align:left; box-shadow:0 8px 22px #000b,0 0 14px color-mix(in srgb,var(--callout-color) 25%,transparent); cursor:pointer; }
+    .detector-callout::after { content:""; position:absolute; left:100%; top:50%; width:34px; height:1px; background:var(--callout-color); box-shadow:0 0 7px var(--callout-color); }
+    .detector-callout span { display:block; color:var(--callout-color); font:7px 'DM Mono',monospace; }
+    .detector-callout strong { display:block; margin-top:2px; color:#fff; font-size:8px; }
+    .detector-callout.active { transform:translate(-100%,-50%) scale(1.05); }
+    .track-callout { position:absolute; z-index:9; display:none; transform:translate(-50%,-50%); padding:5px 7px; border:1px solid var(--track-color); border-radius:5px; background:#060d17ed; color:#dceaf7; text-align:left; box-shadow:0 7px 18px #000c,0 0 13px color-mix(in srgb,var(--track-color) 28%,transparent); cursor:pointer; transition:transform .16s,opacity .16s; }
+    .track-callout::before { content:""; display:inline-block; width:5px; height:5px; margin-right:5px; border-radius:50%; background:var(--track-color); box-shadow:0 0 9px var(--track-color); }
+    .track-callout::after { content:""; position:absolute; z-index:-1; left:50%; top:50%; width:var(--leader-length,0px); height:1px; transform:rotate(var(--leader-angle,0rad)); transform-origin:0 50%; background:linear-gradient(90deg,var(--track-color),transparent); box-shadow:0 0 5px var(--track-color); pointer-events:none; }
+    .track-callout strong { color:#fff; font:500 9px 'DM Mono',monospace; }
+    .track-callout span { display:block; margin-top:2px; color:#91a8bd; font:7px 'DM Mono',monospace; white-space:nowrap; }
+    .track-callout:hover,.track-callout.active { transform:translate(-50%,-50%) scale(1.08); background:#0b1826f5; box-shadow:0 8px 22px #000d,0 0 22px var(--track-color); }
+    .parent-candidate { position:absolute; z-index:11; display:none; place-items:center; width:76px; height:76px; transform:translate(-50%,-50%); border:1px solid #d9f9ff; border-radius:50%; background:radial-gradient(circle,#163e50ee 0 34%,#07111ee8 35% 57%,transparent 59%); color:#fff; text-align:center; box-shadow:0 0 18px #fff8,0 0 48px #39d9ff99; pointer-events:none; animation:parentReveal .72s cubic-bezier(.2,.9,.2,1) both; }
+    .parent-candidate::before,.parent-candidate::after { content:""; position:absolute; inset:-9px; border:1px solid #71eaff88; border-radius:50%; animation:parentRing 1.8s ease-out infinite; }
+    .parent-candidate::after { inset:-20px; animation-delay:.45s; }
+    .parent-candidate strong { display:block; font:500 18px 'DM Mono',monospace; text-shadow:0 0 12px #fff; }
+    .parent-candidate span { display:block; margin-top:1px; color:#a6f2ff; font:7px 'DM Mono',monospace; }
+    .viz.data-reveal[data-report-stage="4"] .parent-candidate { display:grid; }
+    @keyframes parentReveal { from { opacity:0; transform:translate(-50%,-50%) scale(.25); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
+    @keyframes parentRing { from { opacity:.9; transform:scale(.65); } to { opacity:0; transform:scale(1.35); } }
+    .curiosity-card { position:absolute; z-index:12; right:28px; top:92px; display:none; width:306px; padding:16px; border:1px solid #365774; border-radius:9px; background:linear-gradient(155deg,#0a1725f3,#060b13f6); box-shadow:0 22px 60px #000d,0 0 34px #39d9ff18; backdrop-filter:blur(14px); }
+    .curiosity-card > span { color:#63dff5; font:8px 'DM Mono',monospace; letter-spacing:.1em; }
+    .curiosity-card h3 { margin:8px 0 6px; color:#f4f9ff; font-size:18px; line-height:1.35; }
+    .curiosity-card p { margin:0; color:#91a7bc; font-size:10px; line-height:1.58; }
+    .curiosity-card button { width:100%; margin-top:12px; padding:9px 10px; border:1px solid #4c9cbb; border-radius:5px; background:#0d2b3d; color:#c8f7ff; font:500 9px 'DM Mono',monospace; cursor:pointer; }
+    .curiosity-card button:hover { color:#fff; border-color:#7eeaff; box-shadow:0 0 20px #39d9ff33; }
+    .curiosity-progress { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-top:12px; }
+    .curiosity-progress i { height:2px; background:#23364b; }
+    .curiosity-progress i.done { background:#62dff5; box-shadow:0 0 8px #39d9ff; }
+    @keyframes calloutReveal { from { opacity:0; filter:blur(5px); } to { opacity:1; filter:none; } }
+    @keyframes questionPulse { 50% { box-shadow:0 9px 24px #000d,0 0 30px var(--track-color); } }
+    .viz.data-reveal:not([data-report-stage="4"]) .curiosity-card { display:block; }
+    .viz.data-reveal[data-report-stage="0"] [data-track-callout="4"],.viz.data-reveal[data-report-stage="1"] [data-track-callout="4"],.viz.data-reveal[data-report-stage="2"] [data-track-callout="4"],.viz.data-reveal[data-report-stage="3"] [data-track-callout="4"],.viz.data-reveal[data-report-stage="4"] [data-track-callout="4"] { display:block; }
+    .viz.data-reveal[data-report-stage="4"] [data-track-callout="9"] { display:block; }
+    .viz.data-reveal[data-report-stage="0"] [data-track-callout="4"] { animation:questionPulse 1.7s ease-in-out infinite; }
+    .viz.data-reveal[data-report-stage="1"] [data-detector-callout="tracker"],.viz.data-reveal[data-report-stage="2"] [data-detector-callout="calorimeter"],.viz.data-reveal[data-report-stage="3"] [data-detector-callout="muon"] { display:block; animation:calloutReveal .45s ease both; }
+    .metric-source { display:block; margin:3px 0 0; color:#7edff0; font:normal 7px 'DM Mono',monospace; }
+    .viz[data-view="device"] .journey-panel,.viz[data-view="device"] .dqm-panel { display:none; }
+    .viz[data-view="lifecycle"] .build-sequence,.viz[data-view="lifecycle"] .part-detail,.viz[data-view="lifecycle"] .hotspot,.viz[data-view="lifecycle"] .dqm-panel { display:none; }
+    .viz[data-view="dqm"] .build-sequence,.viz[data-view="dqm"] .part-detail,.viz[data-view="dqm"] .hotspot,.viz[data-view="dqm"] .journey-panel,.viz[data-view="dqm"] .collision-label,.viz[data-view="dqm"] .ring-badge { display:none; }
+    .viz[data-view="dqm"] #scene { opacity:.18; filter:saturate(.45) blur(1px); transition:.25s; }
+    .viz[data-view="device"] .hotspot { display:block; }
+    .viz:not([data-view="device"]) .particle-entry { display:none; }
+    /* One continuous immersive surface: legacy chapter/view slices stay out of the experience. */
+    .topbar { position:absolute; inset:0 0 auto; background:linear-gradient(180deg,#050911e8,transparent); border:0; pointer-events:none; }
+    .topbar a { pointer-events:auto; }
+    .workspace { grid-template-columns:1fr; }
+    .learn,.view-switch,.build-sequence,.journey-panel { display:none !important; }
+    .viz { width:100%; }
+    .viz-head { top:58px; left:24px; }
+    .collision-label { display:none; }
+    .part-detail { display:none; }
+    .viz[data-view] #scene { opacity:1; filter:none; transition:filter .5s,opacity .5s; }
+    .viz .dqm-panel { display:none; }
+    .viz.data-reveal .dqm-panel { left:auto; right:24px; top:62px; bottom:24px; width:450px; height:auto; padding:12px; background:linear-gradient(180deg,#07101bdc,#050a12f4); backdrop-filter:blur(14px); }
+    .viz.data-reveal[data-report-stage="4"] .dqm-panel { display:block; }
+    .viz.data-reveal[data-report-stage="4"] .detector-readout { display:none; }
+    .viz.data-reveal .hotspot,.viz.data-reveal .legend,.viz.data-reveal .ring-badge,.viz.data-reveal .particle-entry { display:none !important; }
+    .viz.data-reveal .dqm-head { display:block; padding-right:90px; }
+    .viz.data-reveal .pipeline { margin-top:6px; max-width:none; text-align:left; white-space:normal; }
+    .viz.data-reveal .dqm-grid { grid-template-columns:1fr; margin-top:8px; }
+    .viz.data-reveal .metric-card { padding:8px; }
+    .viz.data-reveal .metric-card svg { height:58px; }
+    .viz.data-reveal .occupancy-chart { margin:8px 0; gap:5px; }
+    .viz.data-reveal .metric-card:not(.active) { transform:none; box-shadow:none; background:#09121d; }
+    .viz.data-reveal .metric-card:not(.active) svg,.viz.data-reveal .metric-card:not(.active) .occupancy-chart,.viz.data-reveal .metric-card:not(.active) .metric-source,.viz.data-reveal .metric-card:not(.active) small { display:none; }
+    .viz.data-reveal .dqm-explain { position:relative; left:auto; right:auto; bottom:auto; margin-top:8px; padding:7px 10px; }
+    .mass-reconstruction { min-height:154px; }
+    .mass-reconstruction svg { display:block; width:100%; height:142px; overflow:visible; }
+    .mass-reconstruction text { fill:#dff8ff; font:500 9px 'DM Mono',monospace; text-anchor:middle; }
+    .mass-reconstruction .mass-value { fill:#7895ac; font-size:7px; }
+    .mass-reconstruction .mass-minus { fill:#ff6d7e; }
+    .mass-reconstruction .mass-plus { fill:#ffb24f; }
+    .mass-reconstruction .mass-node { fill:#0b1d2b; stroke:#baf8ff; stroke-width:1.5; filter:drop-shadow(0 0 8px #39d9ff); }
+    .mass-reconstruction .mass-link { fill:none; stroke-width:2.4; stroke-dasharray:140; stroke-dashoffset:140; animation:massTrace .8s ease forwards; }
+    .mass-reconstruction .mass-link.plus { stroke:#ffb24f; animation-delay:.18s; }
+    .mass-reconstruction .mass-link.minus { stroke:#ff6d7e; }
+    .mass-reconstruction .mass-flow { fill:none; stroke:#78ecff; stroke-width:1.5; stroke-dasharray:6 5; animation:massFlow .8s linear .75s both; }
+    .mass-reconstruction .mass-spectrum { fill:none; stroke:#8deeff; stroke-width:2; stroke-dasharray:220; stroke-dashoffset:220; filter:drop-shadow(0 0 5px #39d9ff); animation:massTrace 1s ease 1s forwards; }
+    .mass-reconstruction .mass-axis { stroke:#2b475e; stroke-width:1; }
+    .mass-reconstruction .mass-focus { stroke:#ffdf7d; stroke-width:1; stroke-dasharray:3 3; opacity:0; animation:massFocus .35s ease 1.75s forwards; }
+    .mass-reconstruction .mass-z { opacity:0; transform-origin:196px 71px; animation:massNode .42s cubic-bezier(.2,1.4,.3,1) .65s forwards; }
+    .mass-visual-key { display:flex; align-items:center; justify-content:center; gap:9px; margin-top:-5px; color:#7892a9; font:7px 'DM Mono',monospace; }
+    .mass-visual-key b { color:#c9f8ff; font-weight:500; }
+    .mass-visual-key i { color:#4dddf7; font-style:normal; }
+    @keyframes massTrace { to { stroke-dashoffset:0; } }
+    @keyframes massFlow { from { opacity:0; stroke-dashoffset:20; } to { opacity:1; stroke-dashoffset:0; } }
+    @keyframes massFocus { to { opacity:1; } }
+    @keyframes massNode { from { opacity:0; transform:scale(.2); } to { opacity:1; transform:scale(1); } }
+    .viz.data-reveal .metric-card small,.viz.data-reveal .data-disclaimer { display:none; }
+    .data-actions { position:absolute; right:12px; top:10px; z-index:3; display:flex; gap:6px; }
+    .data-actions button { padding:7px 10px; border:1px solid #35627d; border-radius:5px; background:#0b2234; color:#9deeff; font:8px 'DM Mono',monospace; cursor:pointer; }
+    .data-actions button:hover { border-color:#6feaff; color:#fff; box-shadow:0 0 18px #39d9ff33; }
+    @media (max-width:1050px) { .view-switch { left:auto; right:92px; transform:none; } .view-switch button { padding:0 6px; } .dqm-grid { grid-template-columns:1fr; } }
+    @media (max-width:850px) {
+      html,body { overflow:auto; } .app { height:auto; min-height:100vh; } .workspace { display:flex; flex-direction:column; }
+      .learn { min-height:620px; border-right:0; border-bottom:1px solid #152036; } .viz { min-height:560px; } .crumb,.repo-link { display:none; }
+      .topbar { grid-template-columns:1fr; } .brand { justify-self:center; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="crumb">DQM / accelerator primer</div>
+      <div class="brand"><span class="brand-mark"></span><span>粒子加速器实验室</span></div>
+      <div style="justify-self:end;display:flex;align-items:center;gap:14px">
+        <a class="repo-link" href="../demo/collision_to_verdict.html" style="padding-right:0">Agent 判定全流程 ↗</a>
+        <a class="repo-link" href="../README.md">DQM Agent · 项目说明 ↗</a>
+      </div>
+    </header>
+    <div class="workspace">
+      <section class="learn" aria-label="科普章节">
+        <div class="chapter-nav">
+          <button class="nav-btn" id="prev" aria-label="上一章">‹</button>
+          <div class="chapter-label" id="chapterLabel">Chapter 01 · <strong>加速器全景</strong></div>
+          <button class="nav-btn" id="next" aria-label="下一章">›</button>
+        </div>
+        <article class="lesson" id="lesson"></article>
+        <footer class="learn-footer">
+          <div class="progress-line"><div class="progress-track"><div class="progress-fill" id="progress"></div></div><span class="progress-count" id="progressCount">01 / 05</span></div>
+          <div class="footer-actions"><button class="continue" id="continue">继续 · 电场如何加速粒子 →</button><button class="restart" id="restart">从头开始</button></div>
+        </footer>
+      </section>
+      <section class="viz" data-view="device" aria-label="3D 粒子加速器">
+        <div id="scene"></div>
+        <div class="view-switch" aria-label="切换观察视角">
+          <button class="active" data-view-mode="device">设备结构</button>
+          <button data-view-mode="lifecycle">粒子旅程</button>
+          <button data-view-mode="dqm">DQM 数据</button>
+        </div>
+        <div class="viz-head">
+          <div class="viz-kicker">Interactive accelerator / section A-01</div>
+          <h2 class="viz-title" id="vizTitle">环形粒子加速器</h2>
+          <div class="viz-subtitle" id="vizSubtitle">两束粒子在真空管中反向循环，并在探测器中心相撞</div>
+          <span class="status-pill"><i></i><span id="statusText">DRAG READY · LEFT MOUSE ROTATES</span></span>
+        </div>
+        <div class="build-sequence" id="buildSequence" style="--stage-color:#39d9ff"><div class="build-head"><span id="buildStage">01 · 真空环轨</span><button id="replayBuild">↻ 重新装配整机</button></div><div class="build-dots" id="buildDots"><i></i><i></i><i></i><i></i><i></i></div><div class="build-caption" id="buildCaption">先建立粒子运行的真空跑道</div></div>
+        <button class="hotspot" data-hotspot="beam" data-part="beam" style="--hotspot:#39d9ff">真空束流管</button>
+        <button class="hotspot" data-hotspot="rf" data-part="rf" style="--hotspot:#ffcb45">RF 加速腔</button>
+        <button class="hotspot" data-hotspot="magnet" data-part="magnet" style="--hotspot:#a66cff">弯转 / 聚焦磁铁</button>
+        <button class="hotspot" data-hotspot="detector" data-part="detector" style="--hotspot:#ff6577">IP1 · 两管汇入同一碰撞轴</button>
+        <button class="particle-entry" id="particleEntry">点击粒子束 · 进入第一视角</button>
+        <div class="flight-hud" aria-live="polite">
+          <div class="flight-readout"><div class="flight-kicker" id="flightKicker">PARTICLE POV · STAGE 01 / 05</div><h3 id="flightTitle">跟随束团进入真空环</h3><p id="flightCopy">镜头已经锁定一束质子。前方每次经过黄色 RF 腔，电场都会做功。</p><div class="flight-gauges"><div class="flight-gauge"><span>RELATIVE ENERGY</span><strong id="flightEnergy">8%</strong></div><div class="flight-gauge"><span>当前圈数</span><strong id="flightLap">第 1 圈</strong></div><div class="flight-gauge" id="flightRateGauge"><span id="flightRateLabel">教学加速倍率</span><strong id="flightSpeed">×1.00</strong></div></div><p class="physics-note" id="physicsNote">视觉上放大圈速差；真实质子接近光速后，RF 主要继续增加能量与动量。</p></div>
+          <div class="flight-controls"><button class="flight-skip" id="skipCollision">直接看碰撞 →</button><button class="flight-exit" id="flightExit">Esc · 退出</button></div>
+          <div class="mission-progress"><i id="missionProgress"></i></div>
+        </div>
+        <div class="orbit-preview" id="orbitPreview" aria-label="第三视角位置预览"><div class="preview-head"><span>THIRD-PERSON TRACK</span><strong id="previewStage">INJECTION</strong></div><i class="preview-marker" id="previewMarker"></i><div class="preview-legend"><span>● 当前束团</span><b>IP1 · 碰撞终点</b></div></div>
+        <div class="impact-countdown" id="impactCountdown"><span id="impactCountdownLabel">预计碰撞</span><strong id="impactCountdownValue">T−27.1 s</strong></div>
+        <div class="collision-guide" id="collisionGuide"><div class="collision-axis"><span class="beam-a">束流 A · 青色</span><i>→</i><b>IP1</b><i>←</i><span class="beam-b">黄色 · 束流 B</span></div><p>环内分管反向运行；IP1 前汇入同一碰撞轴</p><strong id="collisionDistance">尚未进入交汇段</strong><small>粒子撞粒子，不是撞探测器；距离归零后才产生碎片</small></div>
+        <aside class="journey-panel" aria-label="粒子生命周期">
+          <div class="journey-kicker">PARTICLE LIFECYCLE · <span id="lifeCount">01 / 05</span></div>
+          <h3 id="lifeTitle">形成束团</h3>
+          <p id="lifeCopy">粒子先被压缩成很短的束团，送入近乎真空的束流管。</p>
+          <div class="energy-row"><span>相对能量</span><strong id="energyValue">8%</strong></div>
+          <div class="energy-track"><i id="energyFill" style="width:8%"></i></div>
+          <div class="life-steps" id="lifeSteps">
+            <button class="active" data-life-step="0"><i>1</i><span>注入</span></button>
+            <button data-life-step="1"><i>2</i><span>RF 加能</span></button>
+            <button data-life-step="2"><i>3</i><span>磁铁控束</span></button>
+            <button data-life-step="3"><i>4</i><span>逐圈累积</span></button>
+            <button data-life-step="4"><i>5</i><span>迎面碰撞</span></button>
+          </div>
+          <div class="science-note" id="lifeNote">重点：真正给粒子增加能量的是电场，不是磁铁。</div>
+        </aside>
+        <button class="detector-callout active" data-detector-callout="tracker" data-detector-layer="tracker" style="--callout-color:#ff8d6b"><span>内层 · 硅径迹器</span><strong>粒子穿过时留下一串小点</strong></button>
+        <button class="detector-callout" data-detector-callout="calorimeter" data-detector-layer="calorimeter" style="--callout-color:#55dff0"><span>中层 · 量能器</span><strong>粒子在这里释放一团能量</strong></button>
+        <button class="detector-callout" data-detector-callout="muon" data-detector-layer="muon" style="--callout-color:#b98cff"><span>外层 · 缪子室</span><strong>穿到最外层的粒子很可能是 μ 子</strong></button>
+        <button class="track-callout" data-track-callout="4" style="--track-color:#ff6577"><strong>μ− · 46 GeV</strong><span>长轨迹穿到外层 · 向左弯</span></button>
+        <button class="track-callout" data-track-callout="9" style="--track-color:#ff9d45"><strong>μ+ · 44 GeV</strong><span>长轨迹穿到外层 · 向右弯</span></button>
+        <button class="track-callout" data-track-callout="3" style="--track-color:#a66cff"><strong>e− · 32 GeV</strong><span>内层弯线 + 中层能量团</span></button>
+        <button class="track-callout" data-track-callout="2" style="--track-color:#39d9ff"><strong>带电强子 · 18 GeV</strong><span>内层弯线 + 中层强子簇射</span></button>
+        <div class="parent-candidate" id="parentCandidate" aria-label="两条缪子轨迹的共同来源候选 Z 粒子，质量 91.19 GeV"><div><strong>Z?</strong><span>91.19 GeV</span></div></div>
+        <aside class="curiosity-card" id="curiosityCard" aria-live="polite">
+          <span id="curiosityStep">DISCOVERY · 01 / 05</span>
+          <h3 id="curiosityQuestion">先别看报告：哪条粒子飞得最远？</h3>
+          <p id="curiosityClue">观察碰撞中心。大多数轨迹很快停止；只有一条粉红长线穿到了最外圈。</p>
+          <button id="curiosityNext">锁定这条最长轨迹 →</button>
+          <div class="curiosity-progress" id="curiosityProgress" aria-hidden="true"><i class="done"></i><i></i><i></i><i></i><i></i></div>
+        </aside>
+        <section class="dqm-panel" aria-label="DQM 数据解读">
+          <div class="dqm-head"><div><span>DQM AGENT · EVENT RECONSTRUCTION</span><h3>两条轨迹 → 一个共同来源</h3><div class="event-origin"><i></i><span id="eventOrigin">刚才的碰撞 → 探测器信号 → 重建变量</span></div></div><div class="pipeline">TRACKS → PARENT → MASS PEAK</div></div>
+          <div class="detector-readout" aria-label="探测器测量链">
+            <div class="detector-overview"><div class="detector-cutaway" aria-hidden="true"><i class="detector-particle-path"></i><i class="detector-ring active" data-detector-ring="tracker" data-layer="tracker"></i><i class="detector-ring" data-detector-ring="calorimeter" data-layer="calorimeter"></i><i class="detector-ring" data-detector-ring="muon" data-layer="muon"></i><i class="detector-collision-dot"></i></div><div><span>三层同时记录同一次碰撞</span><strong>不是一台相机拍照，而是粒子逐层留下不同痕迹</strong><p>下面三行全部展开；点击只会让对应的 3D 层发亮。</p></div></div>
+            <div class="detector-atlas">
+              <button class="detector-layer-row active" data-detector-layer="tracker"><svg class="layer-sketch" viewBox="0 0 58 48" aria-label="一串命中点被连接成弯曲轨迹"><rect class="frame" x="1" y="1" width="56" height="46" rx="4"/><path class="trace" d="M5 39 Q25 6 53 14"/><circle class="hit" cx="11" cy="31" r="2.5"/><circle class="hit" cx="20" cy="20" r="2.5"/><circle class="hit" cx="31" cy="14" r="2.5"/><circle class="hit" cx="43" cy="12" r="2.5"/></svg><div class="layer-text"><span>内层 · 硅像素与径迹器</span><strong>直接看到：粒子每穿一层，留下一个小点</strong><p>把这些点连成弯曲线。磁场已知时，线弯得越少，粒子动量越大。</p><div class="layer-flow"><b>一串点</b><i>→</i><b>弯曲线</b><i>→</i><b>动量</b><i>→</i><b>质量谱</b></div></div></button>
+              <button class="detector-layer-row" data-detector-layer="calorimeter"><svg class="layer-sketch" viewBox="0 0 58 48" aria-label="粒子在量能器中产生能量簇"><rect class="frame" x="1" y="1" width="56" height="46" rx="4"/><rect class="cell" x="8" y="8" width="9" height="9"/><rect class="cell hot" x="19" y="8" width="9" height="9"/><rect class="cell hot" x="30" y="8" width="9" height="9"/><rect class="cell" x="41" y="8" width="9" height="9"/><rect class="cell" x="8" y="20" width="9" height="9"/><rect class="cell hot" x="19" y="20" width="9" height="9"/><rect class="cell hot" x="30" y="20" width="9" height="9"/><rect class="cell" x="41" y="20" width="9" height="9"/><rect class="cell" x="8" y="32" width="9" height="9"/><rect class="cell" x="19" y="32" width="9" height="9"/><rect class="cell hot" x="30" y="32" width="9" height="9"/><rect class="cell" x="41" y="32" width="9" height="9"/></svg><div class="layer-text"><span>中层 · 电磁与强子量能器</span><strong>直接看到：相邻小格同时变亮，形成一团</strong><p>把这一团所有小格的信号加起来，就是粒子在这里留下的能量，单位 GeV。</p><div class="layer-flow"><b>发亮小格</b><i>→</i><b>能量团</b><i>→</i><b>总能量</b><i>→</i><b>能量谱</b></div></div></button>
+              <button class="detector-layer-row" data-detector-layer="muon"><svg class="layer-sketch" viewBox="0 0 58 48" aria-label="粒子穿过内层后在外层缪子室留下命中"><rect class="frame" x="1" y="1" width="56" height="46" rx="4"/><path class="trace" d="M5 40 L53 8"/><path d="M12 4V44M29 4V44M46 4V44" stroke="#31465b"/><circle class="hit" cx="12" cy="35" r="3"/><circle class="hit" cx="29" cy="24" r="3"/><circle class="hit" cx="46" cy="13" r="3"/></svg><div class="layer-text"><span>外层 · 缪子室</span><strong>直接看到：最外圈又出现几个点，并记录到达时间</strong><p>大多数粒子已停在中层；还能穿到这里并与内层那串点对齐的，通常就是 μ 子。</p><div class="layer-flow"><b>外层几点</b><i>→</i><b>与内层对齐</b><i>→</i><b>确认 μ 子</b><i>→</i><b>双 μ 质量</b></div></div></button>
+            </div>
+          </div>
+          <div class="dqm-grid">
+            <button class="metric-card active" data-metric="spectrum">
+              <span class="metric-tag">01 · DIMUON MASS</span><strong>质量谱：峰的位置与形状</strong><em class="metric-source">径迹器 + 缪子室 → 两条 μ 轨迹</em>
+              <svg viewBox="0 0 240 95" aria-label="双缪子质量谱示例"><path class="gridline" d="M18 72H230M18 46H230M18 20H230"/><path class="spectrum-area" d="M18 72 C36 71 42 67 47 60 C52 70 61 71 78 69 C103 67 117 65 130 62 C146 58 153 20 160 18 C168 21 172 57 182 63 C196 68 213 70 230 71 L230 76 L18 76Z"/><path class="spectrum-line" d="M18 72 C36 71 42 67 47 60 C52 70 61 71 78 69 C103 67 117 65 130 62 C146 58 153 20 160 18 C168 21 172 57 182 63 C196 68 213 70 230 71"/><line class="focus-line" x1="160" y1="13" x2="160" y2="76"/><text x="148" y="10">Z · 91.19 GeV</text><text x="19" y="89">0</text><text x="213" y="89">140 GeV</text></svg>
+              <small>Z 峰整体偏移，优先怀疑动量刻度漂移；不能只看峰值摘要。</small>
+            </button>
+            <button class="metric-card" data-metric="occupancy">
+              <span class="metric-tag">02 · OCCUPANCY</span><strong>占有率：总量与区域份额</strong><em class="metric-source">探测器通道 → 有信号通道比例</em>
+              <div class="occupancy-chart"><div><span>BARREL</span><i style="--value:82%"></i><b>82%</b></div><div><span>ENDCAP +</span><i style="--value:61%"></i><b>61%</b></div><div><span>ENDCAP −</span><i style="--value:58%"></i><b>58%</b></div></div>
+              <small>总事件数下降与局部区域掉点，是两种不同故障，要分开判断。</small>
+            </button>
+            <button class="metric-card" data-metric="drift">
+              <span class="metric-tag">03 · CHUNK DRIFT</span><strong>时间漂移：异常是否在发展</strong><em class="metric-source">同一测量量 → 连续 12 个时间片</em>
+              <svg viewBox="0 0 240 95" aria-label="跨时间片漂移示例"><path class="gridline" d="M18 72H230M18 46H230M18 20H230"/><path class="drift-band" d="M18 67 L230 21 L230 38 L18 78Z"/><path class="drift-line" d="M20 69 L38 68 L56 63 L74 62 L92 57 L110 56 L128 49 L146 50 L164 41 L182 39 L200 31 L224 27"/><g class="drift-points"><circle cx="20" cy="69" r="2"/><circle cx="38" cy="68" r="2"/><circle cx="56" cy="63" r="2"/><circle cx="74" cy="62" r="2"/><circle cx="92" cy="57" r="2"/><circle cx="110" cy="56" r="2"/><circle cx="128" cy="49" r="2"/><circle cx="146" cy="50" r="2"/><circle cx="164" cy="41" r="2"/><circle cx="182" cy="39" r="2"/><circle cx="200" cy="31" r="2"/><circle cx="224" cy="27" r="2"/></g><text x="18" y="89">CHUNK 01</text><text x="187" y="89">CHUNK 12</text></svg>
+              <small>单个离群点只是告警；持续且显著的斜率才说明系统正在漂移。</small>
+            </button>
+          </div>
+          <div class="dqm-explain" id="dqmExplain"></div>
+          <div class="data-disclaimer">示例读法 · 对应本项目真实监控项，不代表当前正在采集的实时数据</div><div class="data-actions"><button id="reviewEvidence">← 回看轨迹证据</button><button id="restartMission">↻ 再跑一次碰撞</button></div>
+        </section>
+        <div class="viz-actions"><button class="icon-btn" id="pause" aria-label="暂停动画">Ⅱ</button><button class="icon-btn" id="resetView" aria-label="重置视角">⌂</button></div>
+        <aside class="part-detail" id="partDetail" style="--detail-color:#39d9ff"></aside>
+        <div class="ring-badge"><strong>360°</strong>storage ring</div>
+        <div class="collision-label" id="collisionLabel"><i></i><strong>碰撞点 IP1</strong><span>① 两束粒子相向接近</span></div>
+        <div class="legend"><span style="--legend-color:#39d9ff"><i></i>质子束 A</span><span style="--legend-color:#ffcb45"><i></i>质子束 B</span><span style="--legend-color:#a66cff"><i></i>超导磁体</span><span style="--legend-color:#ff6577"><i></i>碰撞与探测</span></div>
+        <button class="drag-exit" id="dragExit">Esc · 退出拖动</button>
+        <div class="hint" id="dragHint">水平拖动旋转 · 点击模块查看剖面</div>
+      </section>
+    </div>
+  </main>
+  <script type="module">
+    import * as THREE from 'https://esm.sh/three@0.161.0';
+    import { OrbitControls } from 'https://esm.sh/three@0.161.0/examples/jsm/controls/OrbitControls.js';
+    import { RoomEnvironment } from 'https://esm.sh/three@0.161.0/examples/jsm/environments/RoomEnvironment.js';
+    import { RoundedBoxGeometry } from 'https://esm.sh/three@0.161.0/examples/jsm/geometries/RoundedBoxGeometry.js';
+
+    const PARTS = {
+      overview:{name:'加速器全景',tag:'SYSTEM MAP',color:'#39d9ff',text:'环形结构让粒子反复经过加速腔，每绕一圈都获得更多能量。拖动模型，可以看到磁铁、加速腔和碰撞探测器如何围绕同一条束流轨道协作。'},
+      beam:{name:'真空束流管',tag:'BEAM PIPE',color:'#39d9ff',text:'粒子在近乎真空的细管中飞行，减少与空气分子的碰撞。青色与琥珀色光点代表两束反向运行的粒子束。'},
+      rf:{name:'射频加速腔',tag:'RF CAVITY',color:'#ffcb45',text:'射频腔产生周期变化的电场。粒子每次踩准电场节拍穿过腔体，都会获得一小段能量。'},
+      magnet:{name:'超导弯转磁铁',tag:'DIPOLE MAGNET',color:'#a66cff',text:'紫色磁铁提供强磁场，让高速带电粒子沿圆形轨道转弯；短小的青色磁体负责把发散束流重新聚焦。'},
+      detector:{name:'碰撞点 IP1 与多层探测器',tag:'COLLISION DETECTOR',color:'#ff6577',text:'圆环右侧粉红探测器中央的白红光点就是 IP1。青色与黄色束流沿同一直线相向靠近，在这里迎面相撞；外围探测层记录向外飞出的碎片。'}
+    };
+    const chapters = [
+      {label:'加速器全景',part:'overview',title:'一台粒子加速器，究竟在做什么？',lede:'它是一条让带电粒子<strong>获得能量、保持方向、最终相撞并留下数据</strong>的精密跑道。右侧不是示意图，而是一套可以旋转拆看的结构模型。',eq:'加速器 = 真空轨道 + 电场加速 + 磁场控制 + 碰撞探测',copy:['环形设计的关键优势是<strong>重复利用同一组设备</strong>：粒子每绕一圈，都会再次通过射频加速腔。','点击下方部件，右侧模型会定位并高亮相应结构。'],cta:'继续 · 电场如何加速粒子 →'},
+      {label:'电场与能量',part:'rf',title:'电场是油门，但粒子必须踩准节拍',lede:'黄色金属腔体内部存在快速振荡的电场。带电粒子在正确时刻穿过，就会被沿前进方向“推”一下。',eq:'F = qE　·　电荷 q 在电场 E 中受到加速力',copy:['这很像推秋千：方向和节拍对上，能量才会逐次累积。射频系统必须与束流到达时间精确同步。','真空同样重要；否则空气分子会不断散射粒子，让束流变宽甚至丢失。'],cta:'继续 · 磁场如何控制轨迹 →'},
+      {label:'磁场与轨迹',part:'magnet',title:'磁铁是方向盘，也是束流的镜头',lede:'紫色弯转磁铁让粒子沿圆周运动；青色聚焦磁铁像光学透镜一样，把逐渐发散的粒子束重新收拢。',eq:'F = qv × B　·　磁力改变方向，不直接增加速度',copy:['粒子能量越高，越难弯转，因此大型对撞机依赖强而稳定的超导磁体。','真实设施会沿环布置成百上千个磁体，并持续校正束流位置。'],cta:'继续 · 为什么要让粒子相撞 →'},
+      {label:'碰撞与新粒子',part:'detector',title:'碰撞把运动能量变成新的可能',lede:'两束粒子在一个极小区域迎面相撞。能量被集中后，可以转化为短暂的新粒子，再迅速衰变为探测器能看见的痕迹。',eq:'E = mc²　·　碰撞能量可以转化为质量',copy:['一次碰撞不会直接给出答案。物理学家要比较海量事件的统计分布，寻找超出已知背景的微弱结构。','右侧红色核心是碰撞点，外围同心层分别承担轨迹、量能和缪子探测。'],cta:'继续 · 探测器如何变成数据 →'},
+      {label:'数据质量监控',part:'detector',title:'从不可见的粒子，到可信的数据',lede:'探测器把轨迹与能量转换成电子信号。DQM 系统持续检查这些信号，确认异常来自物理过程，还是来自设备漂移。',eq:'可信发现 = 可靠探测器 + 统计检验 + 持续监控',copy:['本项目检查双缪子质量谱、区域占有率和跨时间片漂移，避免把仪器问题误判成新物理。','这也是 DQM Agent 的位置：它不控制加速器，而是帮助人类判断刚刚采集的数据是否值得相信。'],cta:'回到全景 ↺'}
+    ];
+    const componentKeys=['beam','rf','magnet','detector'];
+    const componentHints={beam:'让粒子无阻力飞行',rf:'电场逐圈增加能量',magnet:'转弯并聚焦束流',detector:'把碰撞变成数据'};
+    let current=0, selected='overview', paused=false,viewMode='device',lifeStep=0,lifeHoldUntil=0,beamTravel=0,missionActive=false,missionStart=0,missionElapsed=0,missionStage=-1;
+    const missionCameraStart=new THREE.Vector3(),missionTargetStart=new THREE.Vector3();
+    const LIFE=[
+      {title:'形成束团并注入',copy:'粒子先被压缩成很短的束团，送入近乎真空的束流管。真空减少散射，但不会主动加速。',energy:8,note:'真空管是跑道：减少阻力，不提供推力。',focus:'beam',speed:.65},
+      {title:'穿过 RF 腔：电场做功',copy:'束团踩准射频电场的相位穿过黄色腔体，电场沿前进方向推粒子，能量和动量在这里增加。',energy:32,note:'RF 电场才是油门：ΔE = q∫E·dl。',focus:'rf',speed:.88},
+      {title:'磁铁转弯并聚焦',copy:'紫色弯转磁铁改变运动方向，青色聚焦磁铁压紧束流；它们控制轨迹，但理想情况下不增加粒子能量。',energy:32,note:'磁力始终垂直于速度，只转弯，不做功。',focus:'magnet',speed:.88},
+      {title:'绕环，再次通过 RF 腔',copy:'环形轨道让同一束粒子反复经过 RF 腔。每一圈只增加一点能量，许多圈后累积到碰撞所需水平。',energy:82,note:'接近光速后，增加的主要是能量与动量，速度变化很小。',focus:'rf',speed:1.18},
+      {title:'在 IP1 迎面碰撞',copy:'两束高能粒子被磁铁压到极小截面，在 IP1 正面对撞。运动能量转化成向外飞出的新粒子与探测信号。',energy:82,note:'碰撞不是“撞设备”：两束粒子在探测器中心彼此相撞。',focus:'detector',speed:1.18}
+    ];
+    const $=id=>document.getElementById(id);
+
+    function renderLesson(){
+      const c=chapters[current];
+      $('chapterLabel').innerHTML=`Chapter 0${current+1} · <strong>${c.label}</strong>`;
+      $('lesson').innerHTML=`<div class="lesson-index">Accelerator primer / interactive</div><h1>跟着一颗粒子，走完整台加速器</h1><p class="lede">不要先读菜单。直接在右侧<strong>点击发光的粒子束</strong>，镜头会进入束团，亲眼看到它如何获得能量、被磁铁控制、迎面碰撞，最后变成 DQM 数据。</p><div class="equation">电场增加能量　·　磁场改变方向　·　碰撞产生可测信号</div><p class="body-copy">设备上的发光标签也都可以直接点击；悬停时，对应设备会高亮并显示可交互状态。</p><div class="direct-guide"><span>ONE CONTINUOUS JOURNEY</span><strong>一条体验线，不再切章节</strong><ol><li>点击环上的发光粒子束</li><li>第一视角经过 RF 腔和磁铁</li><li>在 IP1 看碰撞爆发</li><li>自动进入本次事件的数据解读</li></ol></div>`;
+      $('progress').style.width=`${(current+1)*20}%`;$('progressCount').textContent=`0${current+1} / 05`;$('continue').textContent=c.cta;$('prev').disabled=current===0;
+      document.querySelectorAll('[data-part]').forEach(b=>b.onclick=()=>selectPart(b.dataset.part,true));
+      selectPart(c.part,false);
+    }
+    let detailRenderer=null,detailScene3D=null,detailCamera=null,detailControls=null,detailModel=null;
+    function detailKeys(key){if(key==='beam'||key==='overview')return `<b style="--key:#39d9ff"><i></i>束流 A</b><b style="--key:#ffcb45"><i></i>束流 B</b><b style="--key:#94a9bb"><i></i>真空管壁</b>`;if(key==='rf')return `<b style="--key:#ffcb45"><i></i>铜腔体</b><b style="--key:#39d9ff"><i></i>加速电场 E</b>`;if(key==='magnet')return `<b style="--key:#a66cff"><i></i>铁磁轭</b><b style="--key:#ff9d45"><i></i>超导线圈</b><b style="--key:#39d9ff"><i></i>束流孔径</b>`;return `<b style="--key:#ff6577"><i></i>轨迹层</b><b style="--key:#ff9d45"><i></i>量能器</b><b style="--key:#a66cff"><i></i>缪子层</b>`;}
+    function renderDetail(key){const p=PARTS[key];$('partDetail').style.setProperty('--detail-color',p.color);$('partDetail').innerHTML=`<div class="detail-top"><i class="detail-swatch"></i><span class="detail-tag">${p.tag}</span></div><h3>${p.name}</h3><div class="detail-visual detail-3d" id="detailScene" aria-label="${p.name}局部三维放大"><span class="detail-zoom-tip">局部镜头 · 拖动旋转 · 滚轮放大</span></div><div class="detail-keys">${detailKeys(key)}</div><p>${p.text}</p>`;requestAnimationFrame(()=>mountDetailModel(key));}
+    function go(n){current=(n+chapters.length)%chapters.length;renderLesson();}
+    $('prev').onclick=()=>go(current-1);$('next').onclick=()=>go(current+1);$('continue').onclick=()=>go(current+1);$('restart').onclick=()=>go(0);
+
+    const sceneEl=$('scene'), scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(38,1,.1,100); camera.position.set(0,13.2,1.8);
+    const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,1.5)); renderer.outputColorSpace=THREE.SRGBColorSpace; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.04; renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap; sceneEl.appendChild(renderer.domElement);
+    const previewHost=$('orbitPreview'),previewRenderer=new THREE.WebGLRenderer({antialias:true,alpha:true}),previewCamera=new THREE.PerspectiveCamera(36,1,.1,50);previewRenderer.setPixelRatio(1);previewRenderer.outputColorSpace=THREE.SRGBColorSpace;previewRenderer.toneMapping=THREE.ACESFilmicToneMapping;previewRenderer.toneMappingExposure=.95;previewHost.insertBefore(previewRenderer.domElement,previewHost.firstChild);previewCamera.position.set(0,11,.01);previewCamera.up.set(0,0,-1);previewCamera.lookAt(0,.45,0);
+    const pmrem=new THREE.PMREMGenerator(renderer),roomEnv=pmrem.fromScene(new RoomEnvironment(renderer),.05);scene.environment=roomEnv.texture;pmrem.dispose();
+    const controls=new OrbitControls(camera,renderer.domElement); controls.enableDamping=true; controls.dampingFactor=.085; controls.rotateSpeed=.72; controls.enablePan=false; controls.enableRotate=true; controls.enableZoom=false; controls.minPolarAngle=.09; controls.maxPolarAngle=1.12; controls.target.set(0,0,0); controls.autoRotate=false; controls.mouseButtons.LEFT=THREE.MOUSE.ROTATE; controls.mouseButtons.RIGHT=THREE.MOUSE.ROTATE; controls.update(); controls.saveState();sceneEl.dataset.camera=camera.position.toArray().map(v=>v.toFixed(3)).join(',');sceneEl.dataset.target='0.000,0.000,0.000';
+    scene.add(new THREE.HemisphereLight(0x91b7d4,0x050910,1.05)); const keyLight=new THREE.PointLight(0x69ddff,28,32); keyLight.position.set(4,8,5); keyLight.castShadow=true;keyLight.shadow.mapSize.set(512,512);keyLight.shadow.bias=-.0015;scene.add(keyLight); const rimLight=new THREE.PointLight(0x8b5bd1,18,28); rimLight.position.set(-6,3,-4); scene.add(rimLight); const warmLight=new THREE.PointLight(0xe8873d,14,20); warmLight.position.set(4,2,-5); scene.add(warmLight);
+    const world=new THREE.Group(); scene.add(world); world.position.set(0,.55,0); world.scale.setScalar(.9); world.rotation.y=-.25;
+    const groups={}; const clickable=[]; const R=3.45,IP_ANGLE=Math.PI/2,beamGap=.76,beamArcStart=IP_ANGLE+beamGap/2,beamArcLength=Math.PI*2-beamGap;
+    function makeGrainTexture(){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d'),img=x.createImageData(256,256);for(let y=0;y<256;y++)for(let i=0;i<256;i++){const p=(y*256+i)*4,band=Math.sin(y*.52)*13,noise=(Math.random()-.5)*34,v=Math.max(78,Math.min(224,154+band+noise));img.data[p]=img.data[p+1]=img.data[p+2]=v;img.data[p+3]=255;}x.putImageData(img,0,0);x.globalAlpha=.24;for(let y=0;y<256;y+=5){x.fillStyle=y%10?'#fff':'#111';x.fillRect(0,y,256,1);}const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(3,5);t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());t.colorSpace=THREE.NoColorSpace;return t;}
+    function makeGlowTexture(){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.12,'rgba(255,255,255,.98)');g.addColorStop(.34,'rgba(255,255,255,.42)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);}
+    const grainTexture=makeGrainTexture(),glowTexture=makeGlowTexture();
+    function glowSprite(color,size=.14,opacity=1){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTexture,color,transparent:true,opacity,depthWrite:false,depthTest:false,blending:THREE.AdditiveBlending}));s.scale.setScalar(size);s.renderOrder=14;return s;}
+    function material(color,emissive=color,intensity=.35,opts={}){const base=new THREE.Color(color).lerp(new THREE.Color(emissive),Math.min(.1,intensity*.03)),transparent=!!opts.transparent,m=new THREE.MeshPhysicalMaterial({color:base,emissive,emissiveIntensity:Math.max(.045,intensity*.18),metalness:transparent?.2:.58,roughness:transparent?.32:.4,roughnessMap:grainTexture,bumpMap:grainTexture,bumpScale:transparent?.002:.009,envMapIntensity:transparent?.22:.52,clearcoat:transparent?0:.18,clearcoatRoughness:.34,...opts});m.userData.baseGlow=m.emissiveIntensity;return m;}
+    function groupFor(key){const g=new THREE.Group();g.userData.part=key;groups[key]=g;world.add(g);return g;}
+    const beamG=groupFor('beam'),rfG=groupFor('rf'),magnetG=groupFor('magnet'),detectorG=groupFor('detector');
+    const pipeMat=material(0x209bbb,0x10bce8,1.05,{transparent:true,opacity:.92}),pipeBMat=material(0x244967,0x173d58,.45,{transparent:true,opacity:.8});
+    const pipeAGeometry=new THREE.TorusGeometry(R,.095,12,180,beamArcLength);pipeAGeometry.rotateZ(beamArcStart);const pipeA=new THREE.Mesh(pipeAGeometry,pipeMat);pipeA.rotation.x=Math.PI/2;beamG.add(pipeA);
+    const pipeBGeometry=new THREE.TorusGeometry(R+.24,.055,10,180,beamArcLength);pipeBGeometry.rotateZ(beamArcStart);const pipeB=new THREE.Mesh(pipeBGeometry,pipeBMat);pipeB.rotation.x=Math.PI/2;beamG.add(pipeB);
+    const rightA=IP_ANGLE-beamGap/2,leftA=IP_ANGLE+beamGap/2,ipCenter=new THREE.Vector3(0,0,R),innerRight=new THREE.Vector3(Math.cos(rightA)*R,.02,Math.sin(rightA)*R),innerLeft=new THREE.Vector3(Math.cos(leftA)*R,.02,Math.sin(leftA)*R),outerRight=new THREE.Vector3(Math.cos(rightA)*(R+.24),-.02,Math.sin(rightA)*(R+.24)),outerLeft=new THREE.Vector3(Math.cos(leftA)*(R+.24),-.02,Math.sin(leftA)*(R+.24));
+    const mergeCurveA=new THREE.CatmullRomCurve3([innerRight,new THREE.Vector3(.58,.02,R+.03),ipCenter,new THREE.Vector3(-.58,-.02,R+.03),outerLeft]),mergeCurveB=new THREE.CatmullRomCurve3([outerRight,new THREE.Vector3(.62,-.02,R+.1),ipCenter,new THREE.Vector3(-.55,.02,R-.03),innerLeft]);
+    const mergeAMat=material(0x188ba7,0x39d9ff,1.5,{transparent:true,opacity:.96}),mergeBMat=material(0x8a6415,0xffcb45,1.35,{transparent:true,opacity:.92}),mergeA=new THREE.Mesh(new THREE.TubeGeometry(mergeCurveA,48,.105,12,false),mergeAMat),mergeB=new THREE.Mesh(new THREE.TubeGeometry(mergeCurveB,48,.068,10,false),mergeBMat);mergeA.userData.part=mergeB.userData.part='beam';beamG.add(mergeA,mergeB);
+    const haloGeometry=new THREE.TorusGeometry(R,.155,8,180,beamArcLength);haloGeometry.rotateZ(beamArcStart);const halo=new THREE.Mesh(haloGeometry,new THREE.MeshBasicMaterial({color:0x39d9ff,transparent:true,opacity:.055,depthWrite:false,blending:THREE.AdditiveBlending}));halo.rotation.x=Math.PI/2;beamG.add(halo);
+    const outerRail=new THREE.Mesh(new THREE.TorusGeometry(R+.58,.026,8,180),new THREE.MeshBasicMaterial({color:0x486a91,transparent:true,opacity:.72}));outerRail.rotation.x=Math.PI/2;beamG.add(outerRail);
+    const innerRail=new THREE.Mesh(new THREE.TorusGeometry(R-.38,.018,8,180),new THREE.MeshBasicMaterial({color:0x31506f,transparent:true,opacity:.58}));innerRail.rotation.x=Math.PI/2;beamG.add(innerRail);
+    const clampGroup=new THREE.Group(),clampMat=material(0x526475,0x6f91aa,.16,{metalness:.88,roughness:.24});for(let i=0;i<18;i++){const a=i/18*Math.PI*2,clamp=new THREE.Mesh(new RoundedBoxGeometry(.12,.16,.28,3,.025),clampMat);clamp.position.set(Math.cos(a)*R,.02,Math.sin(a)*R);clamp.rotation.y=-a;clampGroup.add(clamp);}beamG.add(clampGroup);
+    clickable.push(pipeA,pipeB,mergeA,mergeB);
+    const floor=new THREE.Mesh(new THREE.CircleGeometry(5.05,80),new THREE.ShadowMaterial({color:0x000000,transparent:true,opacity:.16,side:THREE.DoubleSide}));floor.rotation.x=-Math.PI/2;floor.position.y=-.78;floor.receiveShadow=true;world.add(floor);
+    for(let ring=0;ring<4;ring++){const guide=new THREE.Mesh(new THREE.RingGeometry(3.9+ring*.38,3.905+ring*.38,96),new THREE.MeshBasicMaterial({color:0x1c3b58,transparent:true,opacity:.22,side:THREE.DoubleSide}));guide.rotation.x=-Math.PI/2;guide.position.y=-.75;world.add(guide);}
+    for(let i=0;i<12;i++){
+      const a=i/12*Math.PI*2+.12, g=new THREE.Group();g.position.set(Math.cos(a)*R,0,Math.sin(a)*R);g.rotation.y=-a;g.userData.part='magnet';
+      const upper=new THREE.Mesh(new RoundedBoxGeometry(.62,.48,.42,4,.055),material(0x5125a6,0x6f35e7,.95,{roughness:.46}));upper.position.y=.34;g.add(upper);
+      const lower=new THREE.Mesh(new RoundedBoxGeometry(.62,.34,.42,4,.05),material(0x371b78,0x50219e,.65,{roughness:.48}));lower.position.y=-.33;g.add(lower);
+      const collar=new THREE.Mesh(new RoundedBoxGeometry(.7,.08,.48,3,.025),material(0x8b73c9,0x5e43a3,.45,{metalness:.74,roughness:.3}));collar.position.y=.02;g.add(collar);
+      const aperture=new THREE.Mesh(new THREE.CylinderGeometry(.105,.105,.76,20),material(0x8fa8b8,0x39d9ff,.42));aperture.rotation.z=Math.PI/2;aperture.position.y=.02;g.add(aperture);
+      [-.25,.25].forEach(x=>{const coil=new THREE.Mesh(new THREE.TorusGeometry(.205,.038,9,24),material(0xc46922,0xff9d45,.72));coil.rotation.y=Math.PI/2;coil.position.set(x,.02,0);g.add(coil);});
+      ;[-.22,.22].forEach(x=>[-.15,.15].forEach(z=>{const bolt=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.035,10),material(0xaebdca,0xffffff,.08,{metalness:.95,roughness:.18}));bolt.position.set(x,.59,z);g.add(bolt);}));
+      clickable.push(upper,lower);magnetG.add(g);
+    }
+    for(let i=0;i<8;i++){
+      const a=(i/8*Math.PI*2)+.5,g=new THREE.Group();g.position.set(Math.cos(a)*(R+.02),0,Math.sin(a)*(R+.02));g.rotation.y=-a;g.userData.part='magnet';
+      const q=new THREE.Mesh(new RoundedBoxGeometry(.26,.88,.28,4,.045),material(0x126b86,0x20badd,.62,{roughness:.42}));g.add(q);const cap1=new THREE.Mesh(new RoundedBoxGeometry(.34,.07,.34,3,.022),material(0x5be0ff,0x39d9ff,.5,{metalness:.82,roughness:.23}));cap1.position.y=.47;g.add(cap1);const cap2=cap1.clone();cap2.position.y=-.47;g.add(cap2);const qAperture=new THREE.Mesh(new THREE.TorusGeometry(.14,.026,9,24),material(0x9bb2c2,0x39d9ff,.28,{metalness:.92,roughness:.2}));qAperture.rotation.y=Math.PI/2;g.add(qAperture);clickable.push(q);magnetG.add(g);
+    }
+    [Math.PI*.25,Math.PI*1.25].forEach((a,idx)=>{
+      const g=new THREE.Group();g.position.set(Math.cos(a)*R,.02,Math.sin(a)*R);g.rotation.y=-a;g.userData.part='rf';
+      for(let j=-2;j<=2;j++){const disc=new THREE.Mesh(new THREE.CylinderGeometry(.43,.43,.1,32),material(idx?0xe59c19:0xdcb220,0xffc72f,1.35));disc.rotation.z=Math.PI/2;disc.position.x=j*.15;g.add(disc);clickable.push(disc);}
+      const core=new THREE.Mesh(new THREE.CylinderGeometry(.19,.19,.9,24),material(0x785410,0xffa72b,.75));core.rotation.z=Math.PI/2;g.add(core);rfG.add(g);
+      ;[-.48,.48].forEach(x=>{const rim=new THREE.Mesh(new THREE.TorusGeometry(.27,.026,10,30),material(0xd5aa55,0xffdb7d,.25,{metalness:.94,roughness:.18}));rim.rotation.y=Math.PI/2;rim.position.x=x;g.add(rim);});
+      const field=new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,1.12,10),new THREE.MeshBasicMaterial({color:0x9af0ff,transparent:true,opacity:.9,depthTest:false,blending:THREE.AdditiveBlending}));field.rotation.z=Math.PI/2;field.renderOrder=8;g.add(field);
+      const fieldTip=new THREE.Mesh(new THREE.ConeGeometry(.075,.19,14),new THREE.MeshBasicMaterial({color:0xe9fcff,depthTest:false}));fieldTip.rotation.z=-Math.PI/2;fieldTip.position.x=.58;fieldTip.renderOrder=9;g.add(fieldTip);
+    });
+    const rfBoostGlow=glowSprite(0xffcb45,1.25,0);rfBoostGlow.position.copy(rfG.children[0].position);rfBoostGlow.position.y+=.08;rfG.add(rfBoostGlow);
+    const da=IP_ANGLE,dp=new THREE.Group();dp.position.set(Math.cos(da)*R,0,Math.sin(da)*R);dp.rotation.y=-da;dp.userData.part='detector';const collisionSequence=new THREE.Group();dp.add(collisionSequence);
+    const detColors=[0xff6577,0xff9d45,0x39d9ff,0xa66cff];
+    const detectorShells=[];[0.42,.68,.95,1.22].forEach((rad,i)=>{const shell=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,.48+i*.13,48,1,true),material(detColors[i],detColors[i],1.1-i*.12,{transparent:true,opacity:.52,side:THREE.DoubleSide}));shell.rotation.x=Math.PI/2;shell.userData.baseOpacity=.52;shell.userData.baseEmissive=1.1-i*.12;detectorShells.push(shell);dp.add(shell);clickable.push(shell);});
+    const panelMatA=material(0x6c355e,0xff6577,.38,{metalness:.46,roughness:.38}),panelMatB=material(0x334c82,0x39d9ff,.3,{metalness:.5,roughness:.34});for(let i=0;i<16;i++){const a=i/16*Math.PI*2,panel=new THREE.Mesh(new RoundedBoxGeometry(.2,.075,.86,3,.025),i%2?panelMatA:panelMatB);panel.position.set(Math.cos(a)*1.14,Math.sin(a)*1.14,0);panel.rotation.z=a;dp.add(panel);clickable.push(panel);}
+    const endcap1=new THREE.Mesh(new THREE.TorusGeometry(1.22,.055,12,48),material(0xff6577,0xff405d,1.4));endcap1.position.z=.45;dp.add(endcap1);const endcap2=endcap1.clone();endcap2.position.z=-.45;dp.add(endcap2);
+    const approachA=new THREE.Mesh(new THREE.CylinderGeometry(.018,.075,1.36,16),new THREE.MeshBasicMaterial({color:0x39d9ff,transparent:true,opacity:.72,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));approachA.rotation.x=Math.PI/2;approachA.position.z=-.68;approachA.renderOrder=10;collisionSequence.add(approachA);
+    const approachB=new THREE.Mesh(new THREE.CylinderGeometry(.018,.075,1.36,16),new THREE.MeshBasicMaterial({color:0xffcb45,transparent:true,opacity:.72,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}));approachB.rotation.x=-Math.PI/2;approachB.position.z=.68;approachB.renderOrder=10;collisionSequence.add(approachB);
+    const arrowA=new THREE.Mesh(new THREE.ConeGeometry(.11,.28,14),new THREE.MeshBasicMaterial({color:0xc8f7ff,depthTest:false}));arrowA.rotation.x=Math.PI/2;arrowA.position.z=-.2;arrowA.renderOrder=11;collisionSequence.add(arrowA);
+    const arrowB=new THREE.Mesh(new THREE.ConeGeometry(.11,.28,14),new THREE.MeshBasicMaterial({color:0xffedaa,depthTest:false}));arrowB.rotation.x=-Math.PI/2;arrowB.position.z=.2;arrowB.renderOrder=11;collisionSequence.add(arrowB);
+    const collisionCore=new THREE.Mesh(new THREE.SphereGeometry(.095,28,28),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:1,depthTest:false}));collisionCore.renderOrder=16;collisionSequence.add(collisionCore);
+    const collisionGlow=glowSprite(0xffffff,.65,.18),collisionPulse=glowSprite(0xff4f70,.5,0);collisionSequence.add(collisionGlow,collisionPulse);const collisionLight=new THREE.PointLight(0xffd7df,0,4);collisionSequence.add(collisionLight);detectorG.add(dp);
+    function makeImpactPacket(color,dir){const g=new THREE.Group();for(let i=0;i<18;i++){const strength=Math.exp(-Math.pow((i-5)/5.2,2)),p=glowSprite(color,.055+.095*strength,.42+.55*strength);p.position.set((Math.random()-.5)*.075,(Math.random()-.5)*.075,-dir*i*.018);p.userData.baseOpacity=p.material.opacity;g.add(p);}return g;}
+    const impactA=makeImpactPacket(0x39d9ff,1);impactA.position.z=-1.3;collisionSequence.add(impactA);const impactB=makeImpactPacket(0xffcb45,-1);impactB.position.z=1.3;collisionSequence.add(impactB);
+    const collisionTracks=new THREE.Group();collisionSequence.add(collisionTracks);for(let i=0;i<20;i++){const a=i/20*Math.PI*2+(i%4)*.09,len=.68+(i%5)*.12,curveSign=i%2?1:-1,turn=curveSign*(.32+(i%3)*.14),midA=a+turn*.34,endA=a+turn,depth=((i%5)-2)*.075,points=[new THREE.Vector3(0,0,0),new THREE.Vector3(Math.cos(midA)*len*.48,depth*.35,Math.sin(midA)*len*.48),new THREE.Vector3(Math.cos(endA)*len,depth,Math.sin(endA)*len)],curve=new THREE.CatmullRomCurve3(points),mat=new THREE.MeshBasicMaterial({color:detColors[i%4],transparent:true,opacity:0,depthTest:false,depthWrite:false,blending:THREE.AdditiveBlending}),tube=new THREE.Mesh(new THREE.TubeGeometry(curve,28,.009+(i%3)*.002,6,false),mat),hit=glowSprite(detColors[i%4],.14,0),track=new THREE.Group();tube.renderOrder=14;hit.position.copy(points[2]);track.add(tube,hit);track.userData={tube,hit,curve,baseOpacity:.34+(i%4)*.07,delay:(i%5)*.035};collisionTracks.add(track);}collisionTracks.scale.setScalar(1);
+    const TRACK_INFO=[{index:4,type:'muon-minus',offset:[-72,-28]},{index:9,type:'muon-plus',offset:[74,-26]},{index:3,type:'electron',offset:[-78,34]},{index:2,type:'hadron',offset:[76,38]}];TRACK_INFO.forEach(info=>{const track=collisionTracks.children[info.index];track.userData.info=info;track.userData.tube.userData.trackIndex=info.index;track.userData.hit.userData.trackIndex=info.index;if(info.index===4){track.userData.tube.geometry.dispose();track.userData.tube.geometry=new THREE.TubeGeometry(track.userData.curve,40,.024,8,false);track.userData.hit.scale.setScalar(1.55);}clickable.push(track.userData.tube,track.userData.hit);});let selectedTrackIndex=null;
+    const evidenceMarkers={},evidenceTrack=collisionTracks.children[4];[{key:'tracker',t:.27,color:0xff9d7a},{key:'calorimeter',t:.6,color:0x58e6f4},{key:'muon',t:.93,color:0xc099ff}].forEach(({key,t,color})=>{const marker=new THREE.Group(),core=new THREE.Mesh(new THREE.SphereGeometry(.045,18,18),new THREE.MeshBasicMaterial({color,transparent:true,opacity:1,depthTest:false,depthWrite:false})),halo=glowSprite(color,.32,.9);core.renderOrder=22;halo.renderOrder=21;marker.position.copy(evidenceTrack.userData.curve.getPointAt(t));marker.add(halo,core);marker.visible=false;marker.userData={core,halo};evidenceTrack.add(marker);evidenceMarkers[key]=marker;});
+    function setEvidenceStage(stage){const current=stage===1?'tracker':stage===2?'calorimeter':stage===3?'muon':null,order=['tracker','calorimeter','muon'];Object.entries(evidenceMarkers).forEach(([key,marker])=>{const passed=current&&order.indexOf(key)<=order.indexOf(current),report=stage===4;marker.visible=Boolean(passed||report);const active=key===current;marker.scale.setScalar(active ? 1.3 : report ? .78 : .58);marker.userData.core.material.opacity=active ? 1 : report ? .72 : .28;marker.userData.halo.material.opacity=active ? .95 : report ? .55 : .18;});}
+    const particleLayer=new THREE.Group();world.add(particleLayer);const particles=[];function addBunch(color,dir,start){for(let i=0;i<38;i++){const strength=Math.exp(-Math.pow((i-18.5)/7.4,2)),size=.075+.18*strength,p=glowSprite(color,size,.32+.68*strength);p.userData={packetOffset:(i-18.5)*.00145+(Math.random()-.5)*.001,dir,start,radialJitter:(Math.random()-.5)*.048,verticalJitter:(Math.random()-.5)*.06,baseSize:size,twinkle:Math.random()*Math.PI*2};particleLayer.add(p);particles.push(p);}}
+    addBunch(0x39d9ff,1,.03);addBunch(0xffcb45,-1,.53);
+    particles.forEach(p=>{p.userData.mission=true;clickable.push(p);});
+    function makeMissionBunch(color){const g=new THREE.Group();g.visible=false;world.add(g);for(let i=0;i<22;i++){const strength=Math.exp(-Math.pow((i-8)/5,2)),p=glowSprite(color,.075+.12*strength,.36+.6*strength);p.position.set((Math.random()-.5)*.08,(Math.random()-.5)*.07,(i-8)*.025);p.userData.baseOpacity=p.material.opacity;p.userData.baseZ=p.position.z;g.add(p);}return g;}
+    const missionBunch=makeMissionBunch(0x39d9ff),missionCore=glowSprite(0xffffff,.26,1);missionCore.userData.baseOpacity=1;missionBunch.add(missionCore);const missionBunchB=makeMissionBunch(0xffcb45),missionCoreB=glowSprite(0xfff4c2,.24,1);missionCoreB.userData.baseOpacity=1;missionBunchB.add(missionCoreB);
+    const stars=new THREE.BufferGeometry(),starPos=[];for(let i=0;i<240;i++)starPos.push((Math.random()-.5)*24,(Math.random()-.5)*12,(Math.random()-.5)*24);stars.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));scene.add(new THREE.Points(stars,new THREE.PointsMaterial({color:0x5e7da1,size:.018,transparent:true,opacity:.55})));
+    world.traverse(o=>{if(o.isMesh&&o.material){o.castShadow=!o.material.transparent;o.receiveShadow=!o.material.transparent;}});floor.castShadow=false;floor.receiveShadow=true;
+    const missionXrayItems=[];[beamG,magnetG,rfG,detectorG].forEach(root=>root.traverse(mesh=>{if(!mesh.isMesh||!mesh.material?.isMeshPhysicalMaterial)return;mesh.material=mesh.material.clone();mesh.material.transparent=true;const edge=new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry,22),new THREE.LineDashedMaterial({color:root===rfG?0xffd35c:root===magnetG?0xb78cff:root===detectorG?0xff7589:0x6cecff,transparent:true,opacity:0,depthTest:false,dashSize:.055,gapSize:.038}));edge.computeLineDistances();edge.visible=false;edge.renderOrder=18;mesh.add(edge);missionXrayItems.push({mesh,edge,baseOpacity:mesh.material.opacity,baseEmissive:mesh.material.emissiveIntensity,baseTransparent:true,baseDepthWrite:mesh.material.depthWrite,always:root===beamG});}));
+    const xrayPoint=new THREE.Vector3();
+    let lastXrayUpdate=0;
+    function updateMissionXray(active){const stamp=performance.now();if(active&&stamp-lastXrayUpdate<90)return;lastXrayUpdate=stamp;missionXrayItems.forEach(item=>{if(!active){item.mesh.material.opacity=item.baseOpacity;item.mesh.material.emissiveIntensity=item.baseEmissive;item.mesh.material.depthWrite=item.baseDepthWrite;item.edge.visible=false;return;}const distance=item.mesh.getWorldPosition(xrayPoint).distanceTo(camera.position),proximity=item.always ? .86 : 1-THREE.MathUtils.smoothstep(distance,.75,3.2);if(proximity>.03){item.mesh.material.opacity=item.baseOpacity*(1-proximity*.95);item.mesh.material.emissiveIntensity=item.baseEmissive*(1-proximity*.9);item.mesh.material.depthWrite=false;item.edge.visible=true;item.edge.material.opacity=.3+proximity*.62;}else{item.mesh.material.opacity=item.baseOpacity;item.mesh.material.emissiveIntensity=item.baseEmissive;item.mesh.material.depthWrite=item.baseDepthWrite;item.edge.visible=false;}});}
+    function makeBeamDetail(){const g=new THREE.Group(),outer=new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,1.9,40,1,true),material(0x65798a,0x9ab4c8,.12,{metalness:.9,roughness:.24,side:THREE.DoubleSide})),vacuum=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,2.02,32),material(0x113b4a,0x39d9ff,.3,{transparent:true,opacity:.62}));outer.rotation.z=vacuum.rotation.z=Math.PI/2;g.add(outer,vacuum);[-.84,.84].forEach(x=>{const flange=new THREE.Mesh(new THREE.TorusGeometry(.35,.045,10,32),material(0x8a9aa7,0xc8d8e4,.1,{metalness:.94,roughness:.2}));flange.rotation.y=Math.PI/2;flange.position.x=x;g.add(flange);});for(let i=0;i<9;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(.045,12,12),new THREE.MeshBasicMaterial({color:i%2?0x39d9ff:0xffcb45}));p.position.set(-.66+i*.17,(i%2?1:-1)*.045,0);g.add(p);}return g;}
+    function mountDetailModel(key){const host=$('detailScene');if(!host)return;if(!detailRenderer){detailRenderer=new THREE.WebGLRenderer({antialias:true,alpha:true});detailRenderer.setPixelRatio(Math.min(devicePixelRatio,2));detailRenderer.outputColorSpace=THREE.SRGBColorSpace;detailRenderer.toneMapping=THREE.ACESFilmicToneMapping;detailRenderer.toneMappingExposure=1.08;detailRenderer.shadowMap.enabled=true;detailScene3D=new THREE.Scene();detailScene3D.environment=roomEnv.texture;detailScene3D.add(new THREE.HemisphereLight(0xbadfff,0x05070b,1.35));const dl=new THREE.DirectionalLight(0xffffff,3.2);dl.position.set(3,4,5);detailScene3D.add(dl);const dr=new THREE.PointLight(0xa66cff,12,14);dr.position.set(-3,1,-2);detailScene3D.add(dr);detailCamera=new THREE.PerspectiveCamera(34,1,.05,30);detailControls=new OrbitControls(detailCamera,detailRenderer.domElement);detailControls.enableDamping=true;detailControls.dampingFactor=.1;detailControls.enablePan=false;detailControls.minDistance=1.3;detailControls.maxDistance=5.2;detailControls.zoomSpeed=.8;detailControls.rotateSpeed=.65;}host.insertBefore(detailRenderer.domElement,host.firstChild);if(detailModel)detailScene3D.remove(detailModel);const source=key==='magnet'?magnetG.children[0]:key==='rf'?rfG.children[0]:key==='detector'?dp:null;detailModel=source?source.clone(true):makeBeamDetail();detailModel.position.set(0,0,0);if(key==='detector'&&detailModel.children[0])detailModel.children[0].visible=false;const box=new THREE.Box3().setFromObject(detailModel),center=box.getCenter(new THREE.Vector3()),sphere=box.getBoundingSphere(new THREE.Sphere());detailModel.position.sub(center);detailModel.scale.setScalar(.93/Math.max(.5,sphere.radius));detailModel.rotation.y+=key==='detector'?.26:.42;detailScene3D.add(detailModel);detailCamera.aspect=host.clientWidth/host.clientHeight;detailCamera.updateProjectionMatrix();detailCamera.position.copy(key==='detector'?new THREE.Vector3(.35,.28,2.55):new THREE.Vector3(1.45,.88,1.85));detailControls.target.set(0,0,0);detailControls.update();detailRenderer.setSize(host.clientWidth,host.clientHeight,false);host.dataset.model=key;}
+    const revealSteps=[
+      {key:'beam',label:'01 · 真空环轨',caption:'先建立粒子运行的真空跑道',color:'#39d9ff'},
+      {key:'magnet',label:'02 · 超导磁铁',caption:'磁铁逐段装上，负责转弯和聚焦',color:'#a66cff'},
+      {key:'rf',label:'03 · RF 加速腔',caption:'黄色腔体提供周期变化的电场',color:'#ffcb45'},
+      {key:'detector',label:'04 · 碰撞探测器',caption:'多层探测器包围唯一的碰撞点 IP1',color:'#ff6577'},
+      {key:'detector',label:'05 · 束流与碰撞',caption:'两束粒子启动，在 IP1 相撞并产生碎片',color:'#4de3a2'}
+    ];
+    let revealIndex=0,revealTimer=null,sequenceActive=false;
+    const stagedGroups=[beamG,magnetG,rfG,detectorG];
+    stagedGroups.forEach(g=>{g.visible=false;g.userData.revealTarget=0;g.children.forEach((child,i)=>{child.userData.buildBase=child.position.clone();child.userData.buildFrom=child.position.clone();if(g===magnetG){child.userData.buildFrom.multiplyScalar(1.58);child.userData.buildFrom.y+=.7+(i%3)*.28;}else if(g===rfG){child.userData.buildFrom.multiplyScalar(1.72);child.userData.buildFrom.y+=1.15;}else if(g===detectorG){child.userData.buildFrom.x+=2.8;child.userData.buildFrom.y+=1.25;}child.userData.buildReveal=0;child.userData.buildDelay=i*(g===beamG?.14:.07);});});
+    [collisionSequence,particleLayer].forEach(g=>g.visible=false);
+    function updateBuildUI(index){const step=revealSteps[index];$('buildSequence').style.setProperty('--stage-color',step.color);$('buildStage').textContent=step.label;$('buildCaption').textContent=step.caption;[...$('buildDots').children].forEach((d,i)=>{d.classList.toggle('done',i<index);d.classList.toggle('active',i===index);});$('buildSequence').dataset.stage=String(index+1);}
+    function setReveal(index,auto=true){clearTimeout(revealTimer);revealIndex=index;sequenceActive=auto;stagedGroups.forEach((g,i)=>{if(i<=Math.min(index,3)&&!g.userData.revealTarget){g.visible=true;g.userData.revealTarget=1;g.userData.buildStart=performance.now()*.001;}});if(index>=4){collisionSequence.visible=true;particleLayer.visible=true;}updateBuildUI(index);selectPart(revealSteps[index].key,false);$('statusText').textContent=index<4?'ASSEMBLY · PARTS MOVING INTO PLACE':'BEAM ON · COLLISION ACTIVE';if(auto&&index<4)revealTimer=setTimeout(()=>setReveal(index+1,true),1900);else sequenceActive=false;}
+    function completeReveal(){clearTimeout(revealTimer);sequenceActive=false;revealIndex=4;stagedGroups.forEach(g=>{g.visible=true;g.userData.revealTarget=1;g.children.forEach(child=>{child.userData.buildReveal=1;child.visible=true;child.position.copy(child.userData.buildBase);});});collisionSequence.visible=true;particleLayer.visible=true;updateBuildUI(4);}
+    function startReveal(){clearTimeout(revealTimer);stagedGroups.forEach(g=>{g.visible=false;g.userData.revealTarget=0;g.scale.setScalar(1);g.children.forEach(child=>{child.userData.buildReveal=0;child.visible=false;child.position.copy(child.userData.buildFrom);});});collisionSequence.visible=false;particleLayer.visible=false;setReveal(0,true);}
+    $('replayBuild').onclick=startReveal;
+    function highlightPart(key){Object.entries(groups).forEach(([name,g])=>g.traverse(o=>{if(o.isMesh&&o.material?.emissive){const mats=Array.isArray(o.material)?o.material:[o.material];mats.forEach(m=>{if(m.userData.baseGlow)m.emissiveIntensity=m.userData.baseGlow*((key==='overview'||name===key)?1.38:.62);});}}));}
+    function selectPart(key,fromUser=true){selected=key;if(fromUser)completeReveal();document.querySelectorAll('[data-part]').forEach(b=>b.classList.toggle('active',b.dataset.part===key));highlightPart(key);$('vizTitle').textContent=PARTS[key].name;$('vizSubtitle').textContent=PARTS[key].text.split('。')[0]+'。';}
+    const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),vizEl=document.querySelector('.viz');let down={x:0,y:0},activeDragPointer=null,hoveredPart=null;
+    const hotspotTargets={
+      beam:{point:new THREE.Vector3(-R,0,0)},
+      rf:{object:rfG.children[1]},
+      magnet:{object:magnetG.children[9]},
+      detector:{object:dp}
+    };
+    function updateHotspots(){if(viewMode!=='device')return;world.updateMatrixWorld(true);document.querySelectorAll('[data-hotspot]').forEach(button=>{const target=hotspotTargets[button.dataset.hotspot],p=target.object?target.object.getWorldPosition(new THREE.Vector3()):target.point.clone().applyMatrix4(world.matrixWorld);p.project(camera);const visible=p.z<1&&p.z>-1;button.style.left=`${(p.x*.5+.5)*sceneEl.clientWidth}px`;button.style.top=`${(-p.y*.5+.5)*sceneEl.clientHeight}px`;button.style.opacity=visible?1:0;button.style.pointerEvents=visible?'auto':'none';});}
+    const detectorCalloutPoint=new THREE.Vector3(),detectorCalloutRadius={tracker:.28,calorimeter:.72,muon:1.12};
+    function updateDetectorCallouts(){if(!vizEl.classList.contains('data-reveal'))return;world.updateMatrixWorld(true);document.querySelectorAll('[data-detector-callout]').forEach(button=>{const marker=evidenceMarkers[button.dataset.detectorCallout];if(reportDiscoveryStage>0&&marker)marker.getWorldPosition(detectorCalloutPoint);else{detectorCalloutPoint.set(0,detectorCalloutRadius[button.dataset.detectorCallout],0);dp.localToWorld(detectorCalloutPoint);}detectorCalloutPoint.project(camera);const visible=detectorCalloutPoint.z<1&&detectorCalloutPoint.z>-1,y=THREE.MathUtils.clamp((-detectorCalloutPoint.y*.5+.5)*sceneEl.clientHeight,82,sceneEl.clientHeight-70);button.style.left=`${(detectorCalloutPoint.x*.5+.5)*sceneEl.clientWidth-36}px`;button.style.top=`${y}px`;button.style.opacity=visible?1:0;button.style.pointerEvents=visible?'auto':'none';});}
+    const trackCalloutPoint=new THREE.Vector3();
+    function applyTrackFocus(index){selectedTrackIndex=index;document.querySelectorAll('[data-track-callout]').forEach(button=>button.classList.toggle('active',Number(button.dataset.trackCallout)===selectedTrackIndex));sceneEl.dataset.selectedTrack=selectedTrackIndex===null?'all':String(selectedTrackIndex);}
+    function setTrackFocus(index){if(vizEl.classList.contains('data-reveal')&&reportDiscoveryStage<4&&index===4){setReportStage(reportDiscoveryStage+1);return;}applyTrackFocus(selectedTrackIndex===index?null:index);if(vizEl.classList.contains('data-reveal'))$('statusText').textContent=selectedTrackIndex===null?`REPORT CAMERA · ${REPORT_VIEWS[selectedDetectorLayer||'tracker'].label}`:`TRACK LOCK · ${document.querySelector(`[data-track-callout="${selectedTrackIndex}"] strong`).textContent}`;}
+    function updateTrackCallouts(){if(!vizEl.classList.contains('data-reveal'))return;world.updateMatrixWorld(true);TRACK_INFO.forEach(info=>{const track=collisionTracks.children[info.index],button=document.querySelector(`[data-track-callout="${info.index}"]`);track.userData.hit.getWorldPosition(trackCalloutPoint);trackCalloutPoint.project(camera);const visible=trackCalloutPoint.z<1&&trackCalloutPoint.z>-1,maxX=Math.max(180,sceneEl.clientWidth-500),anchorX=(trackCalloutPoint.x*.5+.5)*sceneEl.clientWidth,anchorY=(-trackCalloutPoint.y*.5+.5)*sceneEl.clientHeight,x=THREE.MathUtils.clamp(anchorX+info.offset[0],90,maxX),y=THREE.MathUtils.clamp(anchorY+info.offset[1],76,sceneEl.clientHeight-60),dx=anchorX-x,dy=anchorY-y;button.style.left=`${x}px`;button.style.top=`${y}px`;button.style.opacity=visible?1:0;button.style.pointerEvents=visible?'auto':'none';button.style.setProperty('--leader-length',`${Math.hypot(dx,dy)}px`);button.style.setProperty('--leader-angle',`${Math.atan2(dy,dx)}rad`);button.dataset.anchor=trackCalloutPoint.toArray().map(v=>v.toFixed(3)).join(',');});}
+    function setLifeStep(index,fromUser=false){lifeStep=index;const step=LIFE[index];if(fromUser)lifeHoldUntil=performance.now()+4500;$('lifeCount').textContent=`0${index+1} / 05`;$('lifeTitle').textContent=step.title;$('lifeCopy').textContent=step.copy;$('energyValue').textContent=`${step.energy}%`;$('energyFill').style.width=`${step.energy}%`;$('lifeNote').textContent=step.note;document.querySelectorAll('[data-life-step]').forEach(b=>b.classList.toggle('active',Number(b.dataset.lifeStep)===index));highlightPart(step.focus);$('vizTitle').textContent=step.title;$('vizSubtitle').textContent=step.note;$('statusText').textContent=index===1||index===3?'RF FIELD ON · ENERGY RISING':index===2?'MAGNETS STEER · ENERGY CONSTANT':index===4?'IP1 · COLLISION SEQUENCE':'BEAM INJECTION · BUNCH FORMED';}
+    const DETECTOR_LAYERS={
+      tracker:{shells:[0,1]},calorimeter:{shells:[2]},muon:{shells:[3]}
+    };
+    const REPORT_VIEWS={
+      tracker:{camera:[1.4,1.35,R+3.2],look:[0,.02,R],label:'内层近景 · 看一串命中点'},
+      calorimeter:{camera:[2,1.55,R+3.9],look:[0,.08,R],label:'中层视角 · 看发亮能量团'},
+      muon:{camera:[2.7,1.9,R+4.8],look:[0,.18,R],label:'外层全景 · 看粒子是否穿透'}
+    };
+    let selectedDetectorLayer=null;
+    function resetDetectorLayers(){selectedDetectorLayer=null;detectorShells.forEach(shell=>{shell.material.opacity=shell.userData.baseOpacity;shell.material.emissiveIntensity=shell.userData.baseEmissive;});}
+    function setDetectorLayer(key){const d=DETECTOR_LAYERS[key];selectedDetectorLayer=key;document.querySelectorAll('[data-detector-layer]').forEach(button=>button.classList.toggle('active',button.dataset.detectorLayer===key));document.querySelectorAll('[data-detector-ring]').forEach(ring=>ring.classList.toggle('active',ring.dataset.detectorRing===key));detectorShells.forEach((shell,index)=>{const active=d.shells.includes(index);shell.material.opacity=active ? .88 : .1;shell.material.emissiveIntensity=active ? shell.userData.baseEmissive*2.35 : .12;});sceneEl.dataset.detectorLayer=key;sceneEl.dataset.reportView=key;if(vizEl.classList.contains('data-reveal')){reportCameraUserControlled=false;controls.enabled=false;controls.enableZoom=false;sceneEl.dataset.reportCamera='aligning';$('statusText').textContent=`REPORT CAMERA · ${REPORT_VIEWS[key].label}`;}}
+    const DQM_EXPLAIN={
+      spectrum:{layer:'tracker',tag:'当前读法 · 双 μ 质量谱',title:'μ+ 与 μ− 像两块拼图，反推出它们来自谁',copy:'这不是把两个 μ 子的质量相加。探测器量出两条 μ 子各自的飞行方向和动量，再用碰撞的能量—动量关系反推母粒子的质量。许多事件都算一次，结果大量集中在 91.19 GeV，说明这些 μ 子很可能来自 Z 粒子；如果整座峰一起偏移，才优先怀疑动量测量有系统误差。'},
+      occupancy:{layer:'calorimeter',tag:'当前读法 · 占有率',title:'数每个区域有多少通道收到信号',copy:'占有率不是能量大小，而是有信号通道的比例。总量稳定但某一区域突然变低，通常指向局部通道、供电、读出或重建效率问题。'},
+      drift:{layer:'muon',tag:'当前读法 · 跨时间片漂移',title:'把同一个测量量连续重复比较',copy:'Agent 把质量峰、占有率或时间响应按 chunk 排列。单点偏离可能是噪声；连续时间片同方向变化且统计显著，才判断系统正在漂移。'}
+    };
+    const MASS_RECONSTRUCTION=`<div class="mass-reconstruction" role="img" aria-label="负缪子和正缪子的方向与动量共同指向质量为 91.19 GeV 的 Z 粒子候选；许多事件的结果叠加成质量峰"><svg viewBox="0 0 410 142" aria-hidden="true"><path class="mass-link minus" d="M94 38 C128 38 148 57 166 66"/><path class="mass-link plus" d="M94 104 C128 104 148 85 166 76"/><circle class="mass-minus" cx="42" cy="38" r="19" opacity=".16"/><circle class="mass-plus" cx="42" cy="104" r="19" opacity=".16"/><text x="42" y="36">μ−</text><text class="mass-value" x="42" y="48">46 GeV</text><text x="42" y="102">μ+</text><text class="mass-value" x="42" y="114">44 GeV</text><g class="mass-z"><circle class="mass-node" cx="196" cy="71" r="31"/><text x="196" y="68">Z?</text><text class="mass-value" x="196" y="82">91.19 GeV</text></g><path class="mass-flow" d="M230 71 H274"/><path class="mass-flow" d="M266 66 L274 71 L266 76"/><line class="mass-axis" x1="286" y1="113" x2="400" y2="113"/><path class="mass-spectrum" d="M286 112 C314 111 336 110 348 103 C355 92 357 43 362 29 C368 44 368 92 375 103 C383 109 391 111 400 112"/><line class="mass-focus" x1="362" y1="22" x2="362" y2="113"/><text class="mass-value" x="362" y="15">91.19 GeV</text></svg><div class="mass-visual-key"><b>方向 + 动量</b><i>→</i><b>Z 候选</b><i>→</i><b>许多事件叠成峰</b></div></div>`;
+    const REPORT_STORY=[
+      {question:'先别看报告：哪条粒子飞得最远？',clue:'观察碰撞中心。大多数轨迹很快停止；只有一条粉红长线穿到了最外圈。',cta:'锁定这条最长轨迹 →'},
+      {question:'第一站：它在内层留下了什么？',clue:'镜头靠近最内层。粉红轨迹不是画出来的箭头，而是许多硅传感器命中点连成的弯线；弯曲程度给出动量。',cta:'继续跟着同一条轨迹往外走 →'},
+      {question:'第二站：它为什么没停在中层？',clue:'量能器里没有沿这条轨迹出现大的能量团。它只留下很少能量，继续向外穿透。',cta:'它还没停，追到最外层 →'},
+      {question:'第三站：最外层又命中了',clue:'外层命中与内层弯线对齐，说明这条是 μ−；内层弯曲程度同时给出 46 GeV 动量。要追溯碰撞来源，还要找到同一事件里的另一条 μ+。',cta:'把这对 μ 子放进报告 →'}
+    ];
+    let reportDiscoveryStage=0;
+    function setReportStage(index){
+      reportDiscoveryStage=THREE.MathUtils.clamp(index,0,4);vizEl.dataset.reportStage=String(reportDiscoveryStage);sceneEl.dataset.reportStage=String(reportDiscoveryStage);applyTrackFocus(4);setEvidenceStage(reportDiscoveryStage);
+      const label=document.querySelector('[data-track-callout="4"]'),title=label.querySelector('strong'),copy=label.querySelector('span');title.textContent=reportDiscoveryStage===0?'？ 这条为什么最长':reportDiscoveryStage<3?'未知带电粒子':'μ− · 46 GeV';copy.textContent=reportDiscoveryStage===0?'点这条粉红轨迹继续':reportDiscoveryStage<3?'沿着同一条轨迹继续追':'穿过三层 · 向左弯';label.classList.toggle('active',reportDiscoveryStage>0);
+      if(reportDiscoveryStage<4){const story=REPORT_STORY[reportDiscoveryStage];$('curiosityStep').textContent=`DISCOVERY · 0${reportDiscoveryStage+1} / 05`;$('curiosityQuestion').textContent=story.question;$('curiosityClue').textContent=story.clue;$('curiosityNext').textContent=story.cta;document.querySelectorAll('#curiosityProgress i').forEach((dot,i)=>dot.classList.toggle('done',i<=reportDiscoveryStage));}
+      if(reportDiscoveryStage===0){setDetectorLayer('muon');label.classList.remove('active');$('statusText').textContent='DISCOVERY · FIND THE LONGEST TRACK';}
+      else if(reportDiscoveryStage===1){setDetectorLayer('tracker');$('statusText').textContent='CLUE 01 · INNER TRACKER HITS';}
+      else if(reportDiscoveryStage===2){setDetectorLayer('calorimeter');$('statusText').textContent='CLUE 02 · LITTLE ENERGY LEFT HERE';}
+      else if(reportDiscoveryStage===3){setDetectorLayer('muon');$('statusText').textContent='CLUE 03 · OUTER HIT CONFIRMS A MUON';}
+      else{applyTrackFocus(null);document.querySelectorAll('[data-track-callout="4"],[data-track-callout="9"]').forEach(label=>label.classList.add('active'));sceneEl.dataset.selectedTrack='dimuon-pair';setDqmMetric('spectrum');$('statusText').textContent='REPORT · μ+ + μ− REVEAL THEIR PARENT PARTICLE';}
+    }
+    function setDqmMetric(key){const d=DQM_EXPLAIN[key];document.querySelectorAll('[data-metric]').forEach(card=>card.classList.toggle('active',card.dataset.metric===key));$('dqmExplain').innerHTML=key==='spectrum'?MASS_RECONSTRUCTION:`<span>${d.tag}</span><strong>${d.title}</strong><p>${d.copy}</p>`;setDetectorLayer(d.layer);}
+    function setViewMode(mode){viewMode=mode;vizEl.dataset.view=mode;document.querySelectorAll('[data-view-mode]').forEach(b=>b.classList.toggle('active',b.dataset.viewMode===mode));completeReveal();if(mode==='device'){selectPart(selected==='overview'?'beam':selected,false);$('statusText').textContent='CLICK LABELS · INSPECT EACH MODULE';}else if(mode==='lifecycle'){setLifeStep(lifeStep,false);}else{$('vizTitle').textContent='DQM Agent：数据如何读';$('vizSubtitle').textContent='把分布、占有率与时间趋势组合成可解释的质量判断';$('statusText').textContent='DATA INTERPRETATION · EXAMPLE VIEW';highlightPart('overview');}}
+    document.querySelectorAll('[data-view-mode]').forEach(button=>button.onclick=()=>setViewMode(button.dataset.viewMode));
+    document.querySelectorAll('[data-life-step]').forEach(button=>button.onclick=()=>setLifeStep(Number(button.dataset.lifeStep),true));
+    document.querySelectorAll('[data-metric]').forEach(card=>card.onclick=()=>setDqmMetric(card.dataset.metric));
+    document.querySelectorAll('[data-detector-layer]').forEach(button=>button.onclick=()=>setDetectorLayer(button.dataset.detectorLayer));
+    document.querySelectorAll('[data-track-callout]').forEach(button=>button.onclick=()=>setTrackFocus(Number(button.dataset.trackCallout)));
+    const missionCamGoal=new THREE.Vector3(),missionLookGoal=new THREE.Vector3(),missionWideGoal=new THREE.Vector3(),missionWideLook=new THREE.Vector3(),missionApproachA=new THREE.Vector3(),missionApproachB=new THREE.Vector3(),missionTangentA=new THREE.Vector3(),missionTangentB=new THREE.Vector3(),reportCameraGoal=new THREE.Vector3(),reportLookGoal=new THREE.Vector3(),reportLookCurrent=new THREE.Vector3();let reportCameraUserControlled=false;
+    function updateReportCamera(){if(reportCameraUserControlled){controls.update();return;}const view=REPORT_VIEWS[selectedDetectorLayer||'tracker'];world.updateMatrixWorld(true);reportCameraGoal.set(...view.camera);world.localToWorld(reportCameraGoal);reportLookGoal.set(...view.look);world.localToWorld(reportLookGoal);camera.position.lerp(reportCameraGoal,.055);reportLookCurrent.lerp(reportLookGoal,.075);camera.up.set(0,1,0);camera.lookAt(reportLookCurrent);const distance=camera.position.distanceTo(reportCameraGoal);sceneEl.dataset.camera=camera.position.toArray().map(v=>v.toFixed(3)).join(',');sceneEl.dataset.target=reportLookCurrent.toArray().map(v=>v.toFixed(3)).join(',');sceneEl.dataset.reportCameraDistance=distance.toFixed(3);if(distance<.015){reportCameraUserControlled=true;controls.target.copy(reportLookCurrent);controls.enabled=true;controls.enableZoom=true;controls.minDistance=2.2;controls.maxDistance=9;controls.update();sceneEl.dataset.reportCamera='interactive';}}
+    const FLIGHT_DEVICE=['BEAM PIPE','RF ELECTRIC FIELD','DIPOLE + QUADRUPOLE','RF · NEXT LAP','IP1 COLLISION'];
+    const PREVIEW_STAGE=['INJECTION','RF BOOST','MAGNET ARC','SECOND LAP','APPROACH IP1'];
+    const ORBIT_DURATION=24,ORBIT_START_OMEGA=Math.PI*4/(ORBIT_DURATION*1.75),ORBIT_ACCELERATION=ORBIT_START_OMEGA*1.5/ORBIT_DURATION,MISSION_DURATION=34;
+    function setMissionStage(index){if(index===missionStage)return;missionStage=index;setLifeStep(index,false);$('flightKicker').textContent=`PARTICLE POV · STAGE 0${index+1} / 05 · ${FLIGHT_DEVICE[index]}`;$('flightTitle').textContent=LIFE[index].title;$('flightCopy').textContent=LIFE[index].copy;$('previewStage').textContent=PREVIEW_STAGE[index];sceneEl.dataset.deviceAhead=FLIGHT_DEVICE[index];vizEl.classList.toggle('mission-collision',index===4);}
+    function startParticleMission(){
+      completeReveal();beamG.visible=true;magnetG.visible=true;rfG.visible=true;paused=false;$('pause').textContent='Ⅱ';missionActive=true;missionStart=performance.now();missionElapsed=0;missionStage=-1;missionCameraStart.copy(camera.position);missionTargetStart.copy(controls.target);viewMode='lifecycle';vizEl.dataset.view='lifecycle';vizEl.classList.add('mission-active');vizEl.classList.remove('mission-collision','impact-visible','data-reveal');vizEl.removeAttribute('data-report-stage');sceneEl.removeAttribute('data-report-stage');controls.enabled=false;controls.enableZoom=false;reportCameraUserControlled=false;reportDiscoveryStage=0;applyTrackFocus(null);resetDetectorLayers();missionBunch.visible=true;missionBunchB.visible=false;[missionBunch,missionBunchB].forEach(g=>g.children.forEach(p=>{if(p.material)p.material.opacity=p.userData.baseOpacity??1;if(Number.isFinite(p.userData.baseZ))p.position.z=p.userData.baseZ;}));particleLayer.visible=false;collisionSequence.visible=true;$('eventOrigin').textContent='等待两束粒子在 IP1 真正重合…';setMissionStage(0);
+    }
+    function exitParticleMission(){
+      if(!missionActive)return;missionActive=false;missionBunch.visible=false;missionBunchB.visible=false;particleLayer.visible=true;updateMissionXray(false);vizEl.classList.remove('mission-active','mission-collision','impact-visible','data-reveal');controls.enabled=true;controls.enableZoom=false;camera.position.copy(missionCameraStart);controls.target.copy(missionTargetStart);controls.update();viewMode='device';vizEl.dataset.view='device';
+    }
+    function finishParticleMission(){
+      if(!missionActive)return;missionActive=false;missionBunch.visible=false;missionBunchB.visible=false;particleLayer.visible=false;beamG.visible=false;magnetG.visible=false;rfG.visible=false;updateMissionXray(false);vizEl.classList.remove('mission-active','mission-collision','impact-visible');vizEl.classList.add('data-reveal');viewMode='immersive';vizEl.dataset.view='immersive';controls.enabled=false;controls.enableZoom=false;reportCameraUserControlled=false;reportLookCurrent.set(0,.05,R);world.localToWorld(reportLookCurrent);$('dragHint').textContent='先跟随视觉提示 · 对齐后可拖动旋转与缩放';$('eventOrigin').textContent='本次 IP1 碰撞的径迹与能量信号 → 质量、占有率和时间片';setReportStage(0);
+    }
+    function missionEnergy(elapsed){if(elapsed<4)return 8;if(elapsed<9)return Math.round(8+(elapsed-4)/5*27);if(elapsed<15)return 35;if(elapsed<24)return Math.round(35+(elapsed-15)/9*47);return 82;}
+    function updateMission(elapsed){
+      const stage=elapsed<4?0:elapsed<9?1:elapsed<15?2:elapsed<24?3:4;setMissionStage(stage);vizEl.classList.toggle('mission-collision',elapsed>=24);const energy=missionEnergy(elapsed),orbitT=Math.min(elapsed,ORBIT_DURATION),traveled=ORBIT_START_OMEGA*orbitT+.5*ORBIT_ACCELERATION*orbitT*orbitT,currentOmega=ORBIT_START_OMEGA+ORBIT_ACCELERATION*orbitT,speedRatio=currentOmega/ORBIT_START_OMEGA,lap=traveled<Math.PI*2?1:2,approachU=THREE.MathUtils.clamp((elapsed-24)/3.1,0,1),displayedSpeed=elapsed<ORBIT_DURATION?speedRatio:elapsed<27.1?2.5*Math.pow(1-approachU,2):0,isDecelerating=elapsed>=ORBIT_DURATION,collisionEta=27.1-elapsed,countdownEl=$('impactCountdown');$('flightEnergy').textContent=`${energy}%`;$('flightLap').textContent=elapsed<ORBIT_DURATION?`第 ${lap} 圈`:'已完成 2 圈';$('flightRateLabel').textContent=isDecelerating?'教学减速倍率':'教学加速倍率';$('flightRateGauge').classList.toggle('rate-decel',isDecelerating);$('flightSpeed').textContent=`×${displayedSpeed.toFixed(2)}`;$('physicsNote').textContent=isDecelerating?'此处减速仅用于看清两束相向重合；真实束流不会在碰撞前刹车。':'视觉上放大圈速差；真实质子接近光速后，RF 主要继续增加能量与动量。';$('impactCountdownLabel').textContent=collisionEta>0?'预计碰撞':'IP1 碰撞已发生';$('impactCountdownValue').textContent=collisionEta>0?`T−${collisionEta.toFixed(1)} s`:`T+${Math.abs(collisionEta).toFixed(1)} s`;countdownEl.classList.toggle('imminent',collisionEta>0&&collisionEta<=5);countdownEl.classList.toggle('hit',collisionEta<=0);$('missionProgress').style.width=`${Math.min(100,elapsed/MISSION_DURATION*100)}%`;sceneEl.dataset.collisionEta=collisionEta.toFixed(2);sceneEl.dataset.orbitAngle=Math.min(Math.PI*4,traveled).toFixed(3);sceneEl.dataset.orbitSpeed=displayedSpeed.toFixed(2);sceneEl.dataset.motionMode=isDecelerating?'decelerating':'accelerating';sceneEl.dataset.motionMultiplier=displayedSpeed.toFixed(2);sceneEl.dataset.orbitLap=elapsed<ORBIT_DURATION?String(lap):'complete';
+      if(elapsed<ORBIT_DURATION){const a=rightA+Math.min(Math.PI*4,traveled);missionBunch.position.set(Math.cos(a)*R,.1,Math.sin(a)*R);missionBunch.rotation.y=-a;missionBunch.children.forEach(p=>{if(Number.isFinite(p.userData.baseZ))p.position.z=p.userData.baseZ*(1+.55*(speedRatio-1));});missionBunchB.visible=false;sceneEl.dataset.beamSeparation='outside-ip1';$('collisionDistance').textContent='两条独立束流管正在汇入同一碰撞轴';}else{[missionBunch,missionBunchB].forEach(g=>g.children.forEach(p=>{if(Number.isFinite(p.userData.baseZ))p.position.z=p.userData.baseZ;}));const approach=1-Math.pow(1-approachU,3),ta=approach*.5,tb=1-approach*.5;mergeCurveA.getPoint(ta,missionApproachA);mergeCurveA.getPoint(tb,missionApproachB);mergeCurveA.getTangent(ta,missionTangentA);mergeCurveA.getTangent(tb,missionTangentB).multiplyScalar(-1);missionBunch.position.copy(missionApproachA);missionBunch.rotation.y=Math.atan2(missionTangentA.x,missionTangentA.z);missionBunchB.position.copy(missionApproachB);missionBunchB.rotation.y=Math.atan2(missionTangentB.x,missionTangentB.z);missionBunchB.visible=true;const separation=missionApproachA.distanceTo(missionApproachB);arrowA.position.z=-Math.max(.18,separation*.5-.16);arrowB.position.z=Math.max(.18,separation*.5-.16);sceneEl.dataset.beamSeparation=separation.toFixed(3);$('collisionDistance').textContent=separation>.02?`交汇段内 · 两束中心距离 ${separation.toFixed(2)} m`:'同一碰撞轴中心重合 · 现在才发生碰撞';}const bunchFade=1-THREE.MathUtils.smoothstep(elapsed,27.1,27.48);[missionBunch,missionBunchB].forEach(g=>g.children.forEach(p=>{if(p.material)p.material.opacity=(p.userData.baseOpacity??1)*bunchFade;}));sceneEl.dataset.opposingBunch=missionBunchB.visible?'visible':'hidden';world.updateMatrixWorld(true);
+      missionCamGoal.set(-.32,.34,-.42);missionBunch.localToWorld(missionCamGoal);missionLookGoal.set(-.08,.11,.92);missionBunch.localToWorld(missionLookGoal);
+      if(elapsed>23.8){const pull=THREE.MathUtils.smoothstep(elapsed,23.8,24.8);missionWideGoal.set(0,2.15,R+3.15);world.localToWorld(missionWideGoal);missionWideLook.copy(dp.position);missionWideLook.y=.05;world.localToWorld(missionWideLook);missionCamGoal.lerp(missionWideGoal,pull);missionLookGoal.lerp(missionWideLook,pull);}
+      sceneEl.dataset.missionPosition=missionBunch.position.toArray().map(v=>v.toFixed(3)).join(',');camera.position.lerp(missionCamGoal,.12);camera.up.set(0,1,0);camera.lookAt(missionLookGoal);sceneEl.dataset.camera=camera.position.toArray().map(v=>v.toFixed(3)).join(',');updateMissionXray(true);
+    }
+    const previewProject=new THREE.Vector3();let lastPreviewRender=0;
+    function renderOrbitPreview(nowMs){if(!missionActive||nowMs-lastPreviewRender<55)return;lastPreviewRender=nowMs;missionCore.getWorldPosition(previewProject).project(previewCamera);const marker=$('previewMarker'),w=previewHost.clientWidth,h=previewHost.clientHeight,x=THREE.MathUtils.clamp((previewProject.x*.5+.5)*w,14,w-32),y=THREE.MathUtils.clamp((-previewProject.y*.5+.5)*h,28,h-18);marker.style.left=`${x}px`;marker.style.top=`${y}px`;marker.dataset.x=previewProject.x.toFixed(3);marker.dataset.y=previewProject.y.toFixed(3);previewRenderer.render(scene,previewCamera);}
+    function updateParticleEntry(){if(viewMode!=='device'||missionActive)return;const p=particles[18].getWorldPosition(new THREE.Vector3()).project(camera),button=$('particleEntry'),visible=p.z<1&&p.z>-1;button.style.left=`${(p.x*.5+.5)*sceneEl.clientWidth}px`;button.style.top=`${(-p.y*.5+.5)*sceneEl.clientHeight-24}px`;button.style.opacity=visible?1:0;button.style.pointerEvents=visible?'auto':'none';}
+    $('particleEntry').onclick=startParticleMission;$('flightExit').onclick=exitParticleMission;$('skipCollision').onclick=()=>{if(missionActive)missionStart=performance.now()-23800;};$('curiosityNext').onclick=()=>setReportStage(reportDiscoveryStage+1);$('reviewEvidence').onclick=()=>setReportStage(0);$('restartMission').onclick=startParticleMission;
+    function restoreHover(){hoveredPart=null;vizEl.classList.remove('particle-hover');document.querySelectorAll('[data-hotspot]').forEach(b=>b.classList.remove('hover-3d'));if(!missionActive)highlightPart(viewMode==='lifecycle'?LIFE[lifeStep].focus:selected);sceneEl.style.cursor='grab';}
+    renderer.domElement.addEventListener('pointermove',e=>{if(missionActive||e.buttons)return;const r=renderer.domElement.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(clickable,false),trackHit=hits.find(h=>Number.isInteger(h.object.userData.trackIndex));if(vizEl.classList.contains('data-reveal')){sceneEl.style.cursor=trackHit?'pointer':'grab';return;}const particleHit=hits.find(h=>h.object.userData.mission);if(particleHit){if(hoveredPart!==null)restoreHover();vizEl.classList.add('particle-hover');sceneEl.style.cursor='pointer';return;}vizEl.classList.remove('particle-hover');const hit=hits[0];let o=hit?.object;while(o&&!o.userData.part)o=o.parent;const part=o?.userData.part||null;if(part!==hoveredPart){hoveredPart=part;document.querySelectorAll('[data-hotspot]').forEach(b=>b.classList.toggle('hover-3d',b.dataset.hotspot===part));if(part)highlightPart(part);else highlightPart(viewMode==='lifecycle'?LIFE[lifeStep].focus:selected);}sceneEl.style.cursor=part?'pointer':'grab';});
+    renderer.domElement.addEventListener('pointerleave',restoreHover);
+    function leaveDragMode(cancelPointer=false){if(cancelPointer&&activeDragPointer!==null){try{renderer.domElement.dispatchEvent(new PointerEvent('pointercancel',{pointerId:activeDragPointer,pointerType:'mouse',bubbles:true}));}catch{}}activeDragPointer=null;vizEl.classList.remove('dragging');if(vizEl.classList.contains('data-reveal')){$('dragHint').textContent='拖动旋转探测器 · 滚轮缩放 · 点击轨迹锁定';$('statusText').textContent=selectedTrackIndex===null?`REPORT CAMERA · ${REPORT_VIEWS[selectedDetectorLayer||'tracker'].label}`:`TRACK LOCK · ${document.querySelector(`[data-track-callout="${selectedTrackIndex}"] strong`).textContent}`;return;}$('dragHint').textContent='水平拖动旋转 · 点击模块查看剖面';$('statusText').textContent=paused?'BEAM PAUSED · INSPECTION':revealIndex<4?'ASSEMBLY · PARTS MOVING INTO PLACE':'DRAG READY · VIEW LOCKED';}
+    renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};activeDragPointer=e.pointerId;});renderer.domElement.addEventListener('pointerup',e=>{if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>5)return;const r=renderer.domElement.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(clickable,false),trackHit=hits.find(h=>Number.isInteger(h.object.userData.trackIndex));if(vizEl.classList.contains('data-reveal')){if(trackHit)setTrackFocus(trackHit.object.userData.trackIndex);return;}const hit=hits[0];if(hit?.object.userData.mission){startParticleMission();return;}if(hit){let o=hit.object;while(o&&!o.userData.part)o=o.parent;if(o?.userData.part)selectPart(o.userData.part,true);}});
+    controls.addEventListener('start',()=>{vizEl.classList.add('dragging');if(vizEl.classList.contains('data-reveal')){reportCameraUserControlled=true;$('dragHint').textContent='正在旋转报告视角 · 松开后可继续查看轨迹';$('statusText').textContent='REPORT ORBIT · DRAGGING';return;}$('dragHint').textContent='正在旋转视角 · 松开、移出或按 Esc 结束';$('statusText').textContent='CAMERA ORBIT · DRAGGING';});
+    controls.addEventListener('end',()=>leaveDragMode(false));
+    window.addEventListener('pointerup',()=>leaveDragMode(false),true);window.addEventListener('pointercancel',()=>leaveDragMode(false),true);window.addEventListener('blur',()=>leaveDragMode(true));renderer.domElement.addEventListener('lostpointercapture',()=>leaveDragMode(false));renderer.domElement.addEventListener('pointerleave',e=>{if(e.buttons===0)leaveDragMode(false);});document.addEventListener('visibilitychange',()=>{if(document.hidden)leaveDragMode(true);});document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(missionActive)exitParticleMission();else leaveDragMode(true);}});$('dragExit').addEventListener('pointerdown',e=>e.stopPropagation());$('dragExit').onclick=()=>leaveDragMode(true);
+    controls.addEventListener('change',()=>{sceneEl.dataset.camera=camera.position.toArray().map(v=>v.toFixed(3)).join(',');sceneEl.dataset.target=controls.target.toArray().map(v=>v.toFixed(3)).join(',');});
+    $('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ';$('statusText').textContent=paused?'BEAM PAUSED · INSPECTION':'DRAG READY · LEFT MOUSE ROTATES';};
+    $('resetView').onclick=()=>{controls.reset();$('statusText').textContent='DRAG READY · VIEW RESET';};
+    function resize(){const w=sceneEl.clientWidth,h=sceneEl.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,true);const pw=previewHost.clientWidth||218,ph=previewHost.clientHeight||174;previewCamera.aspect=pw/ph;previewCamera.updateProjectionMatrix();previewRenderer.setSize(pw,ph,false);}addEventListener('resize',resize);resize();
+    const clock=new THREE.Clock(),labelPoint=new THREE.Vector3();
+    let simTime=0,perfWindow=0,perfFrames=0,perfMaxFrame=0;
+    function animate(){
+      requestAnimationFrame(animate);
+      const dt=Math.min(.05,clock.getDelta()),nowMs=performance.now();
+      perfWindow+=dt;perfFrames++;perfMaxFrame=Math.max(perfMaxFrame,dt);if(perfWindow>=2){sceneEl.dataset.avgFrameMs=(perfWindow/perfFrames*1000).toFixed(2);sceneEl.dataset.maxFrameMs=(perfMaxFrame*1000).toFixed(2);sceneEl.dataset.renderScale=renderer.getPixelRatio().toFixed(2);perfWindow=0;perfFrames=0;perfMaxFrame=0;}
+      if(missionActive)missionElapsed=(nowMs-missionStart)/1000;
+      if(!paused){
+        simTime+=dt;
+        beamTravel+=dt*.082*LIFE[lifeStep].speed;
+        if(viewMode==='lifecycle'&&!missionActive&&nowMs>lifeHoldUntil){const autoStep=Math.floor(simTime/2.35)%5;if(autoStep!==lifeStep)setLifeStep(autoStep,false);}
+      }
+      const t=simTime,dataShown=vizEl.classList.contains('data-reveal'),missionPhase=missionElapsed<24 ? .08 : missionElapsed<27.1 ? THREE.MathUtils.lerp(.04,.66,(missionElapsed-24)/3.1) : THREE.MathUtils.lerp(.66,.86,Math.min(1,(missionElapsed-27.1)/5.5)),phase=dataShown ? .84 : missionActive ? missionPhase : .08,approachProgress=THREE.MathUtils.smoothstep(phase,.04,.66),flash=Math.exp(-Math.pow((phase-.69)/.055,2)),fragmentGrowth=THREE.MathUtils.smoothstep(phase,.68,.82),fragmentFade=1-THREE.MathUtils.smoothstep(phase,.92,1),now=nowMs*.001,productsVisible=phase>.68;
+      sceneEl.dataset.collisionPhase=phase.toFixed(3);sceneEl.dataset.collisionProducts=productsVisible?'visible':'hidden';sceneEl.dataset.missionElapsed=missionActive?missionElapsed.toFixed(2):'idle';vizEl.classList.toggle('impact-visible',missionActive&&productsVisible);
+      if(!paused){
+        particles.forEach(p=>{const a=(p.userData.start+p.userData.dir*beamTravel+p.userData.packetOffset)*Math.PI*2,r=R+(p.userData.dir>0?0:.24)+p.userData.radialJitter;p.position.set(Math.cos(a)*r,p.userData.dir>0?.09+p.userData.verticalJitter:-.09+p.userData.verticalJitter,Math.sin(a)*r);p.scale.setScalar(p.userData.baseSize*(.88+.12*Math.sin(t*8+p.userData.twinkle)));});
+        const guideVisible=missionActive&&missionElapsed>=23.5&&missionElapsed<27.1,parentReport=dataShown&&reportDiscoveryStage===4,parentBeat=.5+.5*Math.sin(now*3.4);impactA.visible=impactB.visible=false;approachA.material.opacity=approachB.material.opacity=guideVisible ? .34 : 0;arrowA.visible=arrowB.visible=guideVisible;collisionCore.visible=phase>.665;collisionCore.scale.setScalar(parentReport ? .82+parentBeat*.22 : .45+flash*1.55);collisionCore.material.opacity=parentReport ? .72+parentBeat*.24 : .12+flash*.8;collisionGlow.scale.setScalar(parentReport ? .78+parentBeat*.3 : .38+flash*1.15);collisionGlow.material.opacity=parentReport ? .34+parentBeat*.26 : phase>.665 ? .04+flash*.78 : 0;collisionPulse.scale.setScalar(parentReport ? 1.2+parentBeat*.7 : .3+fragmentGrowth*3.1);collisionPulse.material.opacity=parentReport ? .08+parentBeat*.12 : phase>.665 ? fragmentFade*(.42-fragmentGrowth*.25) : 0;collisionLight.intensity=parentReport ? 3+parentBeat*4 : phase>.665 ? flash*22 : 0;
+        collisionTracks.children.forEach(track=>{const delay=track.userData.delay*.25,growth=THREE.MathUtils.smoothstep(phase,.69+delay,.79+delay),visibility=growth*fragmentFade;track.scale.setScalar(.01+.99*growth);track.userData.tube.material.opacity=track.userData.baseOpacity*visibility;track.userData.hit.material.opacity=track.userData.baseOpacity*fragmentFade*THREE.MathUtils.smoothstep(growth,.68,1);});
+        if(dataShown)collisionTracks.children.forEach((track,index)=>{const labeled=Boolean(track.userData.info),pairDefault=reportDiscoveryStage===4&&selectedTrackIndex===null,emphasis=pairDefault?(index===4||index===9?1.55:.07):selectedTrackIndex===null?(labeled?1:.16):(index===selectedTrackIndex?1.55:.07);track.userData.tube.material.opacity=Math.min(1,track.userData.baseOpacity*emphasis);track.userData.hit.material.opacity=Math.min(1,track.userData.baseOpacity*emphasis);});
+      }
+      const rfActive=viewMode==='lifecycle'&&(lifeStep===1||lifeStep===3);rfBoostGlow.material.opacity=rfActive?.18+.2*(.5+.5*Math.sin(t*9)):0;rfBoostGlow.scale.setScalar(rfActive?1.05+.2*Math.sin(t*9):.01);
+      stagedGroups.forEach(g=>g.children.forEach(child=>{const ready=g.userData.revealTarget&&now-(g.userData.buildStart||0)>=child.userData.buildDelay,childTarget=ready?1:0;if(ready)child.visible=true;child.userData.buildReveal+=(childTarget-child.userData.buildReveal)*.105;const eased=child.userData.buildReveal<.5?4*child.userData.buildReveal**3:1-Math.pow(-2*child.userData.buildReveal+2,3)/2;child.position.lerpVectors(child.userData.buildFrom,child.userData.buildBase,eased);child.position.y+=Math.sin(Math.PI*eased)*.34;}));
+      if(missionActive)updateMission(missionElapsed);else if(dataShown)updateReportCamera();else controls.update();if(missionActive&&productsVisible)$('collisionDistance').textContent='碰撞已发生 · 20 条径迹正在穿过探测器';updateHotspots();updateDetectorCallouts();updateTrackCallouts();updateParticleEntry();collisionCore.getWorldPosition(labelPoint).project(camera);
+      const label=$('collisionLabel'),x=(labelPoint.x*.5+.5)*sceneEl.clientWidth,y=(-labelPoint.y*.5+.5)*sceneEl.clientHeight,state=phase<.62?'APPROACH':phase<.77?'COLLISION':'FRAGMENTS',parentCandidate=$('parentCandidate');label.style.left=`${x}px`;label.style.top=`${y}px`;label.style.opacity=revealIndex>=4&&labelPoint.z<1?1:0;label.dataset.phase=state;label.dataset.progress=phase.toFixed(3);label.querySelector('span').textContent=state==='APPROACH'?'① 两个高密度束团相向压缩':state==='COLLISION'?'② 在 IP1 释放碰撞能量':'③ 弯曲径迹穿过探测器各层';parentCandidate.style.left=`${x}px`;parentCandidate.style.top=`${y}px`;parentCandidate.style.opacity=labelPoint.z<1?1:0;
+      renderer.render(scene,camera);renderOrbitPreview(nowMs);if(missionActive&&missionElapsed>=MISSION_DURATION)finishParticleMission();
+    }
+    renderLesson();completeReveal();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;animate();
+  </script>
+</body>
+</html>

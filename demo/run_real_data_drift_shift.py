@@ -49,16 +49,30 @@ def summarize(chunk_id: str, reco_mass: np.ndarray) -> dict:
     }
 
 
-def build_scenario(root_file: str, chunk_size: int = 1500, max_events: int = 50_000,
-                    n_flat_chunks: int = 4, drift_step: float = 0.005):
-    print(f"Loading events from {root_file} ...")
-    events = load_events(source=root_file, max_events=max_events)
+def build_scenario(root_file: str, chunk_size: int = 1500, max_events: int = 80_000,
+                    n_flat_chunks: int = 4, drift_step: float = 0.005, entry_start: int = 0):
+    print(f"Loading events from {root_file} (entry_start={entry_start}) ...")
+    events = load_events(source=root_file, max_events=max_events, entry_start=entry_start)
     raw_chunks = list(chunk_events(events, chunk_size=chunk_size))
-    print(f"Loaded {len(events['pt1'])} events -> {len(raw_chunks)} chunks of size {chunk_size}\n")
+
+    # Drop any trailing partial chunk (real event counts rarely divide
+    # evenly by chunk_size). A previous run included a partial final chunk
+    # (827 of an expected 1500 events), which the agent correctly but
+    # misleadingly read as a catastrophic -17 sigma occupancy collapse --
+    # a real, honest reaction to fake data, not a genuine detector event.
+    # max_events is set high enough by default that dropping the partial
+    # chunk still leaves enough full chunks for a 12-chunk scenario.
+    n_before = len(raw_chunks)
+    raw_chunks = [c for c in raw_chunks if len(c["pt1"]) == chunk_size]
+    if len(raw_chunks) < n_before:
+        print(f"Dropped {n_before - len(raw_chunks)} trailing partial chunk(s) "
+              f"(not a multiple of chunk_size={chunk_size}) to avoid a fake occupancy signal.")
+
+    print(f"Loaded {len(events['pt1'])} events -> {len(raw_chunks)} full chunks of size {chunk_size}\n")
 
     if len(raw_chunks) < n_flat_chunks + 3:
         raise RuntimeError(
-            f"Only {len(raw_chunks)} chunks available -- need at least "
+            f"Only {len(raw_chunks)} full chunks available -- need at least "
             f"{n_flat_chunks + 3} to run a meaningful drift scenario. "
             f"Reduce chunk_size or increase max_events."
         )
