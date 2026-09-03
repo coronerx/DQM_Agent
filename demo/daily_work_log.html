@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>30 关协作训练 · 工作记录</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink:#18201d;
+      --muted:#6f7873;
+      --line:#dfe4df;
+      --paper:#f7f8f5;
+      --card:#ffffff;
+      --green:#226451;
+      --green-soft:#e5f0eb;
+      --orange:#d9783f;
+      --shadow:0 18px 55px rgba(35,48,42,.09);
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      min-height:100vh;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, #eef4ea 0, transparent 34%),
+        radial-gradient(circle at 88% 88%, #f5ebe2 0, transparent 30%),
+        var(--paper);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    }
+    button,input,textarea { font:inherit; }
+    .page { width:min(1120px,calc(100% - 32px)); margin:0 auto; padding:46px 0 70px; }
+    header { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:24px; }
+    .eyebrow { margin:0 0 8px; color:var(--green); font-size:12px; font-weight:700; letter-spacing:.16em; }
+    h1 { margin:0; font-size:clamp(30px,5vw,52px); line-height:1; letter-spacing:-.04em; }
+    .date-line { margin:13px 0 0; color:var(--muted); font-size:14px; }
+    .privacy { padding:9px 12px; border:1px solid var(--line); border-radius:999px; color:var(--muted); background:#ffffffa8; font-size:12px; white-space:nowrap; }
+    .layout { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr); gap:20px; align-items:start; }
+    .card { border:1px solid var(--line); border-radius:22px; background:var(--card); box-shadow:var(--shadow); }
+    .course-card { margin-bottom:20px; padding:24px; overflow:hidden; }
+    .course-top { display:flex; align-items:flex-start; justify-content:space-between; gap:22px; }
+    .course-kicker { color:var(--green); font-size:11px; font-weight:800; letter-spacing:.14em; }
+    .course-top h2 { margin-top:6px; font-size:23px; letter-spacing:-.025em; }
+    .progress-copy { text-align:right; white-space:nowrap; }
+    .progress-copy strong { display:block; color:var(--green); font-size:26px; }
+    .progress-copy span { color:var(--muted); font-size:11px; }
+    .progress-track { height:7px; margin:18px 0; border-radius:999px; overflow:hidden; background:#e9ece8; }
+    .progress-fill { width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#226451,#65a98d); transition:width .45s ease; }
+    .course-body { display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:18px; }
+    .mission { position:relative; min-height:180px; padding:21px 22px; overflow:hidden; border-radius:18px; color:white; background:linear-gradient(135deg,#183c32,#255f4d); }
+    .mission::after { content:""; position:absolute; right:-45px; bottom:-65px; width:190px; height:190px; border:1px solid #ffffff25; border-radius:50%; box-shadow:0 0 0 28px #ffffff09,0 0 0 58px #ffffff06; }
+    .mission-day { color:#b9dfcf; font-size:11px; font-weight:800; letter-spacing:.16em; }
+    .mission h3 { position:relative; z-index:1; margin:9px 0 10px; font-size:24px; }
+    .mission p { position:relative; z-index:1; max-width:620px; margin:0; color:#e5f1ec; line-height:1.65; font-size:14px; }
+    .mission-done { position:relative; z-index:1; display:inline-flex; margin-top:16px; padding:7px 10px; border-radius:8px; color:#214c3d; background:#d7ede3; font-size:11px; font-weight:750; }
+    .day-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:7px; align-content:start; }
+    .day-node { position:relative; aspect-ratio:1; padding:0; border:1px solid var(--line); border-radius:10px; color:#98a09c; background:#f5f6f4; font-size:11px; font-weight:760; cursor:not-allowed; }
+    .day-node.done { color:var(--green); border-color:#bdd5ca; background:#e8f2ed; cursor:pointer; }
+    .day-node.current { color:white; border-color:var(--green); background:var(--green); box-shadow:0 7px 18px #22645136; cursor:pointer; }
+    .day-node.pending { color:#76501f; border-color:#e8c58e; background:#fff2d9; box-shadow:0 7px 18px #d99a4828; cursor:pointer; }
+    .day-node.revision { color:#9b3b31; border-color:#e7b9b3; background:#fff0ee; box-shadow:0 7px 18px #d9525220; cursor:pointer; }
+    .day-node.selected { outline:3px solid #d4e6de; outline-offset:1px; }
+    .unlock-note { grid-column:1/-1; margin:6px 0 0; color:var(--muted); font-size:11px; line-height:1.5; }
+    .form-card { padding:28px; }
+    .timer { display:grid; grid-template-columns:1fr auto; gap:18px; align-items:center; padding:18px; margin-bottom:22px; border-radius:16px; background:var(--green-soft); }
+    .timer strong { display:block; font-size:13px; }
+    .timer-time { margin-top:4px; color:var(--green); font-variant-numeric:tabular-nums; font-size:30px; font-weight:760; letter-spacing:-.03em; }
+    .timer-actions { display:flex; gap:8px; }
+    button { border:0; border-radius:11px; padding:11px 15px; cursor:pointer; transition:transform .15s,background .15s,border-color .15s; }
+    button:hover { transform:translateY(-1px); }
+    button:active { transform:translateY(0); }
+    .primary { color:white; background:var(--green); }
+    .secondary { color:var(--ink); border:1px solid #cfd9d3; background:white; }
+    .danger { color:#9b3b31; border:1px solid #ecd4d1; background:#fff8f7; }
+    .field { margin-top:19px; }
+    label,.field-title { display:block; margin-bottom:8px; font-size:13px; font-weight:700; }
+    input,textarea {
+      width:100%; border:1px solid var(--line); border-radius:12px; color:var(--ink); background:#fbfcfa; outline:none;
+    }
+    input { height:44px; padding:0 12px; }
+    input[readonly] { color:#59635e; background:#f0f2ef; cursor:default; }
+    textarea { min-height:112px; padding:12px; line-height:1.65; resize:vertical; }
+    input:focus,textarea:focus { border-color:#74a393; box-shadow:0 0 0 3px #dcebe5; background:white; }
+    .time-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .duration { height:44px; display:flex; align-items:center; padding:0 12px; border-radius:12px; color:var(--green); background:var(--green-soft); font-weight:750; }
+    .stress-head { display:flex; align-items:baseline; justify-content:space-between; gap:16px; }
+    .stress-value { color:var(--orange); font-size:28px; font-weight:800; }
+    input[type="range"] { height:28px; padding:0; border:0; accent-color:var(--orange); box-shadow:none; background:transparent; }
+    .stress-scale { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
+    .submit-row { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+    .side-card { padding:22px; }
+    .discord-panel { margin-bottom:20px; padding:16px; border:1px solid #d8ddea; border-radius:15px; background:#f7f7fc; }
+    .discord-title { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .discord-title strong { font-size:14px; }
+    .discord-status { display:inline-flex; align-items:center; gap:6px; color:var(--muted); font-size:11px; }
+    .discord-status::before { content:""; width:7px; height:7px; border-radius:50%; background:#adb4b0; }
+    .discord-status.connected { color:#38614f; }
+    .discord-status.connected::before { background:#48a779; box-shadow:0 0 0 3px #48a77920; }
+    .discord-status.pending { color:#9b6729; }
+    .discord-status.pending::before { background:#d99a48; }
+    .discord-copy { margin:9px 0 12px; color:var(--muted); font-size:11px; line-height:1.5; }
+    .discord-panel input { height:40px; margin-top:7px; font-size:12px; }
+    .discord-check { display:flex; align-items:flex-start; gap:8px; margin:11px 0; color:#59635e; font-size:11px; font-weight:500; line-height:1.45; }
+    .discord-check input { width:15px; height:15px; margin-top:1px; flex:none; accent-color:#5865f2; }
+    .discord-actions { display:flex; gap:8px; }
+    .discord-actions button { flex:1; padding:9px 8px; font-size:11px; }
+    .discord-save { color:white; background:#5865f2; }
+    .side-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+    h2 { margin:0; font-size:18px; }
+    .export { padding:8px 10px; color:var(--green); border:1px solid #cfd9d3; background:white; font-size:12px; }
+    .summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+    .metric { padding:13px; border-radius:13px; background:#f3f5f1; }
+    .metric span { display:block; color:var(--muted); font-size:11px; }
+    .metric strong { display:block; margin-top:4px; font-size:20px; }
+    .history { display:grid; gap:10px; max-height:620px; overflow:auto; padding-right:3px; }
+    .empty { padding:45px 12px; color:var(--muted); text-align:center; font-size:13px; }
+    .entry { padding:15px; border:1px solid var(--line); border-radius:15px; background:#fcfdfb; }
+    .entry-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .entry-date { font-weight:760; }
+    .stress-chip { padding:4px 8px; border-radius:999px; background:#f8e9de; color:#a84f20; font-size:11px; font-weight:750; }
+    .entry-time { margin-top:5px; color:var(--muted); font-size:12px; }
+    .entry p { margin:11px 0 0; line-height:1.55; font-size:13px; white-space:pre-wrap; }
+    .entry p.thought { color:#53605a; }
+    .review-chip { display:inline-flex; margin-left:7px; padding:4px 8px; border-radius:999px; color:#68716d; background:#ecefed; font-size:10px; font-weight:800; }
+    .review-chip.pending { color:#8b5b22; background:#fff0d4; }
+    .review-chip.approved { color:#28634d; background:#dff0e8; }
+    .review-chip.revision_requested { color:#963a31; background:#fde6e3; }
+    .review-feedback { padding:10px 11px; border-left:3px solid #d95252; border-radius:4px 9px 9px 4px; color:#71342e !important; background:#fff3f1; }
+    .entry-actions { display:flex; justify-content:flex-end; gap:7px; margin-top:12px; }
+    .entry-actions button { padding:6px 9px; border:1px solid var(--line); background:white; color:var(--muted); font-size:11px; }
+    .toast { position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); padding:10px 14px; border-radius:999px; color:white; background:#17231f; opacity:0; pointer-events:none; transition:.2s; font-size:13px; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    @media (max-width:820px) {
+      .page { padding-top:26px; }
+      header { align-items:flex-start; flex-direction:column; }
+      .layout,.course-body { grid-template-columns:1fr; }
+      .day-grid { grid-template-columns:repeat(10,1fr); }
+      .time-grid { grid-template-columns:1fr 1fr; }
+      .time-grid .field:last-child { grid-column:1/-1; }
+      .timer { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <p class="eyebrow">30-STAGE COLLABORATION COURSE</p>
+        <h1>完成一关，解锁下一关</h1>
+        <p class="date-line" id="todayLine"></p>
+      </div>
+      <div class="privacy">本机草稿 · Discord 批改后解锁</div>
+    </header>
+
+    <section class="card course-card" aria-label="30 关训练进度">
+      <div class="course-top">
+        <div>
+          <div class="course-kicker">30 关协作训练</div>
+          <h2>用完成的工作推进课程</h2>
+        </div>
+        <div class="progress-copy"><strong id="progressCount">0 / 30</strong><span>已完成</span></div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="course-body">
+        <article class="mission" id="missionCard"></article>
+        <div class="day-grid" id="dayGrid"></div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card form-card">
+        <div class="timer">
+          <div>
+            <strong id="timerStatus">还没有开始计时</strong>
+            <div class="timer-time" id="timerDisplay">00:00:00</div>
+          </div>
+          <div class="timer-actions">
+            <button class="primary" id="startBtn">开始工作</button>
+            <button class="secondary" id="stopBtn">结束工作</button>
+          </div>
+        </div>
+
+        <div class="time-grid">
+          <div class="field">
+            <label for="workDate">日期</label>
+            <input type="date" id="workDate" readonly />
+          </div>
+          <div class="field">
+            <label for="startTime">开始时间</label>
+            <input type="time" id="startTime" />
+          </div>
+          <div class="field">
+            <label for="endTime">结束时间</label>
+            <input type="time" id="endTime" />
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <span class="field-title">本次工作时长</span>
+            <div class="duration" id="durationText">等待填写时间</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="workContent">工作内容</label>
+          <textarea id="workContent" placeholder="今天具体完成了什么？例如：整理碰撞到 Verdict 的交互流程。"></textarea>
+        </div>
+        <div class="field">
+          <label for="workThought">工作思路</label>
+          <textarea id="workThought" placeholder="为什么这样做？遇到了什么问题？下一步准备怎么处理？"></textarea>
+        </div>
+        <div class="field">
+          <div class="stress-head">
+            <label for="stress">压力指数</label>
+            <span class="stress-value"><span id="stressValue">5</span>/10</span>
+          </div>
+          <input type="range" id="stress" min="0" max="10" value="5" step="1" />
+          <div class="stress-scale"><span>0 · 很轻松</span><span>5 · 一般</span><span>10 · 非常大</span></div>
+        </div>
+
+        <div class="submit-row">
+          <button class="secondary" id="clearBtn">清空</button>
+          <button class="primary" id="saveBtn">提交本关等待批改</button>
+        </div>
+      </section>
+
+      <aside class="card side-card">
+        <section class="discord-panel" aria-label="Discord 批改设置">
+          <div class="discord-title">
+            <strong>Discord 批改</strong>
+            <span class="discord-status" id="reviewStatus">未配置</span>
+          </div>
+          <p class="discord-copy">提交会进入指定频道。批改者点“通过”才解锁下一关；点“返工”会把评语带回这里。</p>
+          <label for="reviewApiUrl">批改服务地址</label>
+          <input type="url" id="reviewApiUrl" autocomplete="url" placeholder="https://review.example.com" />
+          <label for="learnerId">学习者 ID</label>
+          <input type="text" id="learnerId" autocomplete="username" placeholder="例如 learner_01" />
+          <label for="learnerKey">学习者密钥</label>
+          <input type="password" id="learnerKey" autocomplete="off" placeholder="由课程管理员提供" />
+          <label class="discord-check"><input type="checkbox" id="reviewConsent" />我确认记录者知道工作内容、思路和压力指数会发送到指定 Discord 频道供批改。</label>
+          <div class="discord-actions">
+            <button class="discord-save" id="saveReviewBtn">保存设置</button>
+            <button class="secondary" id="testReviewBtn">检查连接</button>
+          </div>
+        </section>
+        <div class="side-head">
+          <h2>历史记录</h2>
+          <button class="export" id="exportBtn">导出 CSV</button>
+        </div>
+        <div class="summary">
+          <div class="metric"><span>累计记录</span><strong id="totalEntries">0 天</strong></div>
+          <div class="metric"><span>平均压力</span><strong id="avgStress">—</strong></div>
+        </div>
+        <div class="history" id="history"></div>
+      </aside>
+    </div>
+  </main>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'daily-work-log-v1';
+    const TIMER_KEY = 'daily-work-timer-v1';
+    const REVIEW_CONFIG_KEY = 'course-review-config-v1';
+    const COURSE = [
+      {title:'先看别人做了什么',task:'浏览现有成果，不改代码。写出 5 个必须被保留的设计或工作成果。'},
+      {title:'走一遍真实体验',task:'从使用者视角完整操作一次，记录 3 个顺畅点和 3 个断裂点。'},
+      {title:'把情绪翻译成信息',task:'选择一条尖锐反馈，把它改写成可执行的问题、影响和验收标准。'},
+      {title:'区分字面与意图',task:'写下今天任务的表面要求，以及对方真正希望解决的问题。'},
+      {title:'只问一个好问题',task:'在动手前提出一个会真正改变方案方向的问题，避免琐碎追问。'},
+      {title:'复述到双方一致',task:'用三句话复述目标、要保留的部分和准备修改的部分，请对方确认。'},
+      {title:'第一次复盘',task:'总结本周一次理解正确和一次理解偏差，说明下次如何更早发现。'},
+      {title:'给出三个方案',task:'针对同一问题提出最小改动、体验优先和大胆重构三种方案。'},
+      {title:'把取舍说清楚',task:'为推荐方案说明用户收益、代价、风险，以及为什么值得做。'},
+      {title:'先确认再执行',task:'把准备做的流程画成 4–6 步，在写代码前完成一次方向确认。'},
+      {title:'做一个完整小切片',task:'只完成一段端到端体验；不复制页面，不用新链接代替整合。'},
+      {title:'解释自己的判断',task:'用两分钟讲清楚今天为什么这样做，而不只是列出改了哪些文件。'},
+      {title:'让别人自己操作',task:'演示时先保持安静，让对方操作 3 分钟，只观察卡住的位置。'},
+      {title:'先接住反馈',task:'收到意见后，先复述对方的不满和影响，再提出修改，不立即辩解。'},
+      {title:'画共同作品的分镜',task:'把新内容如何进入现有体验画成连续分镜，标出每一步视觉重点。'},
+      {title:'保持体验连续',task:'实现一段不中断、不换页的流程，让用户自然看到前因后果。'},
+      {title:'让关系直接可见',task:'把对象、数据和结论在画面中直接对应起来，减少脱离对象的标签。'},
+      {title:'找一个真实使用者',task:'请一位不了解任务的人试用，记录其第一处停顿和第一处误解。'},
+      {title:'只修最大的问题',task:'根据观察，选择影响理解最大的一个问题完成修改并复测。'},
+      {title:'主动报告进展',task:'用“完成了什么、还差什么、需要什么决定”做一次简短状态更新。'},
+      {title:'第二次复盘',task:'比较两周前后的沟通方式，找出一个已经改善和一个仍反复出现的问题。'},
+      {title:'识别机械执行',task:'主动找出一处技术上完成、体验上失败的改动，并说明为什么。'},
+      {title:'处理模糊要求',task:'列出自己的假设、最大风险和推荐方向，然后带着判断继续推进。'},
+      {title:'练习礼貌地不同意',task:'用“我担心…因为…建议先验证…”表达一次有证据的不同意见。'},
+      {title:'给出有用反馈',task:'向合作者提供一次“观察到什么—造成什么影响—建议怎么改”的反馈。'},
+      {title:'主动查回归',task:'检查改动是否破坏旧功能，记录实际测试路径和结果。'},
+      {title:'完成一次真正整合',task:'把新能力融入主流程，让用户不需要寻找另一个入口才能理解。'},
+      {title:'做一次三分钟演示',task:'只讲用户做什么、看到什么、因此理解什么，不念功能清单。'},
+      {title:'自己迭代三轮',task:'分别做功能、视觉、协作意图三轮自检，每轮至少修改一个问题。'},
+      {title:'完成交付与交接',task:'总结目标、结果、验证证据、未解决风险，以及建议的下一步。'}
+    ];
+    const $ = id => document.getElementById(id);
+    let editingId = null;
+    let timerTick = null;
+    let selectedCourseStep = null;
+    let remoteCourseState = null;
+    let reviewPoll = null;
+
+    const pad = number => String(number).padStart(2,'0');
+    const localDate = date => `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+    const localTime = date => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    const formatDay = value => new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date(`${value}T12:00:00`));
+    const getRecords = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    function normalizeRecords(records) {
+      return [...records].map(item=>({
+        ...item,
+        courseStep:Math.max(1,Math.min(COURSE.length,Number(item.courseStep || item.courseDay || 1))),
+        reviewStatus:item.reviewStatus || 'draft'
+      })).map(item=>{ delete item.courseDay; return item; })
+        .sort((a,b)=>String(b.createdAt||b.savedAt||b.id).localeCompare(String(a.createdAt||a.savedAt||a.id)));
+    }
+    const setRecords = records => {
+      const normalized = normalizeRecords(records);
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(normalized));
+      return normalized;
+    };
+    const getReviewConfig = () => JSON.parse(localStorage.getItem(REVIEW_CONFIG_KEY) || '{}');
+    function completedSteps(records) {
+      if (remoteCourseState) return remoteCourseState.completed;
+      const approved = new Set(records.filter(item=>item.reviewStatus==='approved').map(item=>Number(item.courseStep)));
+      let completed = 0;
+      while (approved.has(completed+1) && completed<COURSE.length) completed += 1;
+      return completed;
+    }
+    function currentStage(records=getRecords()) {
+      return remoteCourseState?.current_stage || Math.min(completedSteps(records)+1,COURSE.length);
+    }
+    function latestForStage(records,stage) {
+      return records.find(item=>Number(item.courseStep)===stage && item.reviewStatus!=='superseded');
+    }
+
+    function selectCourseStep(step) {
+      const completed = completedSteps(getRecords());
+      const current = currentStage();
+      if (step > current) return;
+      selectedCourseStep = step;
+      renderCourse();
+    }
+    function renderCourse() {
+      const records = getRecords();
+      const completed = completedSteps(records);
+      const current = currentStage(records);
+      if (!selectedCourseStep || selectedCourseStep > current) selectedCourseStep = current;
+      const task = COURSE[selectedCourseStep-1];
+      const isDone = selectedCourseStep <= completed;
+      const allDone = completed === COURSE.length;
+      const latest = latestForStage(records,selectedCourseStep);
+      const status = latest?.reviewStatus || '';
+      const missionStatus = isDone ? '✓ 已通过，可以回看'
+        : status==='pending' ? '已提交 · 等待 Discord 批改'
+        : status==='revision_requested' ? '需要返工 · 修改后重新提交'
+        : allDone ? '30 关训练已完成'
+        : '当前关卡 · 批改通过后解锁下一关';
+      $('progressCount').textContent = `${completed} / ${COURSE.length}`;
+      $('progressFill').style.width = `${completed/COURSE.length*100}%`;
+      $('missionCard').innerHTML = `
+        <div class="mission-day">${allDone && selectedCourseStep===30 ? 'COURSE COMPLETE' : `STAGE ${String(selectedCourseStep).padStart(2,'0')}`}</div>
+        <h3>${escapeHtml(task.title)}</h3>
+        <p>${escapeHtml(task.task)}</p>
+        ${status==='revision_requested' && latest.feedback ? `<p class="review-feedback"><strong>批改意见：</strong>${escapeHtml(latest.feedback)}</p>` : ''}
+        <span class="mission-done">${missionStatus}</span>`;
+      $('dayGrid').innerHTML = COURSE.map((_,index)=>{
+        const step = index+1;
+        const stageStatus = latestForStage(records,step)?.reviewStatus;
+        const state = step<=completed ? 'done' : step===current && stageStatus==='pending' ? 'pending' : step===current && stageStatus==='revision_requested' ? 'revision' : step===current && !allDone ? 'current' : '';
+        const selected = step===selectedCourseStep ? 'selected' : '';
+        return `<button class="day-node ${state} ${selected}" ${step>current ? 'disabled' : ''} onclick="selectCourseStep(${step})" aria-label="第 ${step} 关${step>current?'，未解锁':''}">${step}</button>`;
+      }).join('') + '<p class="unlock-note">按完成进度解锁，不按日期：提交后等待批改，只有“通过”才会前进；“返工”会保留当前关卡。</p>';
+    }
+
+    function minutesBetween(start,end) {
+      if (!start || !end) return 0;
+      const [sh,sm] = start.split(':').map(Number);
+      const [eh,em] = end.split(':').map(Number);
+      let minutes = eh*60+em-(sh*60+sm);
+      if (minutes < 0) minutes += 24*60;
+      return minutes;
+    }
+    function formatMinutes(minutes) {
+      if (!minutes) return '等待填写时间';
+      const hours = Math.floor(minutes/60);
+      const rest = minutes%60;
+      return `${hours ? `${hours} 小时 ` : ''}${rest ? `${rest} 分钟` : ''}`.trim();
+    }
+    function updateDuration() {
+      $('durationText').textContent = formatMinutes(minutesBetween($('startTime').value,$('endTime').value));
+    }
+    function showToast(message) {
+      $('toast').textContent = message;
+      $('toast').classList.add('show');
+      window.setTimeout(()=>$('toast').classList.remove('show'),1800);
+    }
+    function normalizeApiUrl(value) {
+      try {
+        const url = new URL(value);
+        const local = ['localhost','127.0.0.1'].includes(url.hostname);
+        if (url.protocol!=='https:' && !(local && url.protocol==='http:')) return '';
+        url.search=''; url.hash='';
+        return url.toString().replace(/\/$/,'');
+      } catch (_) { return ''; }
+    }
+    function validLearnerId(value) { return /^[A-Za-z0-9_-]{1,64}$/.test(value); }
+    function renderReviewConfig() {
+      const config = getReviewConfig();
+      $('reviewApiUrl').value = config.apiUrl || '';
+      $('learnerId').value = config.learnerId || '';
+      $('learnerKey').value = config.learnerKey || '';
+      $('reviewConsent').checked = Boolean(config.consent);
+      const configured = Boolean(normalizeApiUrl(config.apiUrl||'') && validLearnerId(config.learnerId||'') && config.learnerKey && config.consent);
+      const connected = configured && config.verified;
+      $('reviewStatus').textContent = connected ? '已连接' : configured ? '待检查' : '未配置';
+      $('reviewStatus').classList.toggle('connected',connected);
+      $('reviewStatus').classList.toggle('pending',configured&&!connected);
+    }
+    function readReviewForm() {
+      return {
+        apiUrl:normalizeApiUrl($('reviewApiUrl').value.trim()),
+        learnerId:$('learnerId').value.trim(),
+        learnerKey:$('learnerKey').value,
+        consent:$('reviewConsent').checked
+      };
+    }
+    function validateReviewConfig(config) {
+      if (!config.apiUrl) throw new Error('批改服务地址格式不正确');
+      if (!validLearnerId(config.learnerId)) throw new Error('学习者 ID 只能包含字母、数字、_ 和 -');
+      if (!config.learnerKey) throw new Error('请填写学习者密钥');
+      if (!config.consent) throw new Error('请先确认记录者知情');
+    }
+    function saveReviewConfig() {
+      try {
+        const config = readReviewForm();
+        validateReviewConfig(config);
+        const previous = getReviewConfig();
+        config.verified = previous.apiUrl===config.apiUrl && previous.learnerId===config.learnerId && previous.learnerKey===config.learnerKey && previous.verified===true;
+        localStorage.setItem(REVIEW_CONFIG_KEY,JSON.stringify(config));
+        renderReviewConfig();
+        showToast('批改设置已保存在本机');
+        return true;
+      } catch (error) { showToast(error.message); return false; }
+    }
+    async function reviewApi(path,options={}) {
+      const config = getReviewConfig();
+      validateReviewConfig(config);
+      const response = await fetch(`${config.apiUrl}${path}`,{
+        ...options,
+        headers:{'Content-Type':'application/json','X-Learner-Key':config.learnerKey,...(options.headers||{})}
+      });
+      const body = await response.json().catch(()=>({}));
+      if (!response.ok) {
+        const messages = {unauthorized:'学习者密钥不正确','stage is locked':'该关卡尚未解锁','stage is already awaiting review':'这一关已经在等待批改','discord_send_failed':'无法把批改卡发送到 Discord'};
+        throw new Error(messages[body.error] || body.detail || body.error || `服务返回 ${response.status}`);
+      }
+      return body;
+    }
+    function mergeRemoteSubmissions(submissions) {
+      const records = getRecords();
+      submissions.forEach(item=>{
+        const mapped = {
+          id:`remote-${item.id}`,
+          submissionId:item.id,
+          date:item.work_date,start:item.start_time,end:item.end_time,minutes:item.minutes,
+          content:item.content,thought:item.thought,stress:item.stress,courseStep:item.stage,
+          reviewStatus:item.status,feedback:item.feedback||'',reviewerId:item.reviewer_id||'',
+          createdAt:item.created_at,savedAt:item.created_at,reviewedAt:item.reviewed_at||''
+        };
+        const index = records.findIndex(record=>record.submissionId===item.id);
+        if (index>=0) records[index]={...records[index],...mapped,id:records[index].id}; else records.push(mapped);
+      });
+      setRecords(records);
+    }
+    async function syncReviewState({notify=false}={}) {
+      const config = getReviewConfig();
+      const learner = encodeURIComponent(config.learnerId||'');
+      const state = await reviewApi(`/api/course/state?learner_id=${learner}`);
+      const before = completedSteps(getRecords());
+      remoteCourseState = state;
+      mergeRemoteSubmissions(state.submissions||[]);
+      localStorage.setItem(REVIEW_CONFIG_KEY,JSON.stringify({...config,verified:true}));
+      renderReviewConfig(); renderHistory(); renderCourse();
+      if (state.completed>before) showToast(`批改通过，第 ${Math.min(state.completed+1,30)} 关已解锁`);
+      else if (notify) showToast('连接正常，批改状态已同步');
+      window.clearInterval(reviewPoll);
+      reviewPoll = window.setInterval(()=>syncReviewState().catch(()=>{}),12000);
+      return state;
+    }
+    async function testReviewConnection() {
+      if (!saveReviewConfig()) return;
+      try { await syncReviewState({notify:true}); }
+      catch (error) {
+        const config=getReviewConfig();
+        localStorage.setItem(REVIEW_CONFIG_KEY,JSON.stringify({...config,verified:false}));
+        renderReviewConfig(); showToast(error.message || '连接失败');
+      }
+    }
+    function escapeHtml(value='') {
+      return value.replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    }
+
+    function startTimer() {
+      const now = new Date();
+      localStorage.setItem(TIMER_KEY,String(now.getTime()));
+      $('workDate').value = localDate(now);
+      $('startTime').value = localTime(now);
+      $('endTime').value = '';
+      refreshTimer();
+      showToast('已经开始计时');
+    }
+    function stopTimer() {
+      const startedAt = Number(localStorage.getItem(TIMER_KEY));
+      if (!startedAt) return showToast('还没有开始计时');
+      const now = new Date();
+      $('endTime').value = localTime(now);
+      localStorage.removeItem(TIMER_KEY);
+      refreshTimer();
+      updateDuration();
+      showToast('本次计时已结束');
+    }
+    function refreshTimer() {
+      const startedAt = Number(localStorage.getItem(TIMER_KEY));
+      window.clearInterval(timerTick);
+      if (!startedAt) {
+        $('timerStatus').textContent = '还没有开始计时';
+        $('timerDisplay').textContent = '00:00:00';
+        return;
+      }
+      const draw = () => {
+        const seconds = Math.max(0,Math.floor((Date.now()-startedAt)/1000));
+        $('timerDisplay').textContent = `${pad(Math.floor(seconds/3600))}:${pad(Math.floor(seconds%3600/60))}:${pad(seconds%60)}`;
+        $('timerStatus').textContent = '正在工作';
+      };
+      draw();
+      timerTick = window.setInterval(draw,1000);
+    }
+
+    function resetForm() {
+      editingId = null;
+      const now = new Date();
+      $('workDate').value = localDate(now);
+      $('startTime').value = '';
+      $('endTime').value = '';
+      $('workContent').value = '';
+      $('workThought').value = '';
+      $('stress').value = 5;
+      $('stressValue').textContent = 5;
+      $('saveBtn').textContent = '提交本关等待批改';
+      updateDuration();
+    }
+    async function saveRecord() {
+      const date = $('workDate').value;
+      const start = $('startTime').value;
+      const end = $('endTime').value;
+      const content = $('workContent').value.trim();
+      const thought = $('workThought').value.trim();
+      if (!date || !start || !end || !content || !thought) return showToast('请把日期、时间和两段内容填写完整');
+      const records = getRecords();
+      const stage = editingId ? Number(records.find(item=>item.id===editingId)?.courseStep) : currentStage(records);
+      const existingPending = records.find(item=>Number(item.courseStep)===stage && item.reviewStatus==='pending' && item.id!==editingId);
+      if (existingPending) return showToast('这一关已经在等待批改');
+      const record = {
+        id: editingId || `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        date,start,end,
+        minutes:minutesBetween(start,end),
+        content,thought,
+        stress:Number($('stress').value),
+        savedAt:new Date().toISOString(),
+        courseStep:stage,
+        reviewStatus:'draft',
+        feedback:''
+      };
+      const existingRecord = records.find(item=>item.id===record.id);
+      record.createdAt = existingRecord?.createdAt || existingRecord?.savedAt || record.savedAt;
+      const oldIndex = records.findIndex(item=>item.id===record.id);
+      if (oldIndex >= 0) records[oldIndex] = record; else records.push(record);
+      setRecords(records);
+      localStorage.removeItem(TIMER_KEY);
+      refreshTimer();
+      renderHistory();
+      renderCourse();
+      try {
+        const result = await reviewApi('/api/submissions',{
+          method:'POST',
+          body:JSON.stringify({learner_id:getReviewConfig().learnerId,stage,work_date:date,start_time:start,end_time:end,minutes:record.minutes,content,thought,stress:record.stress})
+        });
+        const latest = getRecords();
+        const index = latest.findIndex(item=>item.id===record.id);
+        if (index>=0) latest[index]={...latest[index],submissionId:result.submission.id,reviewStatus:'pending',createdAt:result.submission.created_at};
+        remoteCourseState={...(remoteCourseState||{}),completed:result.completed,current_stage:result.current_stage};
+        setRecords(latest);
+        resetForm(); renderHistory(); renderCourse();
+        showToast('已发到 Discord，等待批改');
+      } catch (error) {
+        editingId=record.id;
+        $('saveBtn').textContent='重新提交批改';
+        renderHistory(); renderCourse();
+        showToast(`草稿已保存在本机：${error.message}`);
+      }
+    }
+    function editRecord(id) {
+      const item = getRecords().find(record=>record.id===id);
+      if (!item) return;
+      if (!['draft','revision_requested'].includes(item.reviewStatus)) return showToast('等待中或已通过的提交不能修改');
+      editingId = id;
+      $('workDate').value = item.date;
+      $('startTime').value = item.start;
+      $('endTime').value = item.end;
+      $('workContent').value = item.content;
+      $('workThought').value = item.thought;
+      $('stress').value = item.stress;
+      $('stressValue').textContent = item.stress;
+      $('saveBtn').textContent = item.reviewStatus==='revision_requested' ? '修改后重新提交' : '提交草稿等待批改';
+      updateDuration();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function deleteRecord(id) {
+      const target = getRecords().find(record=>record.id===id);
+      if (target?.reviewStatus!=='draft') return showToast('已发送的提交不能在这里删除');
+      if (!window.confirm('确定删除这条记录吗？')) return;
+      setRecords(getRecords().filter(record=>record.id!==id));
+      if (editingId===id) resetForm();
+      renderHistory();
+      renderCourse();
+      showToast('记录已删除');
+    }
+    function renderHistory() {
+      const records = getRecords();
+      $('totalEntries').textContent = `${new Set(records.map(item=>item.date)).size} 天`;
+      $('avgStress').textContent = records.length ? `${(records.reduce((sum,item)=>sum+item.stress,0)/records.length).toFixed(1)} / 10` : '—';
+      if (!records.length) {
+        $('history').innerHTML = '<div class="empty">保存第一条记录后，会显示在这里。</div>';
+        return;
+      }
+      $('history').innerHTML = records.map(item=>`
+        <article class="entry">
+          <div class="entry-top"><span class="entry-date">Stage ${item.courseStep || '—'} · ${formatDay(item.date)} <span class="review-chip ${item.reviewStatus}">${reviewStatusLabel(item.reviewStatus)}</span></span><span class="stress-chip">压力 ${item.stress}/10</span></div>
+          <div class="entry-time">${item.start}–${item.end} · ${formatMinutes(item.minutes)}</div>
+          <p>${escapeHtml(item.content)}</p>
+          <p class="thought">思路：${escapeHtml(item.thought)}</p>
+          ${item.feedback ? `<p class="review-feedback"><strong>批改意见：</strong>${escapeHtml(item.feedback)}</p>` : ''}
+          <div class="entry-actions">
+            ${['draft','revision_requested'].includes(item.reviewStatus) ? `<button onclick="editRecord('${item.id}')">${item.reviewStatus==='revision_requested'?'修改并重交':'编辑草稿'}</button>` : ''}
+            ${item.reviewStatus==='draft' ? `<button onclick="deleteRecord('${item.id}')">删除</button>` : ''}
+          </div>
+        </article>`).join('');
+    }
+    function reviewStatusLabel(status) {
+      return ({draft:'本机草稿',pending:'等待批改',approved:'已通过',revision_requested:'需要返工',superseded:'旧版本'})[status] || '未提交';
+    }
+    function exportCsv() {
+      const records = getRecords();
+      if (!records.length) return showToast('还没有可以导出的记录');
+      const quote = value => `"${String(value ?? '').replaceAll('"','""')}"`;
+      const rows = [['课程关卡','日期','开始时间','结束时间','工作分钟','压力指数','工作内容','工作思路','批改状态','批改意见'],...records.map(item=>[item.courseStep || '',item.date,item.start,item.end,item.minutes,item.stress,item.content,item.thought,reviewStatusLabel(item.reviewStatus),item.feedback||''])];
+      const csv = '\ufeff'+rows.map(row=>row.map(quote).join(',')).join('\n');
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+      link.download = `工作记录-${localDate(new Date())}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      showToast('CSV 已导出');
+    }
+
+    $('todayLine').textContent = new Intl.DateTimeFormat('zh-CN',{dateStyle:'full'}).format(new Date());
+    $('startBtn').onclick = startTimer;
+    $('stopBtn').onclick = stopTimer;
+    $('saveBtn').onclick = saveRecord;
+    $('clearBtn').onclick = resetForm;
+    $('exportBtn').onclick = exportCsv;
+    $('saveReviewBtn').onclick = saveReviewConfig;
+    $('testReviewBtn').onclick = testReviewConnection;
+    $('startTime').oninput = updateDuration;
+    $('endTime').oninput = updateDuration;
+    $('stress').oninput = event => $('stressValue').textContent = event.target.value;
+    setRecords(getRecords());
+    resetForm();
+    refreshTimer();
+    renderHistory();
+    renderCourse();
+    renderReviewConfig();
+    if (getReviewConfig().apiUrl) syncReviewState().catch(()=>{});
+  </script>
+</body>
+</html>
